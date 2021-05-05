@@ -69,6 +69,7 @@ const CryptoInput = ({ activeInput, setActiveInput }: Props) => {
 
     return (
         <Input
+            data-test="@coinmarket/sell/crypto-input"
             onFocus={() => {
                 setActiveInput(CRYPTO_INPUT);
             }}
