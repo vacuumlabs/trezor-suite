@@ -191,6 +191,7 @@ const CryptoInput = ({ activeInput, setActiveInput }: Props) => {
                                     <Label>{option.label}</Label>
                                 </Option>
                             )}
+                            data-test="@coinmarket/sell/crypto-currency-select"
                         />
                     )}
                 />

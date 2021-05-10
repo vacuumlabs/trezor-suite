@@ -282,6 +282,7 @@ const Inputs = () => {
                                     isDropdownVisible={account.networkType === 'ethereum'}
                                     isDisabled={account.networkType !== 'ethereum'}
                                     minWidth="100px"
+                                    data-test="@coinmarket/buy/crypto-currency-select"
                                 />
                             )}
                         />
