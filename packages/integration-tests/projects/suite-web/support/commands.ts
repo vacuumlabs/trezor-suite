@@ -24,6 +24,7 @@ import {
     passThroughSetPin,
     enableRegtestAndGetCoins,
 } from './utils/shortcuts';
+import { interceptInvityApi } from './utils/intercept-invity-api';
 
 const command = require('cypress-image-snapshot/command');
 const { skipOn, onlyOn } = require('@cypress/skip-test');
@@ -93,6 +94,7 @@ declare global {
             }) => Chainable<Subject>;
             skipOn: (nameOrFlag: string | boolean, cb?: () => void) => Cypress.Chainable<any>;
             onlyOn: (nameOrFlag: string | boolean, cb?: () => void) => Cypress.Chainable<any>;
+            interceptInvityApi: () => void;
         }
     }
 }
@@ -144,3 +146,4 @@ Cypress.Commands.add('skipOn', skipOn);
 Cypress.Commands.add('onlyOn', onlyOn);
 
 Cypress.Commands.add('text', { prevSubject: true }, subject => subject.text());
+Cypress.Commands.add('interceptInvityApi', interceptInvityApi);
