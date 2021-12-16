@@ -17,6 +17,12 @@ export function vectorSize(someVector: Buffer[]) {
     );
 }
 
+export function writeChunkSize(size: number) {
+    const buf = Buffer.allocUnsafe(1);
+    buf.writeUInt8(size);
+    return buf;
+}
+
 export function isCoinbaseHash(buffer: Buffer): boolean {
     typeforce(types.Hash256bit, buffer);
     for (let i = 0; i < 32; ++i) {
@@ -100,6 +106,18 @@ export class TransactionBase<S = undefined> {
             this.outs.reduce((sum, output) => sum + 8 + varSliceSize(output.script), 0) +
             (hasWitnesses ? this.ins.reduce((sum, input) => sum + vectorSize(input.witness), 0) : 0)
         );
+    }
+
+    getInputWitness(index: number) {
+        // witness size + (chunk[i].size + chunk[i])
+        const input = this.ins[index];
+        if (this.hasWitnesses() && input && Array.isArray(input.witness)) {
+            const chunks = input.witness.reduce(
+                (arr, chunk) => arr.concat([writeChunkSize(chunk.length), chunk]),
+                [writeChunkSize(input.witness.length)],
+            );
+            return Buffer.concat(chunks);
+        }
     }
 
     getHash(forWitness = false): Buffer {
