@@ -20,6 +20,7 @@ const Navigation = () => {
         <WalletLayoutNavigation>
             {items.map(({ route, title }) => (
                 <WalletLayoutNavLink
+                    data-test={`@coinmarket/menu/${route}`}
                     key={route}
                     title={title}
                     active={routeName === route}

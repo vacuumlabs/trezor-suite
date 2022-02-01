@@ -11,11 +11,12 @@ describe('Coinmarket buy', () => {
         cy.prefixedVisit('/');
         cy.passThroughInitialRun();
         cy.discoveryShouldFinish();
+        // navigate to buy
+        cy.getTestElement('@suite/menu/wallet-index').click();
+        cy.getTestElement('@wallet/menu/wallet-coinmarket-buy').click();
     });
 
     it('Should buy crypto successfully', () => {
-        cy.getTestElement('@suite/menu/wallet-index').click();
-        cy.getTestElement('@wallet/menu/wallet-coinmarket-buy').click();
         cy.getTestElement('@coinmarket/buy/fiat-input').type('1000');
         cy.getTestElement('@coinmarket/buy/fiat-currency-select/input').click();
         cy.getTestElement('@coinmarket/buy/fiat-currency-select/option/usd').click();
@@ -34,32 +35,26 @@ describe('Coinmarket buy', () => {
     });
 
     it('Should show same crypto currency as it has been chosen (BTC)', () => {
-        cy.getTestElement('@suite/menu/wallet-index').click();
-        cy.getTestElement('@wallet/menu/wallet-coinmarket-buy').click();
         // Cannot easily check selected account for now. Rely on URI.
         cy.getTestElement('@coinmarket/buy/crypto-currency-select/input').contains('BTC');
     });
 
     it("Should remember form's values as a draft", () => {
-        cy.getTestElement('@suite/menu/wallet-index').click();
-        cy.getTestElement('@wallet/menu/wallet-coinmarket-buy').click();
+        // TODO-test: set also country and verify that it is remembered
+
         cy.getTestElement('@coinmarket/buy/fiat-input').type('1000');
         cy.wait(1000);
 
         cy.getTestElement('@suite/menu/wallet-index').click();
         cy.getTestElement('@wallet/menu/wallet-coinmarket-buy').click();
-        cy.getTestElement('@coinmarket/buy/fiat-input').should('equal', '1000');
-
-        // TODO: rest of inputs
+        cy.getTestElement('@coinmarket/buy/fiat-input').should('have.value', '1000');
     });
 
     it('Should clear form draft', () => {
-        // TODO: Need to set "clear form button id" in Suite
-        // cy.getTestElement('@suite/menu/wallet-index').click();
-        // cy.getTestElement('@wallet/menu/wallet-coinmarket-buy').click();
-        // cy.getTestElement('@coinmarket/buy/fiat-input').type('1000');
-        // cy.getTestElement('(clear form button id)').click();
-        // cy.getTestElement('@coinmarket/buy/fiat-input').should('equal', '');
-        // TODO: rest of inputs
+        // TODO-test: set fiat or crypto input, press clear button and verify that the form is empty
+    });
+
+    it('Should get error on non numeric value typed to fiat input', () => {
+        // TODO-test: enter non numeric value to the fiat input field and verify that an error is shown
     });
 });

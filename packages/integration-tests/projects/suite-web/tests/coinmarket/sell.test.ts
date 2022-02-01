@@ -28,7 +28,7 @@ describe('Coinmarket sell', () => {
         cy.prefixedVisit('/accounts/coinmarket/sell/#/btc/0');
         cy.getTestElement('@coinmarket/sell/fiat-input').type('1000');
         cy.prefixedVisit('/accounts');
-        cy.getTestElement('@coinmarket/sell/fiat-input').should('equal', '1000');
+        cy.getTestElement('@coinmarket/sell/fiat-input').should('have.value', '1000');
 
         // TODO: rest of inputs
     });
@@ -37,7 +37,7 @@ describe('Coinmarket sell', () => {
         cy.prefixedVisit('/accounts/coinmarket/sell/#/btc/0');
         cy.getTestElement('@coinmarket/sell/fiat-input').type('1000');
         cy.getTestElement('(clear form button id)').click();
-        cy.getTestElement('@coinmarket/sell/fiat-input').should('equal', '');
+        cy.getTestElement('@coinmarket/sell/fiat-input').should('have.value', '');
 
         // TODO: rest of inputs
     });
