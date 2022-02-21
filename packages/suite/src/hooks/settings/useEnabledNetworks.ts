@@ -18,9 +18,7 @@ export const useEnabledNetworks = (): EnabledNetworks => {
 
     const mainnets: Network[] = NETWORKS.filter(n => !n.accountType && !n.testnet);
 
-    const testnets: Network[] = NETWORKS.filter(
-        n => !n.accountType && n.testnet === true && (n.symbol !== 'regtest' || debug),
-    );
+    const testnets: Network[] = NETWORKS.filter(n => !n.accountType && n.testnet === true);
 
     const { setEnabled } = useActions({
         setEnabled: changeCoinVisibility,
