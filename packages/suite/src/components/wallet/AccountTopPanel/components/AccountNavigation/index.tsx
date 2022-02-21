@@ -114,6 +114,18 @@ const AccountNavigation = (props: Props) => {
             extra: true,
             isHidden: !account || !hasSignVerify(account),
         },
+        {
+            id: 'wallet-coinjoin',
+            callback: () => {
+                goto('wallet-coinjoin', { preserveParams: true });
+            },
+            title: <span>CoinJoin</span>,
+            icon: 'SIGN',
+            position: 'secondary',
+            extra: true,
+            // isHidden: () => account?.networkType !== 'bitcoin',
+            isHidden: false,
+        },
     ];
 
     // collect all items suitable for current networkType

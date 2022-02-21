@@ -210,6 +210,12 @@ const routes = [
         params: walletParams,
     },
     {
+        name: 'wallet-coinjoin',
+        pattern: '/accounts/coinjoin',
+        app: 'wallet',
+        params: walletParams,
+    },
+    {
         name: 'wallet-tokens',
         pattern: '/accounts/tokens',
         app: 'wallet',
