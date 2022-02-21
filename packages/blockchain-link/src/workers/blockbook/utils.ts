@@ -308,6 +308,7 @@ export const transformAccountInfo = (payload: BlockbookAccountInfo): AccountInfo
 
 export const transformAccountUtxo = (payload: BlockbookAccountUtxo): Utxo[] =>
     payload.map(utxo => ({
+        outpoint: Buffer.concat([Buffer.from(utxo.txid)], utxo.vout),
         txid: utxo.txid,
         vout: utxo.vout,
         amount: utxo.value,
