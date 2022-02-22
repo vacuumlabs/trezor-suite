@@ -99,6 +99,10 @@ export type ToastPayload = (
           type: 'cardano-withdrawal-error';
           error: string;
       }
+    | {
+          type: 'coinjoin-error';
+          error: string;
+      }
 ) &
     Options;
 

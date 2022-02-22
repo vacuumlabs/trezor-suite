@@ -12,6 +12,7 @@
     "include": [".", "**/*.json"],
     "references": [
         { "path": "../components" },
+        { "path": "../coinjoin" },
         { "path": "../suite-data" },
         { "path": "../suite-desktop-api" },
         { "path": "../suite-storage" },
