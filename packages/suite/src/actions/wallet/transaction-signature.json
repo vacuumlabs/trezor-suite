@@ -1,0 +1,125 @@
+// Trezor signing params
+
+inputs: [
+    {
+      "address_n": "m/86'/1'/0'/0/0",
+      "prev_hash": "c8fd1aa9e7f226d3492fb7b60165abffabbe8207d9752d478b22a3d19125f471",
+      "prev_index": 0,
+      "amount": "500000000",
+      "script_type": "SPENDTAPROOT"
+    },
+    {
+      "amount": "300000000",
+      "prev_hash": "70b75871111fe4d6d6a1b823079dbd65a6734fe7f973395e862678e926ebca05",
+      "prev_index": 0,
+      "script_type": "EXTERNAL",
+      "script_pubkey": "0014f23290d9f9be3d13a315b6febe29fc0786d34c96",
+      "ownership_proof": "534C00190101DB191DE3B8D82A9E9EC08C758151F53C6B82AA299758A63A605EB23118D4FE8A000247304402202677B3306FAEFE0C4F6E625156D2CFC1716065D0B033126E63CFA9A1B6C738DA02204C3686EE2F83BE9E0061B6E03D90CD8827DCB08A8184F9930E12F08F997054AB012103B784293DDC455889CE99F39B5179F9242AB779672F6E0487723F1D8D19641A52",
+      "commitment_data": "1d436f696e4a6f696e436f6f7264696e61746f724964656e746966696572ed2073c83c86c40d443d45846bbdb1ea4b6c20c699cc56e0395caaa604a7f732"
+    }
+],
+outputs: [
+    {
+      "address": "bcrt1qwcs46argndfwg8qkxmjxmuztmeunhet678ddl6",
+      "amount": "268435456",
+      "script_type": "PAYTOADDRESS",
+      "payment_req_index": 0
+    },
+    {
+      "address_n": "m/86'/1'/0'/1/0",
+      "amount": "268435456",
+      "script_type": "PAYTOTAPROOT",
+      "payment_req_index": 0
+    },
+    {
+      "address_n": "m/86'/1'/0'/1/1",
+      "amount": "230045968",
+      "script_type": "PAYTOTAPROOT",
+      "payment_req_index": 0
+    },
+    {
+      "address": "bcrt1q2pzlp6a2thsxclgg92k5w0ufplztlstcev3u2x",
+      "amount": "28697814",
+      "script_type": "PAYTOADDRESS",
+      "payment_req_index": 0
+    },
+    {
+      "address": "bcrt1qcfv0ay0cq7xs3nwtr8yfu377tkltrv56dkftu2",
+      "amount": "2396001",
+      "script_type": "PAYTOADDRESS",
+      "payment_req_index": 0
+    },
+    {
+      "address": "bcrt1q0t2t2vca36t978z8u5vf8dvvf8tsete3vjt9e2",
+      "amount": "1594323",
+      "script_type": "PAYTOADDRESS",
+      "payment_req_index": 0
+    },
+    {
+      "address": "bcrt1qkelg25wmnqv2edefawd5kdl9n8v955xxymvel7",
+      "amount": "262144",
+      "script_type": "PAYTOADDRESS",
+      "payment_req_index": 0
+    },
+    {
+      "address": "bcrt1qaxjqhmcwe2ayelmta2kvmx839mq4eatv0xsn7e",
+      "amount": "65536",
+      "script_type": "PAYTOADDRESS",
+      "payment_req_index": 0
+    },
+    {
+      "address": "bcrt1qacr3n8su7q66xzqn3jfkjy3v9zs43stgft9547",
+      "amount": "11961",
+      "script_type": "PAYTOADDRESS",
+      "payment_req_index": 0
+    }
+]
+
+// Trezor signed transaction
+
+{
+    "signatures": [
+      "974344fb56465b2f873dd8b5a5a40bf37f9534849bf41598ebbf706ae07e81f13041388bbfaac0ec7595a3df9fb5a33b010f89edf17aa7082c50f5650f0c8aaf"
+    ],
+    "serializedTx": "0100000000010271f42591d1a3228b472d75d90782beabffab6501b6b72f49d326f2e7a91afdc80000000000ffffffff05caeb26e97826865e3973f9e74f73a665bd9d0723b8a1d6d6e41f117158b7700000000000ffffffff09000000100000000016001476215d74689b52e41c1636e46df04bde793be57a00000010000000002251209a9af24b396f593b34e23fefba6b417a55c5ee3f430c3837379fcb5246ab36d71039b60d000000002251207866dd733460c84db1aa3f7208d9a2d0f706c80306b398050b41dcd44cd214add6e4b501000000001600145045f0ebaa5de06c7d082aad473f890fc4bfc178618f240000000000160014c258fe91f8078d08cdcb19c89e47de5dbeb1b29ad3531800000000001600147ad4b5331d8e965f1c47e51893b58c49d70caf310000040000000000160014b67e8551db9818acb729eb9b4b37e599d85a50c60000010000000000160014e9a40bef0ecaba4cff6beaaccd98f12ec15cf56cb92e000000000000160014ee07199e1cf035a308138c9369122c28a158c1680140974344fb56465b2f873dd8b5a5a40bf37f9534849bf41598ebbf706ae07e81f13041388bbfaac0ec7595a3df9fb5a33b010f89edf17aa7082c50f5650f0c8aaf0000000000",
+    "witnesses": [
+      "0140974344fb56465b2f873dd8b5a5a40bf37f9534849bf41598ebbf706ae07e81f13041388bbfaac0ec7595a3df9fb5a33b010f89edf17aa7082c50f5650f0c8aaf",
+      "00"
+    ]
+}
+
+// request /transaction-signature params
+
+{
+    "roundId":"ed2073c83c86c40d443d45846bbdb1ea4b6c20c699cc56e0395caaa604a7f732",
+    "inputIndex":0,
+    "witness":"0140974344fb56465b2f873dd8b5a5a40bf37f9534849bf41598ebbf706ae07e81f13041388bbfaac0ec7595a3df9fb5a33b010f89edf17aa7082c50f5650f0c8aaf"
+}
+
+
+
+// Backend log
+
+{ 
+    "hash": "0196ed65dcc17916928694f1908b2307d370443760155c858adee68435ae6309",
+    "ver": 1,
+    "vin_sz": 2,
+    "vout_sz": 9,
+    "lock_time": 0,
+    "size": 395, 
+    "in": [ 
+        { "prev_out": { "hash": "c8fd1aa9e7f226d3492fb7b60165abffabbe8207d9752d478b22a3d19125f471", "n": 0 }, "scriptSig": "" }, 
+        { "prev_out": { "hash": "70b75871111fe4d6d6a1b823079dbd65a6734fe7f973395e862678e926ebca05", "n": 0 }, "scriptSig": "" } 
+    ],
+    "out": [
+        { "value": "2.68435456", "scriptPubKey": "0 76215d74689b52e41c1636e46df04bde793be57a" },
+        { "value": "2.68435456", "scriptPubKey": "1 9a9af24b396f593b34e23fefba6b417a55c5ee3f430c3837379fcb5246ab36d7" },
+        { "value": "2.30045968", "scriptPubKey": "1 7866dd733460c84db1aa3f7208d9a2d0f706c80306b398050b41dcd44cd214ad" },
+        { "value": "0.28697814", "scriptPubKey": "0 5045f0ebaa5de06c7d082aad473f890fc4bfc178" },
+        { "value": "0.02396001", "scriptPubKey": "0 c258fe91f8078d08cdcb19c89e47de5dbeb1b29a" },
+        { "value": "0.01594323", "scriptPubKey": "0 7ad4b5331d8e965f1c47e51893b58c49d70caf31" },
+        { "value": "0.00262144", "scriptPubKey": "0 b67e8551db9818acb729eb9b4b37e599d85a50c6" },
+        { "value": "0.00065536", "scriptPubKey": "0 e9a40bef0ecaba4cff6beaaccd98f12ec15cf56c" },
+        { "value": "0.00011961", "scriptPubKey": "0 ee07199e1cf035a308138c9369122c28a158c168" }
+    ]
+}

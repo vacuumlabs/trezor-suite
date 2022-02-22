@@ -328,16 +328,16 @@ export const saveMessageSystem = () => async (_dispatch: Dispatch, getState: Get
 
     const { dismissedMessages, config, currentSequence } = getState().messageSystem;
 
-    db.addItem(
-        'messageSystem',
-        {
-            config,
-            currentSequence,
-            dismissedMessages,
-        },
-        'suite',
-        true,
-    );
+    // db.addItem(
+    //     'messageSystem',
+    //     {
+    //         config,
+    //         currentSequence,
+    //         dismissedMessages,
+    //     },
+    //     'suite',
+    //     true,
+    // );
 };
 
 export const removeDatabase = () => async (dispatch: Dispatch, getState: GetState) => {

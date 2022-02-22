@@ -15,6 +15,7 @@ import * as COINMARKET_COMMON from './coinmarketCommonConstants';
 import * as ACCOUNT_SEARCH from './accountSearch';
 import * as FORM_DRAFT from './formDraftConstants';
 import * as CARDANO_STAKING from './cardanoStakingConstants';
+import * as COINJOIN from './coinjoinConstants';
 
 export {
     BLOCKCHAIN,
@@ -34,4 +35,5 @@ export {
     ACCOUNT_SEARCH,
     FORM_DRAFT,
     CARDANO_STAKING,
+    COINJOIN,
 };
