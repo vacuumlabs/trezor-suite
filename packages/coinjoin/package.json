@@ -1,0 +1,17 @@
+{
+    "name": "@trezor/coinjoin",
+    "version": "1.0.0",
+    "private": true,
+    "license": "See LICENSE.md in repo root",
+    "sideEffects": false,
+    "main": "src/index",
+    "scripts": {
+        "lint": "eslint '**/*.{ts,js}'",
+        "test:unit": "jest",
+        "type-check": "tsc --build"
+    },
+    "dependencies": {
+        "@trezor/utils": "^1.0.1",
+        "@trezor/utxo-lib": "^1.0.0"
+    }
+}
