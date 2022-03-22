@@ -1,0 +1,1959 @@
+diff --git a/node_modules/trezor-connect/CHANGELOG.md b/node_modules/trezor-connect/CHANGELOG.md
+index 930d757..4eaf92d 100644
+--- a/node_modules/trezor-connect/CHANGELOG.md
++++ b/node_modules/trezor-connect/CHANGELOG.md
+@@ -3,9 +3,6 @@
+ ### Changed
+ - signTransaction allows address_n to be bip44 path string
+ 
+-### Fixed
+-- race condition causing "unexpected response" error for calls preceded by a cancelled call.
+-
+ # 8.2.7
+ 
+ ### Added
+diff --git a/node_modules/trezor-connect/README.md b/node_modules/trezor-connect/README.md
+index 98c04fe..5a29906 100644
+--- a/node_modules/trezor-connect/README.md
++++ b/node_modules/trezor-connect/README.md
+@@ -1,4 +1,4 @@
+-# Trezor Connect API version 8.2.8-beta.3
++# Trezor Connect API version 8.2.8-beta.2
+ [![Build Status](https://github.com/trezor/connect/actions/workflows/tests.yml/badge.svg)](https://github.com/trezor/connect/actions/workflows/tests.yml)
+ [![NPM](https://img.shields.io/npm/v/trezor-connect.svg)](https://www.npmjs.org/package/trezor-connect)
+ [![Known Vulnerabilities](https://snyk.io/test/github/trezor/connect/badge.svg?targetFile=package.json)](https://snyk.io/test/github/trezor/connect?targetFile=package.json)
+diff --git a/node_modules/trezor-connect/lib/core/methods/AuthorizeCoinJoin.js b/node_modules/trezor-connect/lib/core/methods/AuthorizeCoinJoin.js
+new file mode 100644
+index 0000000..7fdc8d9
+--- /dev/null
++++ b/node_modules/trezor-connect/lib/core/methods/AuthorizeCoinJoin.js
+@@ -0,0 +1,122 @@
++"use strict";
++
++var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
++
++exports.__esModule = true;
++exports["default"] = void 0;
++
++var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
++
++var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
++
++var _inheritsLoose2 = _interopRequireDefault(require("@babel/runtime/helpers/inheritsLoose"));
++
++var _AbstractMethod2 = _interopRequireDefault(require("./AbstractMethod"));
++
++var _paramsValidator = require("./helpers/paramsValidator");
++
++var _pathUtils = require("../../utils/pathUtils");
++
++var _CoinInfo = require("../../data/CoinInfo");
++
++var AuthorizeCoinJoin = /*#__PURE__*/function (_AbstractMethod) {
++  (0, _inheritsLoose2["default"])(AuthorizeCoinJoin, _AbstractMethod);
++
++  function AuthorizeCoinJoin() {
++    return _AbstractMethod.apply(this, arguments) || this;
++  }
++
++  var _proto = AuthorizeCoinJoin.prototype;
++
++  _proto.init = function init() {
++    var payload = this.payload;
++    (0, _paramsValidator.validateParams)(payload, [{
++      name: 'path',
++      required: true
++    }, {
++      name: 'coordinator',
++      type: 'string',
++      required: true
++    }, {
++      name: 'maxRounds',
++      type: 'number',
++      required: true
++    }, {
++      name: 'maxCoordinatorFeeRate',
++      type: 'number',
++      required: true
++    }, {
++      name: 'maxFeePerKvbyte',
++      type: 'number',
++      required: true
++    }, {
++      name: 'coin',
++      type: 'string'
++    }, {
++      name: 'scriptType',
++      type: 'string'
++    }, {
++      name: 'amountUnit',
++      type: 'uint'
++    }]);
++    var address_n = (0, _pathUtils.validatePath)(payload.path, 3);
++    var coinInfo = (0, _CoinInfo.getBitcoinNetwork)(payload.coin || address_n);
++    var script_type = payload.scriptType || (0, _pathUtils.getScriptType)(address_n);
++    this.params = {
++      coordinator: payload.coordinator,
++      max_rounds: payload.maxRounds,
++      max_coordinator_fee_rate: payload.maxCoordinatorFeeRate,
++      max_fee_per_kvbyte: payload.maxFeePerKvbyte,
++      address_n: address_n,
++      coin_name: coinInfo ? coinInfo.name : undefined,
++      script_type: script_type,
++      amount_unit: payload.amountUnit
++    };
++  };
++
++  _proto.run = /*#__PURE__*/function () {
++    var _run = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee() {
++      var cmd, response;
++      return _regenerator["default"].wrap(function _callee$(_context) {
++        while (1) {
++          switch (_context.prev = _context.next) {
++            case 0:
++              cmd = this.device.getCommands();
++
++              if (this.device.features.experimental_features) {
++                _context.next = 4;
++                break;
++              }
++
++              _context.next = 4;
++              return cmd.typedCall('ApplySettings', 'Success', {
++                experimental_features: true
++              });
++
++            case 4:
++              _context.next = 6;
++              return cmd.typedCall('AuthorizeCoinJoin', 'Success', this.params);
++
++            case 6:
++              response = _context.sent;
++              return _context.abrupt("return", response.message);
++
++            case 8:
++            case "end":
++              return _context.stop();
++          }
++        }
++      }, _callee, this);
++    }));
++
++    function run() {
++      return _run.apply(this, arguments);
++    }
++
++    return run;
++  }();
++
++  return AuthorizeCoinJoin;
++}(_AbstractMethod2["default"]);
++
++exports["default"] = AuthorizeCoinJoin;
+\ No newline at end of file
+diff --git a/node_modules/trezor-connect/lib/core/methods/AuthorizeCoinJoin.js.flow b/node_modules/trezor-connect/lib/core/methods/AuthorizeCoinJoin.js.flow
+new file mode 100644
+index 0000000..edf3305
+--- /dev/null
++++ b/node_modules/trezor-connect/lib/core/methods/AuthorizeCoinJoin.js.flow
+@@ -0,0 +1,52 @@
++/* @flow */
++
++import AbstractMethod from './AbstractMethod';
++import { validateParams } from './helpers/paramsValidator';
++import { validatePath, getScriptType } from '../../utils/pathUtils';
++import { getBitcoinNetwork } from '../../data/CoinInfo';
++import type { MessageType } from '../../types/trezor/protobuf';
++
++export default class AuthorizeCoinJoin extends AbstractMethod<'authorizeCoinJoin'> {
++    params: $ElementType<MessageType, 'AuthorizeCoinJoin'>;
++
++    init() {
++        const { payload } = this;
++
++        validateParams(payload, [
++            { name: 'path', required: true },
++            { name: 'coordinator', type: 'string', required: true },
++            { name: 'maxRounds', type: 'number', required: true },
++            { name: 'maxCoordinatorFeeRate', type: 'number', required: true },
++            { name: 'maxFeePerKvbyte', type: 'number', required: true },
++            { name: 'coin', type: 'string' },
++            { name: 'scriptType', type: 'string' },
++            { name: 'amountUnit', type: 'uint' },
++        ]);
++
++        const address_n = validatePath(payload.path, 3);
++        const coinInfo = getBitcoinNetwork(payload.coin || address_n);
++        const script_type = payload.scriptType || getScriptType(address_n);
++
++        this.params = {
++            coordinator: payload.coordinator,
++            max_rounds: payload.maxRounds,
++            max_coordinator_fee_rate: payload.maxCoordinatorFeeRate,
++            max_fee_per_kvbyte: payload.maxFeePerKvbyte,
++            address_n,
++            coin_name: coinInfo ? coinInfo.name : undefined,
++            script_type,
++            amount_unit: payload.amountUnit,
++        };
++    }
++
++    async run() {
++        const cmd = this.device.getCommands();
++        if (!this.device.features.experimental_features) {
++            // enable experimental features
++            await cmd.typedCall('ApplySettings', 'Success', { experimental_features: true });
++        }
++
++        const response = await cmd.typedCall('AuthorizeCoinJoin', 'Success', this.params);
++        return response.message;
++    }
++}
+diff --git a/node_modules/trezor-connect/lib/core/methods/ComposeTransaction.js b/node_modules/trezor-connect/lib/core/methods/ComposeTransaction.js
+index e88167a..8833a28 100644
+--- a/node_modules/trezor-connect/lib/core/methods/ComposeTransaction.js
++++ b/node_modules/trezor-connect/lib/core/methods/ComposeTransaction.js
+@@ -606,7 +606,8 @@ var ComposeTransaction = /*#__PURE__*/function (_AbstractMethod) {
+             case 18:
+               signTxMethod = !this.device.unavailableCapabilities.replaceTransaction ? _signtx["default"] : _signtxLegacy["default"];
+               _context6.next = 21;
+-              return signTxMethod(this.device.getCommands().typedCall.bind(this.device.getCommands()), inputs, outputs, refTxs, options, coinInfo);
++              return signTxMethod(this.device.getCommands().typedCall.bind(this.device.getCommands()), inputs, outputs, [], // paymentRequests are not used in this method
++              refTxs, options, coinInfo);
+ 
+             case 21:
+               response = _context6.sent;
+diff --git a/node_modules/trezor-connect/lib/core/methods/ComposeTransaction.js.flow b/node_modules/trezor-connect/lib/core/methods/ComposeTransaction.js.flow
+index 81f5ff1..6433427 100644
+--- a/node_modules/trezor-connect/lib/core/methods/ComposeTransaction.js.flow
++++ b/node_modules/trezor-connect/lib/core/methods/ComposeTransaction.js.flow
+@@ -392,6 +392,7 @@ export default class ComposeTransaction extends AbstractMethod<'composeTransacti
+             this.device.getCommands().typedCall.bind(this.device.getCommands()),
+             inputs,
+             outputs,
++            [], // paymentRequests are not used in this method
+             refTxs,
+             options,
+             coinInfo,
+diff --git a/node_modules/trezor-connect/lib/core/methods/GetOwnershipId.js b/node_modules/trezor-connect/lib/core/methods/GetOwnershipId.js
+new file mode 100644
+index 0000000..1342b82
+--- /dev/null
++++ b/node_modules/trezor-connect/lib/core/methods/GetOwnershipId.js
+@@ -0,0 +1,227 @@
++"use strict";
++
++var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
++
++exports.__esModule = true;
++exports["default"] = void 0;
++
++var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
++
++var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
++
++var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
++
++var _inheritsLoose2 = _interopRequireDefault(require("@babel/runtime/helpers/inheritsLoose"));
++
++var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
++
++var _AbstractMethod2 = _interopRequireDefault(require("./AbstractMethod"));
++
++var _paramsValidator = require("./helpers/paramsValidator");
++
++var _pathUtils = require("../../utils/pathUtils");
++
++var UI = _interopRequireWildcard(require("../../constants/ui"));
++
++var _builder = require("../../message/builder");
++
++var _CoinInfo = require("../../data/CoinInfo");
++
++function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
++
++function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
++
++function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
++
++function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
++
++var GetOwnershipId = /*#__PURE__*/function (_AbstractMethod) {
++  (0, _inheritsLoose2["default"])(GetOwnershipId, _AbstractMethod);
++
++  function GetOwnershipId() {
++    var _this;
++
++    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
++      args[_key] = arguments[_key];
++    }
++
++    _this = _AbstractMethod.call.apply(_AbstractMethod, [this].concat(args)) || this;
++    (0, _defineProperty2["default"])((0, _assertThisInitialized2["default"])(_this), "params", []);
++    return _this;
++  }
++
++  var _proto = GetOwnershipId.prototype;
++
++  _proto.init = function init() {
++    var _this2 = this;
++
++    this.requiredPermissions = ['read'];
++    this.info = 'Export ownership id'; // create a bundle with only one batch if bundle doesn't exists
++
++    this.hasBundle = !!this.payload.bundle;
++    var payload = !this.payload.bundle ? _objectSpread(_objectSpread({}, this.payload), {}, {
++      bundle: [this.payload]
++    }) : this.payload; // validate bundle type
++
++    (0, _paramsValidator.validateParams)(payload, [{
++      name: 'bundle',
++      type: 'array'
++    }]);
++    payload.bundle.forEach(function (batch) {
++      // validate incoming parameters for each batch
++      (0, _paramsValidator.validateParams)(batch, [{
++        name: 'path',
++        required: true
++      }, {
++        name: 'coin',
++        type: 'string'
++      }, {
++        name: 'multisig',
++        type: 'object'
++      }, {
++        name: 'scriptType',
++        type: 'string'
++      }]);
++      var address_n = (0, _pathUtils.validatePath)(batch.path, 1);
++      var coinInfo = (0, _CoinInfo.getBitcoinNetwork)(batch.coin || address_n);
++      var script_type = batch.scriptType || (0, _pathUtils.getScriptType)(address_n);
++      _this2.firmwareRange = (0, _paramsValidator.getFirmwareRange)(_this2.name, coinInfo, _this2.firmwareRange);
++
++      _this2.params.push({
++        address_n: address_n,
++        coin_name: coinInfo ? coinInfo.name : undefined,
++        multisig: batch.multisig,
++        script_type: script_type,
++        preauthorized: !!batch.preauthorized
++      });
++    });
++  };
++
++  _proto.confirmation = /*#__PURE__*/function () {
++    var _confirmation = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee() {
++      var uiPromise, label, uiResp;
++      return _regenerator["default"].wrap(function _callee$(_context) {
++        while (1) {
++          switch (_context.prev = _context.next) {
++            case 0:
++              if (!this.confirmed) {
++                _context.next = 2;
++                break;
++              }
++
++              return _context.abrupt("return", true);
++
++            case 2:
++              _context.next = 4;
++              return this.getPopupPromise().promise;
++
++            case 4:
++              // initialize user response promise
++              uiPromise = this.createUiPromise(UI.RECEIVE_CONFIRMATION, this.device);
++              label = this.info;
++
++              if (this.params.length > 1) {
++                label = 'Export multiple ownership proof ids';
++              } // request confirmation view
++
++
++              this.postMessage((0, _builder.UiMessage)(UI.REQUEST_CONFIRMATION, {
++                view: 'export-address',
++                label: label
++              })); // wait for user action
++
++              _context.next = 10;
++              return uiPromise.promise;
++
++            case 10:
++              uiResp = _context.sent;
++              this.confirmed = uiResp.payload;
++              return _context.abrupt("return", this.confirmed);
++
++            case 13:
++            case "end":
++              return _context.stop();
++          }
++        }
++      }, _callee, this);
++    }));
++
++    function confirmation() {
++      return _confirmation.apply(this, arguments);
++    }
++
++    return confirmation;
++  }();
++
++  _proto.run = /*#__PURE__*/function () {
++    var _run = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2() {
++      var responses, cmd, i, batch, _yield$cmd$typedCall, message;
++
++      return _regenerator["default"].wrap(function _callee2$(_context2) {
++        while (1) {
++          switch (_context2.prev = _context2.next) {
++            case 0:
++              responses = [];
++              cmd = this.device.getCommands();
++              i = 0;
++
++            case 3:
++              if (!(i < this.params.length)) {
++                _context2.next = 17;
++                break;
++              }
++
++              batch = this.params[i];
++
++              if (!batch.preauthorized) {
++                _context2.next = 8;
++                break;
++              }
++
++              _context2.next = 8;
++              return cmd.typedCall('DoPreauthorized', 'PreauthorizedRequest', {});
++
++            case 8:
++              _context2.next = 10;
++              return cmd.typedCall('GetOwnershipId', 'OwnershipId', batch);
++
++            case 10:
++              _yield$cmd$typedCall = _context2.sent;
++              message = _yield$cmd$typedCall.message;
++              responses.push(message);
++
++              if (this.hasBundle) {
++                // send progress
++                this.postMessage((0, _builder.UiMessage)(UI.BUNDLE_PROGRESS, {
++                  progress: i,
++                  response: message
++                }));
++              }
++
++            case 14:
++              i++;
++              _context2.next = 3;
++              break;
++
++            case 17:
++              return _context2.abrupt("return", this.hasBundle ? responses : responses[0]);
++
++            case 18:
++            case "end":
++              return _context2.stop();
++          }
++        }
++      }, _callee2, this);
++    }));
++
++    function run() {
++      return _run.apply(this, arguments);
++    }
++
++    return run;
++  }();
++
++  return GetOwnershipId;
++}(_AbstractMethod2["default"]);
++
++exports["default"] = GetOwnershipId;
+\ No newline at end of file
+diff --git a/node_modules/trezor-connect/lib/core/methods/GetOwnershipId.js.flow b/node_modules/trezor-connect/lib/core/methods/GetOwnershipId.js.flow
+new file mode 100644
+index 0000000..f687929
+--- /dev/null
++++ b/node_modules/trezor-connect/lib/core/methods/GetOwnershipId.js.flow
+@@ -0,0 +1,109 @@
++/* @flow */
++
++import AbstractMethod from './AbstractMethod';
++import { validateParams, getFirmwareRange } from './helpers/paramsValidator';
++import { validatePath, getScriptType } from '../../utils/pathUtils';
++import * as UI from '../../constants/ui';
++import { UiMessage } from '../../message/builder';
++import { getBitcoinNetwork } from '../../data/CoinInfo';
++import type { MessageType, OwnershipId } from '../../types/trezor/protobuf';
++
++type Params = {
++    ...$ElementType<MessageType, 'GetOwnershipId'>,
++    preauthorized: boolean,
++};
++
++export default class GetOwnershipId extends AbstractMethod<'getOwnershipId'> {
++    params: Params[] = [];
++
++    hasBundle: boolean;
++
++    confirmed: ?boolean;
++
++    init() {
++        this.requiredPermissions = ['read'];
++        this.info = 'Export ownership id';
++
++        // create a bundle with only one batch if bundle doesn't exists
++        this.hasBundle = !!this.payload.bundle;
++        const payload = !this.payload.bundle
++            ? { ...this.payload, bundle: [this.payload] }
++            : this.payload;
++
++        // validate bundle type
++        validateParams(payload, [{ name: 'bundle', type: 'array' }]);
++
++        payload.bundle.forEach(batch => {
++            // validate incoming parameters for each batch
++            validateParams(batch, [
++                { name: 'path', required: true },
++                { name: 'coin', type: 'string' },
++                { name: 'multisig', type: 'object' },
++                { name: 'scriptType', type: 'string' },
++            ]);
++
++            const address_n = validatePath(batch.path, 1);
++            const coinInfo = getBitcoinNetwork(batch.coin || address_n);
++            const script_type = batch.scriptType || getScriptType(address_n);
++            this.firmwareRange = getFirmwareRange(this.name, coinInfo, this.firmwareRange);
++
++            this.params.push({
++                address_n,
++                coin_name: coinInfo ? coinInfo.name : undefined,
++                multisig: batch.multisig,
++                script_type,
++                preauthorized: !!batch.preauthorized,
++            });
++        });
++    }
++
++    async confirmation() {
++        if (this.confirmed) return true;
++        // wait for popup window
++        await this.getPopupPromise().promise;
++        // initialize user response promise
++        const uiPromise = this.createUiPromise(UI.RECEIVE_CONFIRMATION, this.device);
++        let label = this.info;
++        if (this.params.length > 1) {
++            label = 'Export multiple ownership proof ids';
++        }
++
++        // request confirmation view
++        this.postMessage(
++            UiMessage(UI.REQUEST_CONFIRMATION, {
++                view: 'export-address',
++                label,
++            }),
++        );
++
++        // wait for user action
++        const uiResp = await uiPromise.promise;
++
++        this.confirmed = uiResp.payload;
++        return this.confirmed;
++    }
++
++    async run() {
++        const responses: OwnershipId[] = [];
++        const cmd = this.device.getCommands();
++        for (let i = 0; i < this.params.length; i++) {
++            const batch = this.params[i];
++            if (batch.preauthorized) {
++                await cmd.typedCall('DoPreauthorized', 'PreauthorizedRequest', {});
++            }
++            const { message } = await cmd.typedCall('GetOwnershipId', 'OwnershipId', batch);
++            responses.push(message);
++
++            if (this.hasBundle) {
++                // send progress
++                this.postMessage(
++                    UiMessage(UI.BUNDLE_PROGRESS, {
++                        progress: i,
++                        response: message,
++                    }),
++                );
++            }
++        }
++        return this.hasBundle ? responses : responses[0];
++    }
++}
+diff --git a/node_modules/trezor-connect/lib/core/methods/GetOwnershipProof.js b/node_modules/trezor-connect/lib/core/methods/GetOwnershipProof.js
+new file mode 100644
+index 0000000..8aa2749
+--- /dev/null
++++ b/node_modules/trezor-connect/lib/core/methods/GetOwnershipProof.js
+@@ -0,0 +1,239 @@
++"use strict";
++
++var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
++
++exports.__esModule = true;
++exports["default"] = void 0;
++
++var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
++
++var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
++
++var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
++
++var _inheritsLoose2 = _interopRequireDefault(require("@babel/runtime/helpers/inheritsLoose"));
++
++var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
++
++var _AbstractMethod2 = _interopRequireDefault(require("./AbstractMethod"));
++
++var _paramsValidator = require("./helpers/paramsValidator");
++
++var _pathUtils = require("../../utils/pathUtils");
++
++var _CoinInfo = require("../../data/CoinInfo");
++
++var UI = _interopRequireWildcard(require("../../constants/ui"));
++
++var _builder = require("../../message/builder");
++
++function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
++
++function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
++
++function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
++
++function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
++
++var GetOwnershipProof = /*#__PURE__*/function (_AbstractMethod) {
++  (0, _inheritsLoose2["default"])(GetOwnershipProof, _AbstractMethod);
++
++  function GetOwnershipProof() {
++    var _this;
++
++    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
++      args[_key] = arguments[_key];
++    }
++
++    _this = _AbstractMethod.call.apply(_AbstractMethod, [this].concat(args)) || this;
++    (0, _defineProperty2["default"])((0, _assertThisInitialized2["default"])(_this), "params", []);
++    return _this;
++  }
++
++  var _proto = GetOwnershipProof.prototype;
++
++  _proto.init = function init() {
++    var _this2 = this;
++
++    this.requiredPermissions = ['read'];
++    this.info = 'Export ownership proof'; // create a bundle with only one batch if bundle doesn't exists
++
++    this.hasBundle = !!this.payload.bundle;
++    var payload = !this.payload.bundle ? _objectSpread(_objectSpread({}, this.payload), {}, {
++      bundle: [this.payload]
++    }) : this.payload; // validate bundle type
++
++    (0, _paramsValidator.validateParams)(payload, [{
++      name: 'bundle',
++      type: 'array'
++    }]);
++    payload.bundle.forEach(function (batch) {
++      // validate incoming parameters for each batch
++      (0, _paramsValidator.validateParams)(batch, [{
++        name: 'path',
++        required: true
++      }, {
++        name: 'coin',
++        type: 'string'
++      }, {
++        name: 'scriptType',
++        type: 'string'
++      }, {
++        name: 'multisig',
++        type: 'object'
++      }, {
++        name: 'userConfirmation',
++        type: 'boolean'
++      }, {
++        name: 'ownershipIds',
++        type: 'array'
++      }, {
++        name: 'commitmentData',
++        type: 'string'
++      }]);
++      var address_n = (0, _pathUtils.validatePath)(batch.path, 3);
++      var coinInfo = (0, _CoinInfo.getBitcoinNetwork)(batch.coin || address_n);
++      var script_type = batch.scriptType || (0, _pathUtils.getScriptType)(address_n);
++      _this2.firmwareRange = (0, _paramsValidator.getFirmwareRange)(_this2.name, coinInfo, _this2.firmwareRange);
++
++      _this2.params.push({
++        address_n: address_n,
++        coin_name: coinInfo ? coinInfo.name : undefined,
++        script_type: script_type,
++        multisig: batch.multisig,
++        user_confirmation: batch.userConfirmation,
++        ownership_ids: batch.ownershipIds,
++        commitment_data: batch.commitmentData,
++        preauthorized: !!batch.preauthorized
++      });
++    });
++  };
++
++  _proto.confirmation = /*#__PURE__*/function () {
++    var _confirmation = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee() {
++      var uiPromise, label, uiResp;
++      return _regenerator["default"].wrap(function _callee$(_context) {
++        while (1) {
++          switch (_context.prev = _context.next) {
++            case 0:
++              if (!this.confirmed) {
++                _context.next = 2;
++                break;
++              }
++
++              return _context.abrupt("return", true);
++
++            case 2:
++              _context.next = 4;
++              return this.getPopupPromise().promise;
++
++            case 4:
++              // initialize user response promise
++              uiPromise = this.createUiPromise(UI.RECEIVE_CONFIRMATION, this.device);
++              label = this.info;
++
++              if (this.params.length > 1) {
++                label = 'Export multiple ownership proofs';
++              } // request confirmation view
++
++
++              this.postMessage((0, _builder.UiMessage)(UI.REQUEST_CONFIRMATION, {
++                view: 'export-address',
++                label: label
++              })); // wait for user action
++
++              _context.next = 10;
++              return uiPromise.promise;
++
++            case 10:
++              uiResp = _context.sent;
++              this.confirmed = uiResp.payload;
++              return _context.abrupt("return", this.confirmed);
++
++            case 13:
++            case "end":
++              return _context.stop();
++          }
++        }
++      }, _callee, this);
++    }));
++
++    function confirmation() {
++      return _confirmation.apply(this, arguments);
++    }
++
++    return confirmation;
++  }();
++
++  _proto.run = /*#__PURE__*/function () {
++    var _run = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2() {
++      var responses, cmd, i, batch, _yield$cmd$typedCall, message;
++
++      return _regenerator["default"].wrap(function _callee2$(_context2) {
++        while (1) {
++          switch (_context2.prev = _context2.next) {
++            case 0:
++              responses = [];
++              cmd = this.device.getCommands();
++              i = 0;
++
++            case 3:
++              if (!(i < this.params.length)) {
++                _context2.next = 17;
++                break;
++              }
++
++              batch = this.params[i];
++
++              if (!batch.preauthorized) {
++                _context2.next = 8;
++                break;
++              }
++
++              _context2.next = 8;
++              return cmd.typedCall('DoPreauthorized', 'PreauthorizedRequest', {});
++
++            case 8:
++              _context2.next = 10;
++              return cmd.typedCall('GetOwnershipProof', 'OwnershipProof', batch);
++
++            case 10:
++              _yield$cmd$typedCall = _context2.sent;
++              message = _yield$cmd$typedCall.message;
++              responses.push(message);
++
++              if (this.hasBundle) {
++                // send progress
++                this.postMessage((0, _builder.UiMessage)(UI.BUNDLE_PROGRESS, {
++                  progress: i,
++                  response: message
++                }));
++              }
++
++            case 14:
++              i++;
++              _context2.next = 3;
++              break;
++
++            case 17:
++              return _context2.abrupt("return", this.hasBundle ? responses : responses[0]);
++
++            case 18:
++            case "end":
++              return _context2.stop();
++          }
++        }
++      }, _callee2, this);
++    }));
++
++    function run() {
++      return _run.apply(this, arguments);
++    }
++
++    return run;
++  }();
++
++  return GetOwnershipProof;
++}(_AbstractMethod2["default"]);
++
++exports["default"] = GetOwnershipProof;
+\ No newline at end of file
+diff --git a/node_modules/trezor-connect/lib/core/methods/GetOwnershipProof.js.flow b/node_modules/trezor-connect/lib/core/methods/GetOwnershipProof.js.flow
+new file mode 100644
+index 0000000..4f825aa
+--- /dev/null
++++ b/node_modules/trezor-connect/lib/core/methods/GetOwnershipProof.js.flow
+@@ -0,0 +1,115 @@
++/* @flow */
++
++import AbstractMethod from './AbstractMethod';
++import { validateParams, getFirmwareRange } from './helpers/paramsValidator';
++import { validatePath, getScriptType } from '../../utils/pathUtils';
++import { getBitcoinNetwork } from '../../data/CoinInfo';
++import * as UI from '../../constants/ui';
++import { UiMessage } from '../../message/builder';
++import type { MessageType, OwnershipProof } from '../../types/trezor/protobuf';
++
++type Params = {
++    ...$ElementType<MessageType, 'GetOwnershipProof'>,
++    preauthorized: boolean,
++};
++
++export default class GetOwnershipProof extends AbstractMethod<'getOwnershipProof'> {
++    params: Params[] = [];
++
++    hasBundle: boolean;
++
++    confirmed: ?boolean;
++
++    init() {
++        this.requiredPermissions = ['read'];
++        this.info = 'Export ownership proof';
++
++        // create a bundle with only one batch if bundle doesn't exists
++        this.hasBundle = !!this.payload.bundle;
++        const payload = !this.payload.bundle
++            ? { ...this.payload, bundle: [this.payload] }
++            : this.payload;
++
++        // validate bundle type
++        validateParams(payload, [{ name: 'bundle', type: 'array' }]);
++
++        payload.bundle.forEach(batch => {
++            // validate incoming parameters for each batch
++            validateParams(batch, [
++                { name: 'path', required: true },
++                { name: 'coin', type: 'string' },
++                { name: 'scriptType', type: 'string' },
++                { name: 'multisig', type: 'object' },
++                { name: 'userConfirmation', type: 'boolean' },
++                { name: 'ownershipIds', type: 'array' },
++                { name: 'commitmentData', type: 'string' },
++            ]);
++
++            const address_n = validatePath(batch.path, 3);
++            const coinInfo = getBitcoinNetwork(batch.coin || address_n);
++            const script_type = batch.scriptType || getScriptType(address_n);
++            this.firmwareRange = getFirmwareRange(this.name, coinInfo, this.firmwareRange);
++
++            this.params.push({
++                address_n,
++                coin_name: coinInfo ? coinInfo.name : undefined,
++                script_type,
++                multisig: batch.multisig,
++                user_confirmation: batch.userConfirmation,
++                ownership_ids: batch.ownershipIds,
++                commitment_data: batch.commitmentData,
++                preauthorized: !!batch.preauthorized,
++            });
++        });
++    }
++
++    async confirmation() {
++        if (this.confirmed) return true;
++        // wait for popup window
++        await this.getPopupPromise().promise;
++        // initialize user response promise
++        const uiPromise = this.createUiPromise(UI.RECEIVE_CONFIRMATION, this.device);
++        let label = this.info;
++        if (this.params.length > 1) {
++            label = 'Export multiple ownership proofs';
++        }
++
++        // request confirmation view
++        this.postMessage(
++            UiMessage(UI.REQUEST_CONFIRMATION, {
++                view: 'export-address',
++                label,
++            }),
++        );
++
++        // wait for user action
++        const uiResp = await uiPromise.promise;
++
++        this.confirmed = uiResp.payload;
++        return this.confirmed;
++    }
++
++    async run() {
++        const responses: OwnershipProof[] = [];
++        const cmd = this.device.getCommands();
++        for (let i = 0; i < this.params.length; i++) {
++            const batch = this.params[i];
++            if (batch.preauthorized) {
++                await cmd.typedCall('DoPreauthorized', 'PreauthorizedRequest', {});
++            }
++            const { message } = await cmd.typedCall('GetOwnershipProof', 'OwnershipProof', batch);
++            responses.push(message);
++
++            if (this.hasBundle) {
++                // send progress
++                this.postMessage(
++                    UiMessage(UI.BUNDLE_PROGRESS, {
++                        progress: i,
++                        response: message,
++                    }),
++                );
++            }
++        }
++        return this.hasBundle ? responses : responses[0];
++    }
++}
+diff --git a/node_modules/trezor-connect/lib/core/methods/SignTransaction.js b/node_modules/trezor-connect/lib/core/methods/SignTransaction.js
+index fdd2253..05a4627 100644
+--- a/node_modules/trezor-connect/lib/core/methods/SignTransaction.js
++++ b/node_modules/trezor-connect/lib/core/methods/SignTransaction.js
+@@ -129,6 +129,7 @@ var SignTransaction = /*#__PURE__*/function (_AbstractMethod) {
+     this.params = {
+       inputs: inputs,
+       outputs: payload.outputs,
++      paymentRequests: payload.paymentRequests || [],
+       refTxs: refTxs,
+       addresses: payload.account ? payload.account.addresses : undefined,
+       options: {
+@@ -142,7 +143,8 @@ var SignTransaction = /*#__PURE__*/function (_AbstractMethod) {
+         decred_staking_ticket: payload.decredStakingTicket
+       },
+       coinInfo: coinInfo,
+-      push: typeof payload.push === 'boolean' ? payload.push : false
++      push: typeof payload.push === 'boolean' ? payload.push : false,
++      preauthorized: !!payload.preauthorized
+     };
+ 
+     if (coinInfo.hasTimestamp && !Object.prototype.hasOwnProperty.call(payload, 'timestamp')) {
+@@ -153,7 +155,7 @@ var SignTransaction = /*#__PURE__*/function (_AbstractMethod) {
+ 
+   _proto.run = /*#__PURE__*/function () {
+     var _run = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee() {
+-      var device, params, refTxs, useLegacySignProcess, refTxsIds, blockchain, rawTxs, origTxsIds, rawOrigTxs, addresses, accountPath, node, account, origRefTxs, signTxMethod, response, _blockchain, txid;
++      var device, params, refTxs, useLegacySignProcess, refTxsIds, blockchain, rawTxs, origTxsIds, rawOrigTxs, addresses, accountPath, node, account, origRefTxs, signTxMethod, response, bitcoinTx, _blockchain, txid;
+ 
+       return _regenerator["default"].wrap(function _callee$(_context) {
+         while (1) {
+@@ -251,55 +253,73 @@ var SignTransaction = /*#__PURE__*/function (_AbstractMethod) {
+               refTxs = params.refTxs;
+ 
+             case 37:
+-              signTxMethod = !useLegacySignProcess ? _signtx["default"] : _signtxLegacy["default"];
++              if (!params.preauthorized) {
++                _context.next = 40;
++                break;
++              }
++
+               _context.next = 40;
+-              return signTxMethod(device.getCommands().typedCall.bind(device.getCommands()), params.inputs, params.outputs, refTxs, params.options, params.coinInfo);
++              return device.getCommands().typedCall('DoPreauthorized', 'PreauthorizedRequest', {});
+ 
+             case 40:
++              signTxMethod = !useLegacySignProcess ? _signtx["default"] : _signtxLegacy["default"];
++              _context.next = 43;
++              return signTxMethod(device.getCommands().typedCall.bind(device.getCommands()), params.inputs, params.outputs, params.paymentRequests, refTxs, params.options, params.coinInfo);
++
++            case 43:
+               response = _context.sent;
+ 
+               if (!params.options.decred_staking_ticket) {
+-                _context.next = 46;
++                _context.next = 49;
+                 break;
+               }
+ 
+-              _context.next = 44;
++              _context.next = 47;
+               return (0, _signtxVerify.verifyTicketTx)(device.getCommands().getHDNode.bind(device.getCommands()), params.inputs, params.outputs, response.serializedTx, params.coinInfo);
+ 
+-            case 44:
+-              _context.next = 48;
++            case 47:
++              _context.next = 53;
+               break;
+ 
+-            case 46:
+-              _context.next = 48;
++            case 49:
++              _context.next = 51;
+               return (0, _signtxVerify.verifyTx)(device.getCommands().getHDNode.bind(device.getCommands()), params.inputs, params.outputs, response.serializedTx, params.coinInfo);
+ 
+-            case 48:
++            case 51:
++              bitcoinTx = _context.sent;
++
++              if (bitcoinTx.hasWitnesses()) {
++                response.witnesses = bitcoinTx.ins.map(function (inp) {
++                  return (0, _tx.getWitness)(inp.witness);
++                });
++              }
++
++            case 53:
+               if (!params.push) {
+-                _context.next = 57;
++                _context.next = 62;
+                 break;
+               }
+ 
+               // validate backend
+               (0, _BlockchainLink.isBackendSupported)(params.coinInfo);
+-              _context.next = 52;
++              _context.next = 57;
+               return (0, _BlockchainLink.initBlockchain)(params.coinInfo, this.postMessage);
+ 
+-            case 52:
++            case 57:
+               _blockchain = _context.sent;
+-              _context.next = 55;
++              _context.next = 60;
+               return _blockchain.pushTransaction(response.serializedTx);
+ 
+-            case 55:
++            case 60:
+               txid = _context.sent;
+               return _context.abrupt("return", _objectSpread(_objectSpread({}, response), {}, {
+                 txid: txid
+               }));
+ 
+-            case 57:
++            case 62:
+               return _context.abrupt("return", response);
+ 
+-            case 58:
++            case 63:
+             case "end":
+               return _context.stop();
+           }
+diff --git a/node_modules/trezor-connect/lib/core/methods/SignTransaction.js.flow b/node_modules/trezor-connect/lib/core/methods/SignTransaction.js.flow
+index 2df29dc..d59878c 100644
+--- a/node_modules/trezor-connect/lib/core/methods/SignTransaction.js.flow
++++ b/node_modules/trezor-connect/lib/core/methods/SignTransaction.js.flow
+@@ -21,20 +21,23 @@ import {
+     transformReferencedTransactions,
+     getOrigTransactions,
+     transformOrigTransactions,
++    getWitness,
+ } from './tx';
+ 
+ import type { RefTransaction, TransactionOptions } from '../../types/networks/bitcoin';
+-import type { TxInputType, TxOutputType } from '../../types/trezor/protobuf';
++import type { TxInputType, TxOutputType, TxAckPaymentRequest } from '../../types/trezor/protobuf';
+ import type { BitcoinNetworkInfo, AccountAddresses } from '../../types';
+ 
+ type Params = {
+     inputs: TxInputType[],
+     outputs: TxOutputType[],
++    paymentRequests: TxAckPaymentRequest[],
+     refTxs?: RefTransaction[],
+     addresses?: AccountAddresses,
+     options: TransactionOptions,
+     coinInfo: BitcoinNetworkInfo,
+     push: boolean,
++    preauthorized?: boolean,
+ };
+ 
+ export default class SignTransaction extends AbstractMethod<'signTransaction'> {
+@@ -97,6 +100,7 @@ export default class SignTransaction extends AbstractMethod<'signTransaction'> {
+         this.params = {
+             inputs,
+             outputs: payload.outputs,
++            paymentRequests: payload.paymentRequests || [],
+             refTxs,
+             addresses: payload.account ? payload.account.addresses : undefined,
+             options: {
+@@ -111,6 +115,7 @@ export default class SignTransaction extends AbstractMethod<'signTransaction'> {
+             },
+             coinInfo,
+             push: typeof payload.push === 'boolean' ? payload.push : false,
++            preauthorized: !!payload.preauthorized,
+         };
+ 
+         if (coinInfo.hasTimestamp && !Object.prototype.hasOwnProperty.call(payload, 'timestamp')) {
+@@ -169,11 +174,16 @@ export default class SignTransaction extends AbstractMethod<'signTransaction'> {
+             refTxs = params.refTxs;
+         }
+ 
++        if (params.preauthorized) {
++            await device.getCommands().typedCall('DoPreauthorized', 'PreauthorizedRequest', {});
++        }
++
+         const signTxMethod = !useLegacySignProcess ? signTx : signTxLegacy;
+         const response = await signTxMethod(
+             device.getCommands().typedCall.bind(device.getCommands()),
+             params.inputs,
+             params.outputs,
++            params.paymentRequests,
+             refTxs,
+             params.options,
+             params.coinInfo,
+@@ -188,13 +198,17 @@ export default class SignTransaction extends AbstractMethod<'signTransaction'> {
+                 params.coinInfo,
+             );
+         } else {
+-            await verifyTx(
++            const bitcoinTx = await verifyTx(
+                 device.getCommands().getHDNode.bind(device.getCommands()),
+                 params.inputs,
+                 params.outputs,
+                 response.serializedTx,
+                 params.coinInfo,
+             );
++
++            if (bitcoinTx.hasWitnesses()) {
++                response.witnesses = bitcoinTx.ins.map(inp => getWitness(inp.witness));
++            }
+         }
+ 
+         if (params.push) {
+diff --git a/node_modules/trezor-connect/lib/core/methods/helpers/signtx-legacy.js b/node_modules/trezor-connect/lib/core/methods/helpers/signtx-legacy.js
+index d34e0a2..21442b7 100644
+--- a/node_modules/trezor-connect/lib/core/methods/helpers/signtx-legacy.js
++++ b/node_modules/trezor-connect/lib/core/methods/helpers/signtx-legacy.js
+@@ -213,7 +213,7 @@ var processTxRequest = /*#__PURE__*/function () {
+ }();
+ 
+ var _default = /*#__PURE__*/function () {
+-  var _ref4 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(typedCall, inputs, outputs, refTxsArray, options, coinInfo) {
++  var _ref4 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(typedCall, inputs, outputs, _paymentRequests, refTxsArray, options, coinInfo) {
+     var refTxs, _yield$typedCall2, message;
+ 
+     return _regenerator["default"].wrap(function _callee2$(_context2) {
+@@ -252,7 +252,7 @@ var _default = /*#__PURE__*/function () {
+     }, _callee2);
+   }));
+ 
+-  return function (_x2, _x3, _x4, _x5, _x6, _x7) {
++  return function (_x2, _x3, _x4, _x5, _x6, _x7, _x8) {
+     return _ref4.apply(this, arguments);
+   };
+ }();
+diff --git a/node_modules/trezor-connect/lib/core/methods/helpers/signtx-legacy.js.flow b/node_modules/trezor-connect/lib/core/methods/helpers/signtx-legacy.js.flow
+index 3ada237..3744ac7 100644
+--- a/node_modules/trezor-connect/lib/core/methods/helpers/signtx-legacy.js.flow
++++ b/node_modules/trezor-connect/lib/core/methods/helpers/signtx-legacy.js.flow
+@@ -178,6 +178,7 @@ export default async (
+     typedCall: TypedCall,
+     inputs: TxInputType[],
+     outputs: TxOutputType[],
++    _paymentRequests: any[],
+     refTxsArray: RefTransaction[],
+     options: TransactionOptions,
+     coinInfo: BitcoinNetworkInfo,
+diff --git a/node_modules/trezor-connect/lib/core/methods/helpers/signtx.js b/node_modules/trezor-connect/lib/core/methods/helpers/signtx.js
+index a61a7a9..4aed3a0 100644
+--- a/node_modules/trezor-connect/lib/core/methods/helpers/signtx.js
++++ b/node_modules/trezor-connect/lib/core/methods/helpers/signtx.js
+@@ -126,7 +126,8 @@ var requestSignedTxInfo = function requestSignedTxInfo(_ref2) {
+       request_type = _ref2$txRequest.request_type,
+       details = _ref2$txRequest.details,
+       inputs = _ref2.inputs,
+-      outputs = _ref2.outputs;
++      outputs = _ref2.outputs,
++      paymentRequests = _ref2.paymentRequests;
+ 
+   if (request_type === 'TXINPUT') {
+     return typedCall('TxAckInput', 'TxRequest', {
+@@ -144,6 +145,22 @@ var requestSignedTxInfo = function requestSignedTxInfo(_ref2) {
+     });
+   }
+ 
++  if (request_type === 'TXPAYMENTREQ') {
++    var req = paymentRequests[details.request_index];
++
++    if (!req) {
++      throw _constants.ERRORS.TypedError('Runtime', "requestPrevTxInfo: Requested unknown payment request at " + details.request_index);
++    }
++
++    return typedCall('TxAckPaymentRequest', 'TxRequest', {
++      nonce: req.nonce,
++      recipient_name: req.recipient_name,
++      memos: req.memos,
++      amount: req.amount,
++      signature: req.signature
++    });
++  }
++
+   if (request_type === 'TXMETA') {
+     throw _constants.ERRORS.TypedError('Runtime', 'requestSignedTxInfo: Cannot read TXMETA from signed transaction');
+   }
+@@ -188,13 +205,13 @@ var saveTxSignatures = function saveTxSignatures(txRequest, serializedTx, signat
+ 
+ var processTxRequest = /*#__PURE__*/function () {
+   var _ref3 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee(props) {
+-    var typedCall, txRequest, refTxs, inputs, outputs, serializedTx, signatures, _yield$requestTxAck, message;
++    var txRequest, serializedTx, signatures, _yield$requestTxAck, message;
+ 
+     return _regenerator["default"].wrap(function _callee$(_context) {
+       while (1) {
+         switch (_context.prev = _context.next) {
+           case 0:
+-            typedCall = props.typedCall, txRequest = props.txRequest, refTxs = props.refTxs, inputs = props.inputs, outputs = props.outputs, serializedTx = props.serializedTx, signatures = props.signatures;
++            txRequest = props.txRequest, serializedTx = props.serializedTx, signatures = props.signatures;
+             saveTxSignatures(txRequest.serialized, serializedTx, signatures);
+ 
+             if (!(txRequest.request_type === 'TXFINISHED')) {
+@@ -214,15 +231,9 @@ var processTxRequest = /*#__PURE__*/function () {
+           case 6:
+             _yield$requestTxAck = _context.sent;
+             message = _yield$requestTxAck.message;
+-            return _context.abrupt("return", processTxRequest({
+-              typedCall: typedCall,
+-              txRequest: message,
+-              refTxs: refTxs,
+-              inputs: inputs,
+-              outputs: outputs,
+-              serializedTx: serializedTx,
+-              signatures: signatures
+-            }));
++            return _context.abrupt("return", processTxRequest(_objectSpread(_objectSpread({}, props), {}, {
++              txRequest: message
++            })));
+ 
+           case 9:
+           case "end":
+@@ -238,7 +249,7 @@ var processTxRequest = /*#__PURE__*/function () {
+ }();
+ 
+ var _default = /*#__PURE__*/function () {
+-  var _ref4 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(typedCall, inputs, outputs, refTxsArray, options, coinInfo) {
++  var _ref4 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(typedCall, inputs, outputs, paymentRequests, refTxsArray, options, coinInfo) {
+     var refTxs, _yield$typedCall, message;
+ 
+     return _regenerator["default"].wrap(function _callee2$(_context2) {
+@@ -265,6 +276,7 @@ var _default = /*#__PURE__*/function () {
+               refTxs: refTxs,
+               inputs: inputs,
+               outputs: outputs,
++              paymentRequests: paymentRequests,
+               serializedTx: [],
+               signatures: []
+             }));
+@@ -277,7 +289,7 @@ var _default = /*#__PURE__*/function () {
+     }, _callee2);
+   }));
+ 
+-  return function (_x2, _x3, _x4, _x5, _x6, _x7) {
++  return function (_x2, _x3, _x4, _x5, _x6, _x7, _x8) {
+     return _ref4.apply(this, arguments);
+   };
+ }();
+diff --git a/node_modules/trezor-connect/lib/core/methods/helpers/signtx.js.flow b/node_modules/trezor-connect/lib/core/methods/helpers/signtx.js.flow
+index bb270eb..e5e2ae5 100644
+--- a/node_modules/trezor-connect/lib/core/methods/helpers/signtx.js.flow
++++ b/node_modules/trezor-connect/lib/core/methods/helpers/signtx.js.flow
+@@ -13,6 +13,7 @@ import type {
+     TxInputType,
+     TxOutputType,
+     TxRequestSerializedType,
++    TxAckPaymentRequest,
+ } from '../../../types/trezor/protobuf';
+ 
+ type RefTxs = { [hash: string]: RefTransaction };
+@@ -20,6 +21,7 @@ type Props = {
+     typedCall: TypedCall,
+     txRequest: TxRequest,
+     refTxs: RefTxs,
++    paymentRequests: TxAckPaymentRequest[],
+     inputs: TxInputType[],
+     outputs: TxOutputType[],
+     serializedTx: string[],
+@@ -121,6 +123,7 @@ const requestSignedTxInfo = ({
+     txRequest: { request_type, details },
+     inputs,
+     outputs,
++    paymentRequests,
+ }: Props) => {
+     if (request_type === 'TXINPUT') {
+         return typedCall('TxAckInput', 'TxRequest', {
+@@ -132,6 +135,22 @@ const requestSignedTxInfo = ({
+             tx: { output: outputs[details.request_index] },
+         });
+     }
++    if (request_type === 'TXPAYMENTREQ') {
++        const req = paymentRequests[details.request_index];
++        if (!req) {
++            throw ERRORS.TypedError(
++                'Runtime',
++                `requestPrevTxInfo: Requested unknown payment request at ${details.request_index}`,
++            );
++        }
++        return typedCall('TxAckPaymentRequest', 'TxRequest', {
++            nonce: req.nonce,
++            recipient_name: req.recipient_name,
++            memos: req.memos,
++            amount: req.amount,
++            signature: req.signature,
++        });
++    }
+     if (request_type === 'TXMETA') {
+         throw ERRORS.TypedError(
+             'Runtime',
+@@ -182,7 +201,7 @@ const saveTxSignatures = (
+ };
+ 
+ const processTxRequest = async (props: Props) => {
+-    const { typedCall, txRequest, refTxs, inputs, outputs, serializedTx, signatures } = props;
++    const { txRequest, serializedTx, signatures } = props;
+     saveTxSignatures(txRequest.serialized, serializedTx, signatures);
+     if (txRequest.request_type === 'TXFINISHED') {
+         return Promise.resolve({
+@@ -193,13 +212,8 @@ const processTxRequest = async (props: Props) => {
+ 
+     const { message } = await requestTxAck(props);
+     return processTxRequest({
+-        typedCall,
++        ...props,
+         txRequest: message,
+-        refTxs,
+-        inputs,
+-        outputs,
+-        serializedTx,
+-        signatures,
+     });
+ };
+ 
+@@ -207,6 +221,7 @@ export default async (
+     typedCall: TypedCall,
+     inputs: TxInputType[],
+     outputs: TxOutputType[],
++    paymentRequests: TxAckPaymentRequest[],
+     refTxsArray: RefTransaction[],
+     options: TransactionOptions,
+     coinInfo: BitcoinNetworkInfo,
+@@ -229,6 +244,7 @@ export default async (
+         refTxs,
+         inputs,
+         outputs,
++        paymentRequests,
+         serializedTx: [],
+         signatures: [],
+     });
+diff --git a/node_modules/trezor-connect/lib/core/methods/helpers/signtxVerify.js b/node_modules/trezor-connect/lib/core/methods/helpers/signtxVerify.js
+index 156826e..8b61717 100644
+--- a/node_modules/trezor-connect/lib/core/methods/helpers/signtxVerify.js
++++ b/node_modules/trezor-connect/lib/core/methods/helpers/signtxVerify.js
+@@ -241,6 +241,9 @@ var verifyTx = /*#__PURE__*/function () {
+             break;
+ 
+           case 20:
++            return _context3.abrupt("return", bitcoinTx);
++
++          case 21:
+           case "end":
+             return _context3.stop();
+         }
+diff --git a/node_modules/trezor-connect/lib/core/methods/helpers/signtxVerify.js.flow b/node_modules/trezor-connect/lib/core/methods/helpers/signtxVerify.js.flow
+index 3eb75bf..73e78b7 100644
+--- a/node_modules/trezor-connect/lib/core/methods/helpers/signtxVerify.js.flow
++++ b/node_modules/trezor-connect/lib/core/methods/helpers/signtxVerify.js.flow
+@@ -129,6 +129,8 @@ export const verifyTx = async (
+             throw ERRORS.TypedError('Runtime', `verifyTx: Output ${i} scripts differ`);
+         }
+     }
++
++    return bitcoinTx;
+ };
+ 
+ export const verifyTicketTx = async (
+diff --git a/node_modules/trezor-connect/lib/core/methods/index.js b/node_modules/trezor-connect/lib/core/methods/index.js
+index cb511bb..fb8fe56 100644
+--- a/node_modules/trezor-connect/lib/core/methods/index.js
++++ b/node_modules/trezor-connect/lib/core/methods/index.js
+@@ -9,6 +9,8 @@ var _constants = require("../../constants");
+ 
+ var _AbstractMethod = _interopRequireDefault(require("./AbstractMethod"));
+ 
++var _AuthorizeCoinJoin = _interopRequireDefault(require("./AuthorizeCoinJoin"));
++
+ var _BlockchainDisconnect = _interopRequireDefault(require("./blockchain/BlockchainDisconnect"));
+ 
+ var _BlockchainEstimateFee = _interopRequireDefault(require("./blockchain/BlockchainEstimateFee"));
+@@ -65,6 +67,10 @@ var _GetDeviceState = _interopRequireDefault(require("./GetDeviceState"));
+ 
+ var _GetFeatures = _interopRequireDefault(require("./GetFeatures"));
+ 
++var _GetOwnershipId = _interopRequireDefault(require("./GetOwnershipId"));
++
++var _GetOwnershipProof = _interopRequireDefault(require("./GetOwnershipProof"));
++
+ var _GetPublicKey = _interopRequireDefault(require("./GetPublicKey"));
+ 
+ var _GetSettings = _interopRequireDefault(require("./GetSettings"));
+@@ -132,6 +138,7 @@ var _GetCoinInfo = _interopRequireDefault(require("./GetCoinInfo"));
+ var _RebootToBootloader = _interopRequireDefault(require("./RebootToBootloader"));
+ 
+ var METHODS = {
++  authorizeCoinJoin: _AuthorizeCoinJoin["default"],
+   blockchainDisconnect: _BlockchainDisconnect["default"],
+   blockchainEstimateFee: _BlockchainEstimateFee["default"],
+   blockchainGetAccountBalanceHistory: _BlockchainGetAccountBalanceHistory["default"],
+@@ -160,6 +167,8 @@ var METHODS = {
+   getAddress: _GetAddress["default"],
+   getDeviceState: _GetDeviceState["default"],
+   getFeatures: _GetFeatures["default"],
++  getOwnershipId: _GetOwnershipId["default"],
++  getOwnershipProof: _GetOwnershipProof["default"],
+   getPublicKey: _GetPublicKey["default"],
+   getSettings: _GetSettings["default"],
+   liskDeprecated: _LiskDeprecated["default"],
+diff --git a/node_modules/trezor-connect/lib/core/methods/index.js.flow b/node_modules/trezor-connect/lib/core/methods/index.js.flow
+index 7637a87..a2621e4 100644
+--- a/node_modules/trezor-connect/lib/core/methods/index.js.flow
++++ b/node_modules/trezor-connect/lib/core/methods/index.js.flow
+@@ -5,6 +5,7 @@ import { ERRORS } from '../../constants';
+ 
+ import AbstractMethod from './AbstractMethod';
+ 
++import authorizeCoinJoin from './AuthorizeCoinJoin';
+ import blockchainDisconnect from './blockchain/BlockchainDisconnect';
+ import blockchainEstimateFee from './blockchain/BlockchainEstimateFee';
+ import blockchainGetAccountBalanceHistory from './blockchain/BlockchainGetAccountBalanceHistory';
+@@ -33,6 +34,8 @@ import getAccountInfo from './GetAccountInfo';
+ import getAddress from './GetAddress';
+ import getDeviceState from './GetDeviceState';
+ import getFeatures from './GetFeatures';
++import getOwnershipId from './GetOwnershipId';
++import getOwnershipProof from './GetOwnershipProof';
+ import getPublicKey from './GetPublicKey';
+ import getSettings from './GetSettings';
+ import liskDeprecated from './LiskDeprecated';
+@@ -68,6 +71,7 @@ import getCoinInfo from './GetCoinInfo';
+ import rebootToBootloader from './RebootToBootloader';
+ 
+ const METHODS = {
++    authorizeCoinJoin,
+     blockchainDisconnect,
+     blockchainEstimateFee,
+     blockchainGetAccountBalanceHistory,
+@@ -96,6 +100,8 @@ const METHODS = {
+     getAddress,
+     getDeviceState,
+     getFeatures,
++    getOwnershipId,
++    getOwnershipProof,
+     getPublicKey,
+     getSettings,
+     liskDeprecated,
+diff --git a/node_modules/trezor-connect/lib/core/methods/tx/refTx.js b/node_modules/trezor-connect/lib/core/methods/tx/refTx.js
+index 820b94b..7077d83 100644
+--- a/node_modules/trezor-connect/lib/core/methods/tx/refTx.js
++++ b/node_modules/trezor-connect/lib/core/methods/tx/refTx.js
+@@ -1,7 +1,7 @@
+ "use strict";
+ 
+ exports.__esModule = true;
+-exports.validateReferencedTransactions = exports.transformReferencedTransactions = exports.transformOrigTransactions = exports.getOrigTransactions = exports.getReferencedTransactions = void 0;
++exports.validateReferencedTransactions = exports.transformReferencedTransactions = exports.transformOrigTransactions = exports.getWitness = exports.getOrigTransactions = exports.getReferencedTransactions = void 0;
+ 
+ var _utxoLib = require("@trezor/utxo-lib");
+ 
+@@ -65,6 +65,8 @@ var getWitness = function getWitness(witness) {
+ }; // extend refTx object with optional data
+ 
+ 
++exports.getWitness = getWitness;
++
+ var enhanceTransaction = function enhanceTransaction(refTx, srcTx) {
+   var extraData = srcTx.getExtraData();
+ 
+diff --git a/node_modules/trezor-connect/lib/core/methods/tx/refTx.js.flow b/node_modules/trezor-connect/lib/core/methods/tx/refTx.js.flow
+index 1a176b9..9276fa9 100644
+--- a/node_modules/trezor-connect/lib/core/methods/tx/refTx.js.flow
++++ b/node_modules/trezor-connect/lib/core/methods/tx/refTx.js.flow
+@@ -46,7 +46,7 @@ export const getOrigTransactions = (inputs: TxInputType[], outputs: TxOutputType
+ // expected hex response format:
+ // chunks size + (chunk[i].size + chunk[i])
+ // TODO: this code should be implemented in BitcoinJsTransaction (@trezor/utxo-lib)
+-const getWitness = (witness?: Buffer[]) => {
++export const getWitness = (witness?: Buffer[]) => {
+     if (!Array.isArray(witness)) return;
+     const getChunkSize = (n: number) => {
+         const buf = Buffer.allocUnsafe(1);
+diff --git a/node_modules/trezor-connect/lib/index.js b/node_modules/trezor-connect/lib/index.js
+index 5674395..52cf771 100644
+--- a/node_modules/trezor-connect/lib/index.js
++++ b/node_modules/trezor-connect/lib/index.js
+@@ -47,6 +47,11 @@ var TrezorConnect = {
+   },
+   uiResponse: _node.uiResponse,
+   // methods
++  authorizeCoinJoin: function authorizeCoinJoin(params) {
++    return (0, _node.call)(_objectSpread({
++      method: 'authorizeCoinJoin'
++    }, params));
++  },
+   blockchainGetAccountBalanceHistory: function blockchainGetAccountBalanceHistory(params) {
+     return (0, _node.call)(_objectSpread({
+       method: 'blockchainGetAccountBalanceHistory'
+@@ -197,6 +202,16 @@ var TrezorConnect = {
+       method: 'getFeatures'
+     }, params));
+   },
++  getOwnershipId: function getOwnershipId(params) {
++    return (0, _node.call)(_objectSpread({
++      method: 'getOwnershipId'
++    }, params));
++  },
++  getOwnershipProof: function getOwnershipProof(params) {
++    return (0, _node.call)(_objectSpread({
++      method: 'getOwnershipProof'
++    }, params));
++  },
+   getPublicKey: function getPublicKey(params) {
+     return (0, _node.call)(_objectSpread({
+       method: 'getPublicKey'
+diff --git a/node_modules/trezor-connect/lib/index.js.flow b/node_modules/trezor-connect/lib/index.js.flow
+index 2eec8cc..d957af7 100644
+--- a/node_modules/trezor-connect/lib/index.js.flow
++++ b/node_modules/trezor-connect/lib/index.js.flow
+@@ -37,6 +37,8 @@ const TrezorConnect: API = {
+ 
+     // methods
+ 
++    authorizeCoinJoin: params => call({ method: 'authorizeCoinJoin', ...params }),
++
+     blockchainGetAccountBalanceHistory: params =>
+         call({ method: 'blockchainGetAccountBalanceHistory', ...params }),
+ 
+@@ -109,6 +111,10 @@ const TrezorConnect: API = {
+ 
+     getFeatures: params => call({ method: 'getFeatures', ...params }),
+ 
++    getOwnershipId: params => call({ method: 'getOwnershipId', ...params }),
++
++    getOwnershipProof: params => call({ method: 'getOwnershipProof', ...params }),
++
+     getPublicKey: params => call({ method: 'getPublicKey', ...params }),
+ 
+     liskGetAddress: () => call({ method: 'liskDeprecated' }),
+diff --git a/node_modules/trezor-connect/lib/types/api.js.flow b/node_modules/trezor-connect/lib/types/api.js.flow
+index d514daa..2e7dbf2 100644
+--- a/node_modules/trezor-connect/lib/types/api.js.flow
++++ b/node_modules/trezor-connect/lib/types/api.js.flow
+@@ -297,6 +297,12 @@ export type API = {
+      */
+     getFeatures: Method<{}, Device.Features>,
+ 
++    getOwnershipId: Bundled<Bitcoin.GetOwnershipId, Protobuf.OwnershipId>,
++
++    getOwnershipProof: Bundled<Bitcoin.GetOwnershipProof, Protobuf.OwnershipProof>,
++
++    authorizeCoinJoin: Method<Bitcoin.AuthorizeCoinJoin, Protobuf.Success>,
++
+     /**
+      * Retrieves device state associated with passphrase.
+      */
+diff --git a/node_modules/trezor-connect/lib/types/networks/bitcoin.js.flow b/node_modules/trezor-connect/lib/types/networks/bitcoin.js.flow
+index dfaffbc..c80c2a2 100644
+--- a/node_modules/trezor-connect/lib/types/networks/bitcoin.js.flow
++++ b/node_modules/trezor-connect/lib/types/networks/bitcoin.js.flow
+@@ -1,10 +1,12 @@
+ /* @flow */
+ import type {
++    AmountUnit,
+     PrevInput,
+     TxInput as OrigTxInputType,
+     TxInputType,
+     TxOutputType,
+     TxOutputBinType,
++    TxAckPaymentRequest,
+     Address as ProtobufAddress,
+     InternalInputScriptType,
+     MultisigRedeemScriptType,
+@@ -97,6 +99,7 @@ export type TransactionOptions = {|
+ export type SignTransaction = {
+     inputs: TxInputType[],
+     outputs: TxOutputType[],
++    paymentRequests?: TxAckPaymentRequest[],
+     refTxs?: RefTransaction[],
+     account?: {
+         addresses: AccountAddresses,
+@@ -111,13 +114,44 @@ export type SignTransaction = {
+     branchId?: number,
+     decredStakingTicket?: boolean,
+     push?: boolean,
++    preauthorized?: boolean,
+ };
+ export type SignedTransaction = {
+     signatures: string[],
++    witnesses?: Array<string | typeof undefined>,
+     serializedTx: string,
+     txid?: string,
+ };
+ 
++export type GetOwnershipId = {
++    path: string | number[],
++    coin?: string,
++    multisig?: MultisigRedeemScriptType,
++    scriptType?: InternalInputScriptType,
++    preauthorized?: boolean,
++};
++
++export type GetOwnershipProof = {
++    path: string | number[],
++    coin?: string,
++    multisig?: MultisigRedeemScriptType,
++    scriptType?: InternalInputScriptType,
++    userConfirmation?: boolean,
++    ownershipIds?: string[],
++    commitmentData?: string,
++    preauthorized?: boolean,
++};
++
++export type AuthorizeCoinJoin = {
++    path: string | number[],
++    coordinator: string,
++    maxTotalFee: number,
++    feePerAnonymity?: number,
++    coin?: string,
++    scriptType?: InternalInputScriptType,
++    amountUnit?: AmountUnit,
++};
++
+ // push transaction params
+ export type PushTransaction = {
+     tx: string,
+diff --git a/node_modules/trezor-connect/lib/types/trezor/protobuf.js b/node_modules/trezor-connect/lib/types/trezor/protobuf.js
+index 6c49e6f..3398e8a 100644
+--- a/node_modules/trezor-connect/lib/types/trezor/protobuf.js
++++ b/node_modules/trezor-connect/lib/types/trezor/protobuf.js
+@@ -129,7 +129,8 @@ exports.Enum_CardanoTxAuxiliaryDataSupplementType = Enum_CardanoTxAuxiliaryDataS
+ var Enum_CardanoTxSigningMode = Object.freeze({
+   ORDINARY_TRANSACTION: 0,
+   POOL_REGISTRATION_AS_OWNER: 1,
+-  MULTISIG_TRANSACTION: 2
++  MULTISIG_TRANSACTION: 2,
++  PLUTUS_TRANSACTION: 3
+ });
+ exports.Enum_CardanoTxSigningMode = Enum_CardanoTxSigningMode;
+ var Enum_CardanoTxWitnessType = Object.freeze({
+diff --git a/node_modules/trezor-connect/lib/types/trezor/protobuf.js.flow b/node_modules/trezor-connect/lib/types/trezor/protobuf.js.flow
+index 6d816b0..c23d1bb 100644
+--- a/node_modules/trezor-connect/lib/types/trezor/protobuf.js.flow
++++ b/node_modules/trezor-connect/lib/types/trezor/protobuf.js.flow
+@@ -525,7 +525,7 @@ export type GetOwnershipProof = {
+     script_type?: InputScriptType,
+     multisig?: MultisigRedeemScriptType,
+     user_confirmation?: boolean,
+-    ownership_ids: string[],
++    ownership_ids?: string[],
+     commitment_data?: string,
+ };
+ 
+@@ -538,8 +538,9 @@ export type OwnershipProof = {
+ // AuthorizeCoinJoin
+ export type AuthorizeCoinJoin = {
+     coordinator: string,
+-    max_total_fee: number,
+-    fee_per_anonymity?: number,
++    max_rounds: number,
++    max_coordinator_fee_rate: number,
++    max_fee_per_kvbyte: number,
+     address_n: number[],
+     coin_name?: string,
+     script_type?: InputScriptType,
+@@ -636,6 +637,7 @@ export const Enum_CardanoTxSigningMode = Object.freeze({
+     ORDINARY_TRANSACTION: 0,
+     POOL_REGISTRATION_AS_OWNER: 1,
+     MULTISIG_TRANSACTION: 2,
++    PLUTUS_TRANSACTION: 3,
+ });
+ export type CardanoTxSigningMode = $Values<typeof Enum_CardanoTxSigningMode>;
+ 
+@@ -729,6 +731,10 @@ export type CardanoSignTxInit = {
+     witness_requests_count: number,
+     minting_asset_groups_count: number,
+     derivation_type: CardanoDerivationType,
++    include_network_id?: boolean,
++    script_data_hash?: string,
++    collateral_inputs_count: number,
++    required_signers_count: number,
+ };
+ 
+ // CardanoTxInput
+@@ -743,6 +749,7 @@ export type CardanoTxOutput = {
+     address_parameters?: CardanoAddressParametersType,
+     amount: UintType,
+     asset_groups_count: number,
++    datum_hash?: string,
+ };
+ 
+ // CardanoAssetGroup
+@@ -802,6 +809,7 @@ export type CardanoTxCertificate = {
+     pool?: string,
+     pool_parameters?: CardanoPoolParametersType,
+     script_hash?: string,
++    key_hash?: string,
+ };
+ 
+ // CardanoTxWithdrawal
+@@ -809,6 +817,7 @@ export type CardanoTxWithdrawal = {
+     path?: number[],
+     amount: UintType,
+     script_hash?: string,
++    key_hash?: string,
+ };
+ 
+ // CardanoCatalystRegistrationParametersType
+@@ -830,6 +839,18 @@ export type CardanoTxMint = {
+     asset_groups_count: number,
+ };
+ 
++// CardanoTxCollateralInput
++export type CardanoTxCollateralInput = {
++    prev_hash: string,
++    prev_index: number,
++};
++
++// CardanoTxRequiredSigner
++export type CardanoTxRequiredSigner = {
++    key_hash?: string,
++    key_path: number[],
++};
++
+ // CardanoTxItemAck
+ export type CardanoTxItemAck = {};
+ 
+@@ -2269,6 +2290,8 @@ export type MessageType = {
+     CardanoCatalystRegistrationParametersType: $Exact<CardanoCatalystRegistrationParametersType>,
+     CardanoTxAuxiliaryData: CardanoTxAuxiliaryData,
+     CardanoTxMint: $Exact<CardanoTxMint>,
++    CardanoTxCollateralInput: $Exact<CardanoTxCollateralInput>,
++    CardanoTxRequiredSigner: CardanoTxRequiredSigner,
+     CardanoTxItemAck: CardanoTxItemAck,
+     CardanoTxAuxiliaryDataSupplement: $Exact<CardanoTxAuxiliaryDataSupplement>,
+     CardanoTxWitnessRequest: CardanoTxWitnessRequest,
+diff --git a/node_modules/trezor-connect/lib/typescript/api.d.ts b/node_modules/trezor-connect/lib/typescript/api.d.ts
+index 5f3d707..d2d5b42 100644
+--- a/node_modules/trezor-connect/lib/typescript/api.d.ts
++++ b/node_modules/trezor-connect/lib/typescript/api.d.ts
+@@ -390,6 +390,24 @@ export namespace TrezorConnect {
+      */
+     function getFeatures(params?: P.CommonParams): P.Response<Device.Features>;
+ 
++    function getOwnershipId(
++        params: P.CommonParams & Bitcoin.GetOwnershipId,
++    ): P.Response<Protobuf.OwnershipId>;
++    function getOwnershipId(
++        params: P.CommonParams & P.Bundle<Bitcoin.GetOwnershipId>,
++    ): P.BundledResponse<Protobuf.OwnershipId>;
++
++    function getOwnershipProof(
++        params: P.CommonParams & Bitcoin.GetOwnershipProof,
++    ): P.Response<Protobuf.OwnershipProof>;
++    function getOwnershipProof(
++        params: P.CommonParams & P.Bundle<Bitcoin.GetOwnershipProof>,
++    ): P.BundledResponse<Protobuf.OwnershipProof>;
++
++    function authorizeCoinJoin(
++        params: P.CommonParams & Bitcoin.AuthorizeCoinJoin,
++    ): P.Response<Protobuf.Success>;
++
+     /**
+      * Retrieves device state associated with passphrase.
+      */
+diff --git a/node_modules/trezor-connect/lib/typescript/networks/bitcoin.d.ts b/node_modules/trezor-connect/lib/typescript/networks/bitcoin.d.ts
+index eae3f10..a61672f 100644
+--- a/node_modules/trezor-connect/lib/typescript/networks/bitcoin.d.ts
++++ b/node_modules/trezor-connect/lib/typescript/networks/bitcoin.d.ts
+@@ -1,9 +1,11 @@
+ import type {
++    AmountUnit,
+     PrevInput,
+     TxInput as OrigTxInputType,
+     TxInputType,
+     TxOutputType,
+     TxOutputBinType,
++    TxAckPaymentRequest,
+     Address as ProtobufAddress,
+     MultisigRedeemScriptType,
+     InternalInputScriptType,
+@@ -95,6 +97,7 @@ export type TransactionOptions = {
+ export interface SignTransaction {
+     inputs: TxInputType[];
+     outputs: TxOutputType[];
++    paymentRequests?: TxAckPaymentRequest[];
+     refTxs?: RefTransaction[];
+     account?: {
+         addresses: AccountAddresses;
+@@ -109,13 +112,45 @@ export interface SignTransaction {
+     branchId?: number;
+     decredStakingTicket?: boolean;
+     push?: boolean;
++    preauthorized?: boolean;
+ }
++
+ export type SignedTransaction = {
+     signatures: string[];
++    witnesses?: Array<string | typeof undefined>;
+     serializedTx: string;
+     txid?: string;
+ };
+ 
++export type GetOwnershipId = {
++    path: string | number[];
++    coin?: string;
++    multisig?: MultisigRedeemScriptType;
++    scriptType?: InternalInputScriptType;
++    preauthorized?: boolean;
++};
++
++export type GetOwnershipProof = {
++    path: string | number[];
++    coin?: string;
++    multisig?: MultisigRedeemScriptType;
++    scriptType?: InternalInputScriptType;
++    userConfirmation?: boolean;
++    ownershipIds?: string[];
++    commitmentData?: string;
++    preauthorized?: boolean;
++};
++
++export type AuthorizeCoinJoin = {
++    path: string | number[];
++    coordinator: string;
++    maxTotalFee: number;
++    feePerAnonymity?: number;
++    coin?: string;
++    scriptType?: InternalInputScriptType;
++    amountUnit?: AmountUnit;
++};
++
+ // push transaction params
+ export interface PushTransaction {
+     tx: string;
+diff --git a/node_modules/trezor-connect/lib/typescript/trezor/protobuf.d.ts b/node_modules/trezor-connect/lib/typescript/trezor/protobuf.d.ts
+index 8272364..636f833 100644
+--- a/node_modules/trezor-connect/lib/typescript/trezor/protobuf.d.ts
++++ b/node_modules/trezor-connect/lib/typescript/trezor/protobuf.d.ts
+@@ -515,7 +515,7 @@ export type GetOwnershipProof = {
+     script_type?: InputScriptType;
+     multisig?: MultisigRedeemScriptType;
+     user_confirmation?: boolean;
+-    ownership_ids: string[];
++    ownership_ids?: string[];
+     commitment_data?: string;
+ };
+ 
+@@ -528,8 +528,9 @@ export type OwnershipProof = {
+ // AuthorizeCoinJoin
+ export type AuthorizeCoinJoin = {
+     coordinator: string;
+-    max_total_fee: number;
+-    fee_per_anonymity?: number;
++    max_rounds: number;
++    max_coordinator_fee_rate: number;
++    max_fee_per_kvbyte: number;
+     address_n: number[];
+     coin_name?: string;
+     script_type?: InputScriptType;
+@@ -615,6 +616,7 @@ export enum CardanoTxSigningMode {
+     ORDINARY_TRANSACTION = 0,
+     POOL_REGISTRATION_AS_OWNER = 1,
+     MULTISIG_TRANSACTION = 2,
++    PLUTUS_TRANSACTION = 3,
+ }
+ 
+ export enum CardanoTxWitnessType {
+@@ -706,6 +708,10 @@ export type CardanoSignTxInit = {
+     witness_requests_count: number;
+     minting_asset_groups_count: number;
+     derivation_type: CardanoDerivationType;
++    include_network_id?: boolean;
++    script_data_hash?: string;
++    collateral_inputs_count: number;
++    required_signers_count: number;
+ };
+ 
+ // CardanoTxInput
+@@ -720,6 +726,7 @@ export type CardanoTxOutput = {
+     address_parameters?: CardanoAddressParametersType;
+     amount: UintType;
+     asset_groups_count: number;
++    datum_hash?: string;
+ };
+ 
+ // CardanoAssetGroup
+@@ -779,6 +786,7 @@ export type CardanoTxCertificate = {
+     pool?: string;
+     pool_parameters?: CardanoPoolParametersType;
+     script_hash?: string;
++    key_hash?: string;
+ };
+ 
+ // CardanoTxWithdrawal
+@@ -786,6 +794,7 @@ export type CardanoTxWithdrawal = {
+     path?: number[];
+     amount: UintType;
+     script_hash?: string;
++    key_hash?: string;
+ };
+ 
+ // CardanoCatalystRegistrationParametersType
+@@ -807,6 +816,18 @@ export type CardanoTxMint = {
+     asset_groups_count: number;
+ };
+ 
++// CardanoTxCollateralInput
++export type CardanoTxCollateralInput = {
++    prev_hash: string;
++    prev_index: number;
++};
++
++// CardanoTxRequiredSigner
++export type CardanoTxRequiredSigner = {
++    key_hash?: string;
++    key_path: number[];
++};
++
+ // CardanoTxItemAck
+ export type CardanoTxItemAck = {};
+ 
