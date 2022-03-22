@@ -32,3 +32,6 @@ services:
   bitcoin-regtest:
     image: ghcr.io/trezor/trezor-user-env-regtest # this is a special image that runs regtest and blockbook
     network_mode: service:trezor-user-env-unix
+  coinjoin-backend:
+    image: ghcr.io/trezor/coinjoin-backend:latest # see https://github.com/trezor/coinjoin-backend
+    network_mode: service:trezor-user-env-unix
