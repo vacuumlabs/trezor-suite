@@ -78,6 +78,7 @@
 
 suite web:
   extends: .suite web base
+  when: manual
 
 suite web snapshots:
   extends: .suite web base

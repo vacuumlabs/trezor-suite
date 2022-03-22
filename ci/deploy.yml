@@ -90,6 +90,9 @@ msg-system deploy dev:
   stage: deploy to dev
   variables:
     DEPLOY_DIRECTORY: ${DEPLOY_BASE_DIR}/connect-explorer/${CI_BUILD_REF_NAME}
+  needs:
+    - connect-explorer build
+  when: manual
   environment:
     name: ${CI_BUILD_REF_NAME}
     url: $BASE_REVIEW_URL/${CI_BUILD_REF_NAME}

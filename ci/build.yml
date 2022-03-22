@@ -273,6 +273,7 @@ suite-native build android:
 
 .connect-explorer build base:
   stage: build
+  when: manual
   script:
     - yarn install --frozen-lockfile --cache-folder .yarn --prefer-offline
     - yarn build:libs

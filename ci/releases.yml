@@ -1,36 +1,36 @@
 # Upload everything to staging
-suite codesign deploy staging-suite:
-  stage: deploy to staging
-  needs:
-    - suite-web build stable codesign
-    - suite-desktop build mac codesign
-    - suite-desktop build linux codesign
-    - suite-desktop build windows codesign
-    - suite-web-landing build stable
-  environment:
-    name: ${CI_BUILD_REF_NAME}-staging-suite
-    url: ${STAGING_SUITE_SERVER_URL}
-  before_script: []
-  only:
-    refs:
-      - codesign
-  when: manual
-  script:
-    - source ${STAGING_SUITE_DEPLOY_KEYFILE}
-    - mkdir -p packages/suite-web/build/static/desktop
-    - 'rsync --delete -va "${DESKTOP_APP_NAME}"-*.AppImage ./packages/suite-web/build/static/desktop || :'
-    - 'rsync --delete -va "${DESKTOP_APP_NAME}"-*.AppImage.asc ./packages/suite-web/build/static/desktop || :'
-    - 'rsync --delete -va "${DESKTOP_APP_NAME}"-*.dmg ./packages/suite-web/build/static/desktop || :'
-    - 'rsync --delete -va "${DESKTOP_APP_NAME}"-*.dmg.asc ./packages/suite-web/build/static/desktop || :'
-    - 'rsync --delete -va "${DESKTOP_APP_NAME}"-*.exe ./packages/suite-web/build/static/desktop || :'
-    - 'rsync --delete -va "${DESKTOP_APP_NAME}"-*.exe.asc ./packages/suite-web/build/static/desktop || :'
-    - cd packages/suite-web
-    - ./scripts/s3sync.sh staging-suite
-    - cd -
-    - cd packages/suite-web-landing
-    - ./scripts/s3sync.sh staging-suite
-  tags:
-    - deploy
+# suite codesign deploy staging-suite:
+#   stage: deploy to staging
+#   needs:
+#     - suite-web build stable codesign
+#     - suite-desktop build mac codesign
+#     - suite-desktop build linux codesign
+#     - suite-desktop build windows codesign
+#     - suite-web-landing build stable
+#   environment:
+#     name: ${CI_BUILD_REF_NAME}-staging-suite
+#     url: ${STAGING_SUITE_SERVER_URL}
+#   before_script: []
+#   only:
+#     refs:
+#       - codesign
+#   when: manual
+#   script:
+#     - source ${STAGING_SUITE_DEPLOY_KEYFILE}
+#     - mkdir -p packages/suite-web/build/static/desktop
+#     - 'rsync --delete -va "${DESKTOP_APP_NAME}"-*.AppImage ./packages/suite-web/build/static/desktop || :'
+#     - 'rsync --delete -va "${DESKTOP_APP_NAME}"-*.AppImage.asc ./packages/suite-web/build/static/desktop || :'
+#     - 'rsync --delete -va "${DESKTOP_APP_NAME}"-*.dmg ./packages/suite-web/build/static/desktop || :'
+#     - 'rsync --delete -va "${DESKTOP_APP_NAME}"-*.dmg.asc ./packages/suite-web/build/static/desktop || :'
+#     - 'rsync --delete -va "${DESKTOP_APP_NAME}"-*.exe ./packages/suite-web/build/static/desktop || :'
+#     - 'rsync --delete -va "${DESKTOP_APP_NAME}"-*.exe.asc ./packages/suite-web/build/static/desktop || :'
+#     - cd packages/suite-web
+#     - ./scripts/s3sync.sh staging-suite
+#     - cd -
+#     - cd packages/suite-web-landing
+#     - ./scripts/s3sync.sh staging-suite
+#   tags:
+#     - deploy
 
 # Suite desktop deploy to staging
 suite-desktop deploy autoupdate test:
@@ -83,19 +83,19 @@ release commit messages:
     - ci/scripts/check_release_commit_messages.sh
 
 # Messaging system deploy to production
-msg-system codesign deploy:
-  stage: deploy to production
-  when: manual
-  needs:
-    - "msg-system config sign stable"
-  only:
-    refs:
-      - codesign
-  tags:
-    - deploy
-  variables:
-    AWS_CLOUDFRONT_ID: E1ERY5K2OTKKI1
-  script:
-    - source ${MSG_SYSTEM_DATA_DEPLOY_KEYFILE}
-    - aws s3 cp packages/suite-data/files/message-system/config.v1.jws s3://data.trezor.io/config/stable/config.v1.jws
-    - aws cloudfront create-invalidation --distribution-id ${AWS_CLOUDFRONT_ID} --paths '/config/stable/*'
+# msg-system codesign deploy:
+#   stage: deploy to production
+#   when: manual
+#   needs:
+#     - "msg-system config sign stable"
+#   only:
+#     refs:
+#       - codesign
+#   tags:
+#     - deploy
+#   variables:
+#     AWS_CLOUDFRONT_ID: E1ERY5K2OTKKI1
+#   script:
+#     - source ${MSG_SYSTEM_DATA_DEPLOY_KEYFILE}
+#     - aws s3 cp packages/suite-data/files/message-system/config.v1.jws s3://data.trezor.io/config/stable/config.v1.jws
+#     - aws cloudfront create-invalidation --distribution-id ${AWS_CLOUDFRONT_ID} --paths '/config/stable/*'
