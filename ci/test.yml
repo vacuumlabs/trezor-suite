@@ -51,12 +51,19 @@
   extends: .e2e web
   parallel:
     matrix:
-      - TEST_GROUP: ['@group:suite', '@group:onboarding', '@group:device-management', '@group:settings', '@group:metadata']
-        CONTAINERS: 'trezor-user-env-unix'
-      - TEST_GROUP: '@group:wallet'
-        CONTAINERS: 'trezor-user-env-unix bitcoin-regtest'
-      - TEST_GROUP: '@group:coinjoin'
-        CONTAINERS: 'trezor-user-env-unix coinjoin-backend'
+      - TEST_GROUP:
+          [
+            "@group:suite",
+            "@group:onboarding",
+            "@group:device-management",
+            "@group:settings",
+            "@group:metadata",
+          ]
+        CONTAINERS: "trezor-user-env-unix"
+      - TEST_GROUP: "@group:wallet"
+        CONTAINERS: "trezor-user-env-unix bitcoin-regtest"
+      - TEST_GROUP: "@group:coinjoin"
+        CONTAINERS: "trezor-user-env-unix coinjoin-backend"
 
 # fragile group is dependent on external powers which means it might fail when some external resource
 # is modified. We still believe it might be worth having to fix such broken test time to time.
@@ -70,6 +77,7 @@
 
 suite web:
   extends: .suite web base
+  when: manual
 
 suite web snapshots:
   extends: .suite web base
@@ -110,8 +118,8 @@ suite web coinjoin:
     FIRMWARE: 2-master
   parallel:
     matrix:
-      - TEST_GROUP: ['@group:coinjoin']
-        CONTAINERS: 'trezor-user-env-unix coinjoin-backend'
+      - TEST_GROUP: ["@group:coinjoin"]
+        CONTAINERS: "trezor-user-env-unix coinjoin-backend"
 
 # TODO scheduled jobs against beta chrome channel
 # TODO scheduled jobs against suite.trezor.io

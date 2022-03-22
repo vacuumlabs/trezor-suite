@@ -298,6 +298,7 @@ suite-desktop build windows codesign:
 
 connect-explorer build:
   stage: build
+  when: manual
   script:
     - yarn install --frozen-lockfile --cache-folder .yarn --prefer-offline
     - yarn build:libs
