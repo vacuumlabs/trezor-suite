@@ -124,6 +124,7 @@ const getDeviceContextModal = ({ modal, device, onPinCancel }: SharedProps) => {
         case 'ButtonRequest_UnknownDerivationPath':
         case 'ButtonRequest_FirmwareUpdate':
         case 'ButtonRequest_PinEntry':
+        case 'ButtonRequest_FeeOverThreshold':
             return <ConfirmAction device={device} />;
         default:
             return null;
