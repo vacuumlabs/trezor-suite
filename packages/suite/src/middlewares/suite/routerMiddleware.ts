@@ -15,7 +15,10 @@ const router = (api: MiddlewareAPI<Dispatch, AppState>) => (next: Dispatch) => (
              * Exclude settings routes – we want to close the settings and not just switch the settigns tab...
              * Exculde foreground apps – to prevent going back to modals and other unexpected states.
              */
-            if (router.app !== 'settings' && !router.route?.isForegroundApp) {
+            if (
+                (router.app !== 'settings' && !router.route?.isForegroundApp) ||
+                (action.payload.app === 'onboarding' && router.app !== 'onboarding')
+            ) {
                 return next({
                     ...action,
                     payload: {
