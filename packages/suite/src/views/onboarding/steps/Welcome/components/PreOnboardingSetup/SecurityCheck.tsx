@@ -70,9 +70,10 @@ const OuterActions = styled.div`
 
 const SecurityCheck = () => {
     const { goToNextStep, goto, rerun, updateAnalytics } = useOnboarding();
-    const { device, recovery } = useSelector(s => ({
+    const { device, recovery, settingsBackRoute } = useSelector(s => ({
         device: s.suite.device,
         recovery: s.recovery,
+        settingsBackRoute: s.router.settingsBackRoute,
     }));
 
     const deviceStatus = getConnectedDeviceStatus(device);
@@ -141,7 +142,9 @@ const SecurityCheck = () => {
                     {initialized ? (
                         <OnboardingButtonCta
                             data-test="@onboarding/exit-app-button"
-                            onClick={() => goto('suite-index')}
+                            onClick={() =>
+                                goto(settingsBackRoute.name, { params: settingsBackRoute.params })
+                            }
                         >
                             <Translation id="TR_GO_TO_SUITE" />
                         </OnboardingButtonCta>

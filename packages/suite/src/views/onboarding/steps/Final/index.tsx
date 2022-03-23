@@ -161,9 +161,10 @@ const FinalStep = () => {
 
     const { isLocked, device } = useDevice();
     const isDeviceLocked = isLocked();
-    const { modal, onboardingAnalytics } = useSelector(state => ({
+    const { modal, onboardingAnalytics, settingsBackRoute } = useSelector(state => ({
         modal: state.modal,
         onboardingAnalytics: state.onboarding.onboardingAnalytics,
+        settingsBackRoute: s.router.settingsBackRoute,
     }));
 
     const [state, setState] = useState<'rename' | 'homescreen' | null>(null);
@@ -273,7 +274,7 @@ const FinalStep = () => {
                         variant="secondary"
                         data-test="@onboarding/exit-app-button"
                         onClick={() => {
-                            goto('suite-index');
+                            goto(settingsBackRoute.name, { params: settingsBackRoute.params });
 
                             const payload = {
                                 ...onboardingAnalytics,
