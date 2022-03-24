@@ -57,7 +57,12 @@ module.exports = on => {
 
         if (browser.name === 'chrome') {
             launchOptions.args.push('--disable-dev-shm-usage');
+            launchOptions.args.push('--auto-open-devtools-for-tabs');
             return launchOptions;
+        }
+        if (browser.name === 'electron') {
+            // Cypress-specific option (state)
+            launchOptions.devTools = true;
         }
 
         return launchOptions;
