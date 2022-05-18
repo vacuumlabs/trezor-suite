@@ -1,7 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
 import { analytics, EventType } from '@trezor/suite-analytics';
-
 import { variables, H2, Button, Card } from '@trezor/components';
 import { Translation, Image } from '@suite-components';
 import { useActions, useSelector } from '@suite-hooks';
@@ -69,14 +68,14 @@ interface Props {
     account: Account;
 }
 
-const AccountEmpty = (props: Props) => {
+const AccountEmpty = ({ account }: Props) => {
     const { bech32BannerClosed, taprootBannerClosed } = useSelector(state => state.suite.flags);
     const { goto, setFlag } = useActions({
         goto: routerActions.goto,
         setFlag: suiteActions.setFlag,
     });
-    const bip43 = getBip43Type(props.account.path);
-    const networkSymbol = props.account.symbol.toUpperCase();
+    const bip43 = getBip43Type(account.path);
+    const networkSymbol = account.symbol.toUpperCase();
 
     return (
         <Wrapper>
@@ -87,7 +86,7 @@ const AccountEmpty = (props: Props) => {
                     }}
                 />
             )}
-            {bip43 === 'bip86' && !taprootBannerClosed && (
+            {account.accountType === 'taproot' && !taprootBannerClosed && (
                 <TaprootBanner
                     onClose={() => {
                         setFlag('taprootBannerClosed', true);
@@ -100,10 +99,14 @@ const AccountEmpty = (props: Props) => {
                     <Translation id="TR_ACCOUNT_IS_EMPTY_TITLE" />
                 </Title>
                 <Description>
-                    <Translation
-                        id="TR_ACCOUNT_IS_EMPTY_DESCRIPTION"
-                        values={{ network: networkSymbol }}
-                    />
+                    {typeof account.loading === 'number' ? (
+                        <h1>Loading account: {account.loading}%</h1>
+                    ) : (
+                        <Translation
+                            id="TR_ACCOUNT_IS_EMPTY_DESCRIPTION"
+                            values={{ network: networkSymbol }}
+                        />
+                    )}
                 </Description>
                 <Divider />
                 <Actions>
@@ -122,21 +125,31 @@ const AccountEmpty = (props: Props) => {
                     >
                         <Translation id="TR_RECEIVE_NETWORK" values={{ network: networkSymbol }} />
                     </ActionButton>
-                    <ActionButton
-                        data-test="@accounts/empty-account/buy"
-                        variant="primary"
-                        onClick={() => {
-                            goto('wallet-coinmarket-buy', { preserveParams: true });
-                            analytics.report({
-                                type: EventType.AccountsEmptyAccountBuy,
-                                payload: {
-                                    symbol: networkSymbol.toLowerCase(),
-                                },
-                            });
-                        }}
-                    >
-                        <Translation id="TR_BUY_NETWORK" values={{ network: networkSymbol }} />
-                    </ActionButton>
+                    {account.accountType === 'coinjoin' ? (
+                        <ActionButton
+                            data-test="@accounts/empty-account/migration"
+                            variant="primary"
+                            onClick={() => {}}
+                        >
+                            Start migration
+                        </ActionButton>
+                    ) : (
+                        <ActionButton
+                            data-test="@accounts/empty-account/buy"
+                            variant="primary"
+                            onClick={() => {
+                                goto('wallet-coinmarket-buy', { preserveParams: true });
+                                analytics.report({
+                                    type: EventType.AccountsEmptyAccountBuy,
+                                    payload: {
+                                        symbol: networkSymbol.toLowerCase(),
+                                    },
+                                });
+                            }}
+                        >
+                            <Translation id="TR_BUY_NETWORK" values={{ network: networkSymbol }} />
+                        </ActionButton>
+                    )}
                 </Actions>
             </StyledCard>
         </Wrapper>
