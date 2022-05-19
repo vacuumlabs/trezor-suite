@@ -15,6 +15,10 @@ const networks = {
         features: ['rbf', 'sign-verify'],
         customBackends: ['blockbook', 'electrum'],
         accountTypes: {
+            // coinjoin: {
+            //     name: 'Bitcoin (PEA)',
+            //     bip43Path: "m/10025'/0'/i'",
+            // },
             taproot: {
                 name: 'Bitcoin (Taproot)',
                 bip43Path: "m/86'/0'/i'",
@@ -235,6 +239,10 @@ const networks = {
         features: ['rbf', 'sign-verify'],
         customBackends: ['blockbook', 'electrum'],
         accountTypes: {
+            coinjoin: {
+                name: 'Bitcoin Testnet (PEA)',
+                bip43Path: "m/10025'/1'/i'",
+            },
             taproot: {
                 name: 'Bitcoin Testnet (taproot)',
                 bip43Path: "m/86'/1'/i'",
@@ -264,6 +272,10 @@ const networks = {
         features: ['rbf', 'sign-verify'],
         customBackends: ['blockbook', 'electrum'],
         accountTypes: {
+            coinjoin: {
+                name: 'Bitcoin Regtest (PEA)',
+                bip43Path: "m/10025'/1'/i'",
+            },
             taproot: {
                 name: 'Bitcoin Regtest (taproot)',
                 bip43Path: "m/86'/1'/i'",

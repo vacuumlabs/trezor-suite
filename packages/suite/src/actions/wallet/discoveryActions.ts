@@ -184,6 +184,7 @@ const filterUnavailableNetworks = (enabledNetworks: Account['symbol'][], device?
 
         return (
             enabledNetworks.includes(n.symbol) &&
+            n.accountType !== 'coinjoin' &&
             !n.isHidden &&
             !device?.unavailableCapabilities?.[n.accountType!] && // exclude by account types (ex: taproot)
             !device?.unavailableCapabilities?.[n.symbol] && // exclude by network symbol (ex: xrp on T1)
