@@ -49,6 +49,7 @@ export type Account = {
     symbol: Network['symbol'];
     empty: boolean;
     visible: boolean;
+    loading?: number;
     imported?: boolean;
     failed?: boolean;
     balance: string;

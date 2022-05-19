@@ -232,6 +232,7 @@ export const getStateForAction = (action: Action) => (dispatch: Dispatch, getSta
             'addresses',
             'visible',
             'utxo',
+            'loading',
         ],
         discovery: [
             'status',

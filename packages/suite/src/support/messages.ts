@@ -2244,6 +2244,10 @@ export default defineMessages({
         description: 'Link to Trezor wiki.',
         id: 'TR_LEARN_MORE',
     },
+    TR_COINJOIN_ACCOUNTS: {
+        defaultMessage: 'Privacy enhanced accounts',
+        id: 'TR_COINJOIN_ACCOUNTS',
+    },
     TR_TAPROOT_ACCOUNTS: {
         defaultMessage: 'Taproot accounts',
         id: 'TR_TAPROOT_ACCOUNTS',
@@ -3163,6 +3167,10 @@ export default defineMessages({
         defaultMessage:
             'Legacy Pay-to-Public-Key-Hash (P2PKH) is the basic type of transaction used in Bitcoin and other similar crypto currencies.',
     },
+    TR_ACCOUNT_TYPE_SLIP25_DESC: {
+        id: 'TR_ACCOUNT_TYPE_SLIP25_DESC',
+        defaultMessage: 'What is a privacy enhanced account?',
+    },
     TR_ACCOUNT_DETAILS_XPUB_HEADER: {
         id: 'TR_ACCOUNT_DETAILS_XPUB_HEADER',
         defaultMessage: 'Public key (XPUB)',
@@ -3181,6 +3189,11 @@ export default defineMessages({
         defaultMessage:
             'Current firmware does not support Taproot. Please update your Trezor firmware to enable this feature.',
     },
+    TR_ACCOUNT_TYPE_SLIP25_NOT_SUPPORTED: {
+        id: 'TR_ACCOUNT_TYPE_SLIP25_NOT_SUPPORTED',
+        defaultMessage:
+            'Current firmware does not support Coinjoin. Please update your Trezor firmware to enable this feature.',
+    },
     TR_ACCOUNT_TYPE_BIP86_NAME: {
         id: 'TR_ACCOUNT_TYPE_BIP86_NAME',
         defaultMessage: 'Taproot',
@@ -3197,6 +3210,10 @@ export default defineMessages({
         id: 'TR_ACCOUNT_TYPE_BIP44_NAME',
         defaultMessage: 'Legacy',
     },
+    TR_ACCOUNT_TYPE_SLIP25_NAME: {
+        id: 'TR_ACCOUNT_TYPE_SLIP25_NAME',
+        defaultMessage: 'Privacy enhanced account',
+    },
     TR_ACCOUNT_TYPE_BIP84_TECH: {
         id: 'TR_ACCOUNT_TYPE_BIP84_TECH',
         defaultMessage: 'BIP84, P2WPKH, Bech32',
@@ -3212,6 +3229,10 @@ export default defineMessages({
     TR_ACCOUNT_TYPE_BIP44_TECH: {
         id: 'TR_ACCOUNT_TYPE_BIP44_TECH',
         defaultMessage: 'BIP44, P2PKH, Base58',
+    },
+    TR_ACCOUNT_TYPE_SLIP25_TECH: {
+        id: 'TR_ACCOUNT_TYPE_SLIP25_TECH',
+        defaultMessage: 'SLIP25, P2TR, Bech32m',
     },
     TOAST_QR_INCORRECT_ADDRESS: {
         id: 'TOAST_QR_INCORRECT_ADDRESS',
