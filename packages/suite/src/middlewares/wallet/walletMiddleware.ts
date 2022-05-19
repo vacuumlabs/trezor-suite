@@ -46,7 +46,10 @@ const walletMiddleware =
         // propagate action to reducers
         next(action);
 
-        if (action.type === ACCOUNT.CREATE || action.type === ACCOUNT.UPDATE) {
+        if (
+            (action.type === ACCOUNT.CREATE || action.type === ACCOUNT.UPDATE) &&
+            action.payload.accountType !== 'coinjoin' // Do not subscribe coinjoin accounts
+        ) {
             api.dispatch(blockchainActions.subscribe(action.payload.symbol));
         }
 
