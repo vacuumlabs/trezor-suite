@@ -119,6 +119,7 @@ export const Firmware = () => {
             case 'unplug': // only relevant for T1, TT auto restarts itself
             case 'reconnect-in-normal': // only relevant for T1, TT auto restarts itself
             case 'partially-done': // only relevant for T1, updating from very old fw is done in 2 fw updates, partially-done means first update was installed
+            case 'validation':
             case 'done':
                 return (
                     <FirmwareInstallation

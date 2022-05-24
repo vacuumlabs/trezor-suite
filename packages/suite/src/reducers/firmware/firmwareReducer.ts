@@ -13,6 +13,8 @@ type FirmwareUpdateCommon = {
     prevDevice?: Device; // cached device for the purpose of fw update
     intermediaryInstalled: boolean; // Fresh unpacked T1 comes with 1.4.0 bootloader and will install intermediary fw, after the installation is complete it is set to true
     subsequentInstalling: boolean; // Used to reset state of progress bar when installing subsequent update right after an intermediary one
+    firmwareHash?: string;
+    firmwareChallenge?: string;
 };
 
 export type FirmwareStatus =
@@ -26,6 +28,7 @@ export type FirmwareStatus =
     | 'wait-for-reboot' // progress - model t2 is restarting after firmware update
     | 'unplug' // progress - user is asked to reconnect device (t1)
     | 'reconnect-in-normal' // progress - after unplugging device from previous step, user is asked to connect it again
+    | 'validation' // firmware validation in progress
     | 'done'; // firmware successfully installed
 
 export type FirmwareUpdateState =
@@ -67,6 +70,10 @@ const firmwareUpdate = (state: FirmwareUpdateState = initialState, action: Actio
                     }
                     draft.error = undefined;
                 }
+                break;
+            case FIRMWARE.SET_HASH:
+                draft.firmwareHash = action.payload.hash;
+                draft.firmwareChallenge = action.payload.challenge;
                 break;
             case FIRMWARE.SET_ERROR:
                 draft.error = action.payload;

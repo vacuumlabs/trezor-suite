@@ -14,6 +14,7 @@ export type FirmwareAction =
           type: typeof FIRMWARE.SET_UPDATE_STATUS;
           payload: ReturnType<GetState>['firmware']['status'];
       }
+    | { type: typeof FIRMWARE.SET_HASH; payload: { hash: string; challenge: string } }
     | { type: typeof FIRMWARE.SET_TARGET_RELEASE; payload: AcquiredDevice['firmwareRelease'] }
     | { type: typeof FIRMWARE.RESET_REDUCER }
     | { type: typeof FIRMWARE.ENABLE_REDUCER; payload: boolean }
@@ -140,6 +141,8 @@ const firmwareInstall =
             return dispatch({ type: FIRMWARE.SET_ERROR, payload: updateResponse.payload.error });
         }
 
+        dispatch({ type: FIRMWARE.SET_HASH, payload: updateResponse.payload });
+
         // handling case described here: https://github.com/trezor/trezor-suite/issues/2650
         // firmwareMiddleware handles device-connect event but it never happens for model T
         // with pin_protection set to true. In this case, we show success screen directly.
@@ -159,6 +162,40 @@ const firmwareInstall =
     };
 
 export const firmwareUpdate = () => firmwareInstall();
+
+export const validateFirmware =
+    (device: Device) => async (dispatch: Dispatch, getState: GetState) => {
+        const { app: prevApp } = getState().router;
+        const { firmwareChallenge, firmwareHash } = getState().firmware;
+
+        dispatch(setStatus('validation'));
+
+        const fwHash = await TrezorConnect.getFirmwareHash({
+            device: {
+                path: device.path,
+            },
+            challenge: firmwareChallenge,
+        });
+        if (!fwHash.success) {
+            dispatch(addToast({ type: 'error', error: fwHash.payload.error }));
+            return;
+        }
+
+        if (fwHash.payload.hash !== firmwareHash) {
+            dispatch(addToast({ type: 'error', error: 'Invalid hash' }));
+            return;
+        }
+
+        // last version of firmware or custom firmware version was installed
+        if (
+            device.firmware === 'valid' ||
+            (device.firmware === 'outdated' && prevApp === 'firmware-custom')
+        ) {
+            dispatch(setStatus('done'));
+        } else if (['outdated', 'required'].includes(device.firmware!)) {
+            dispatch(setStatus('partially-done'));
+        }
+    };
 
 export const firmwareCustom = (fwBinary: ArrayBuffer) => firmwareInstall(fwBinary);
 
