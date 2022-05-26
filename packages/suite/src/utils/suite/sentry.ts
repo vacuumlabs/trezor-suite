@@ -62,19 +62,21 @@ export const beforeBreadcrumb: Options['beforeBreadcrumb'] = breadcrumb => {
 };
 
 export const allowSentryReport = (value: boolean) => {
-    Sentry.configureScope(scope => {
-        scope.setTag(allowReportTag, value);
-    });
+    Sentry.setTag(allowReportTag, value);
 };
 
 export const setSentryUser = (instanceId: string) => {
-    Sentry.configureScope(scope => {
-        scope.setUser({ id: instanceId });
-    });
+    Sentry.setUser({ id: instanceId });
 };
 
 export const unsetSentryUser = () => {
-    Sentry.configureScope(scope => {
-        scope.setUser(null);
-    });
+    Sentry.setUser(null);
+};
+
+type SetSentryTransportProps = {
+    type: string;
+    version: string;
+};
+export const setSentryTransport = ({ type, version }: SetSentryTransportProps) => {
+    Sentry.setContext('transport', { type, version });
 };
