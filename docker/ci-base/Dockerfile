@@ -1,7 +1,7 @@
 # Base
 ## Use a proxy or fallback to no proxy at all (direct access to Docker Hub).
 ARG CI_DOCKER_PROXY=""
-FROM ${CI_DOCKER_PROXY}debian:buster-slim as base
+FROM ${CI_DOCKER_PROXY}debian:bullseye-slim as base
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -14,7 +14,7 @@ RUN apt-get update && \
 
 # Docker
 FROM base as docker
-ENV DOCKER_VERSION=19.03.12
+ENV DOCKER_VERSION=20.10.14
 RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_VERSION}.tgz \
     && mv docker-${DOCKER_VERSION}.tgz docker.tgz \
     && tar xzvf docker.tgz \
@@ -23,12 +23,12 @@ RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${
 
 # Docker Compose
 FROM base as docker_compose
-ENV DOCKER_COMPOSE_VERSION=1.26.2
-RUN curl -L https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VERSION/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose
+ENV DOCKER_COMPOSE_VERSION=2.6.0
+RUN curl -L "https://github.com/docker/compose/releases/download/v${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose
 
 # Final image
-# buster is for debian 10. the same version as firmware team has in its Dockerfile.
-FROM ${CI_DOCKER_PROXY}node:14-buster
+# bullseye is for debian 11. the same version as firmware team has in its Dockerfile.
+FROM ${CI_DOCKER_PROXY}node:lts-bullseye
 
 RUN apt-get update && apt-get install -y \
     build-essential \
@@ -60,6 +60,7 @@ RUN apt-get install -y \
 
 RUN pip3 install attrs
 RUN pip3 install --upgrade setuptools
+RUN pip3 install "click<8.1"
 RUN pip3 install trezor
 RUN pip3 install termcolor
 
@@ -100,7 +101,7 @@ RUN mkdir ${NVM_DIR}
 RUN wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
 
 # Install and use correct version of node - should match witch Nix and .nvmrc
-ENV NODE_VERSION 14.18.1
+ENV NODE_VERSION 16.15.0
 RUN . $NVM_DIR/nvm.sh \
     && nvm install $NODE_VERSION \
     && nvm alias default $NODE_VERSION \
