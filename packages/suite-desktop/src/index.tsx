@@ -5,7 +5,8 @@ import { Router as RouterProvider } from 'react-router-dom';
 import { init as initSentry } from '@sentry/electron/renderer';
 import { desktopApi } from '@trezor/suite-desktop-api';
 
-import { store } from '@suite/reducers/store';
+import { initStore } from '@suite/reducers/store';
+import { preloadStore } from '@suite-support/preloadStore';
 import { isDev } from '@suite-utils/build';
 
 import Metadata from '@suite-components/Metadata';
@@ -52,7 +53,7 @@ const Main = () => (
     </ThemeProvider>
 );
 
-window.onload = () => {
+window.onload = async () => {
     if (!isDev) {
         initSentry(SENTRY_CONFIG);
     }
@@ -60,11 +61,16 @@ window.onload = () => {
     desktopApi.clientReady();
 
     const root = document.getElementById('app');
-
-    render(
-        <ReduxProvider store={store}>
-            <Main />
-        </ReduxProvider>,
-        root,
-    );
+    try {
+        const preloaded = await preloadStore();
+        const store = initStore(preloaded);
+        render(
+            <ReduxProvider store={store}>
+                <Main />
+            </ReduxProvider>,
+            root,
+        );
+    } catch (error) {
+        render(<ErrorBoundary error={error} />, root);
+    }
 };

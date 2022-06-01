@@ -1,6 +1,4 @@
-import { mergeObject } from '@trezor/utils';
 import { db } from '@suite/storage';
-import { getAccountKey } from '@wallet-utils/accountUtils';
 import * as notificationActions from '@suite-actions/notificationActions';
 import * as suiteActions from '@suite-actions/suiteActions';
 import { serializeDiscovery, serializeDevice } from '@suite-utils/storage';
@@ -9,17 +7,16 @@ import { getFormDraftKey } from '@wallet-utils/formDraftUtils';
 import { FormDraftPrefixKeyValues } from '@wallet-constants/formDraft';
 import { STORAGE } from './constants';
 
-import type { Dispatch, GetState, AppState, TrezorDevice } from '@suite-types';
+import type { Dispatch, GetState, TrezorDevice } from '@suite-types';
 import type { Account, Network } from '@wallet-types';
 import type { GraphData } from '@wallet-types/graph';
 import type { Discovery } from '@wallet-reducers/discoveryReducer';
 import type { FormState } from '@wallet-types/sendForm';
 import type { Trade, TradeType } from '@wallet-types/coinmarketCommonTypes';
 import type { FormDraft, FormDraftKeyPrefix } from '@wallet-types/form';
+import type { PreloadedStore } from '@suite-support/preloadStore';
 
-export type StorageAction =
-    | { type: typeof STORAGE.LOAD }
-    | { type: typeof STORAGE.LOADED; payload: AppState };
+export type StorageAction = { type: typeof STORAGE.LOAD; payload: PreloadedStore };
 
 const isDBAccessible = async () => {
     const isSupported = await db.isSupported();
@@ -371,134 +368,6 @@ export const removeDatabase = () => async (dispatch: Dispatch, getState: GetStat
 export const loadSuiteSettings = async () => {
     if (!(await isDBAccessible())) return;
     return db.getItemByPK('suiteSettings', 'suite');
-};
-
-export const loadStorage = () => async (dispatch: Dispatch, getState: GetState) => {
-    const isDBAvailable = await isDBAccessible();
-
-    if (!isDBAvailable) {
-        const initialState = getState();
-        dispatch({
-            type: STORAGE.LOADED,
-            payload: {
-                ...initialState,
-            },
-        });
-    } else {
-        //  load state from database
-        const suite = await loadSuiteSettings();
-        const devices = await db.getItemsExtended('devices');
-        const accounts = await db.getItemsExtended('accounts');
-        const discovery = await db.getItemsExtended('discovery');
-        const walletSettings = await db.getItemByPK('walletSettings', 'wallet');
-        const fiatRates = await db.getItemsExtended('fiatRates');
-        const coinmarketTrades = await db.getItemsExtended('coinmarketTrades');
-        const walletGraphData = await db.getItemsExtended('graph');
-        const analytics = await db.getItemByPK('analytics', 'suite');
-        const metadata = await db.getItemByPK('metadata', 'state');
-        const txs = await db.getItemsExtended('txs', 'order');
-        const mappedTxs: AppState['wallet']['transactions']['transactions'] = {};
-        const messageSystem = await db.getItemByPK('messageSystem', 'suite');
-        const backendSettings = await db.getItemsWithKeys('backendSettings');
-
-        txs.forEach(item => {
-            const k = getAccountKey(item.tx.descriptor, item.tx.symbol, item.tx.deviceState);
-            if (!mappedTxs[k]) {
-                mappedTxs[k] = [];
-            }
-            mappedTxs[k][item.order] = item.tx;
-        });
-
-        const initialState = getState();
-
-        const sendForm = await db.getItemsWithKeys('sendFormDrafts');
-        const drafts: AppState['wallet']['send']['drafts'] = {};
-        sendForm.forEach(item => {
-            drafts[item.key] = item.value;
-        });
-
-        const dbFormDrafts = await db.getItemsWithKeys('formDrafts');
-        const stateFormDrafts: AppState['wallet']['formDrafts'] = {};
-        dbFormDrafts.forEach(item => {
-            stateFormDrafts[item.key] = item.value;
-        });
-
-        dispatch({
-            type: STORAGE.LOADED,
-            payload: {
-                ...initialState,
-                suite: {
-                    ...initialState.suite,
-                    ...suite,
-                    flags: {
-                        ...initialState.suite.flags,
-                        ...suite?.flags,
-                    },
-                    settings: {
-                        ...initialState.suite.settings,
-                        ...suite?.settings,
-                        debug: {
-                            ...initialState.suite.settings.debug,
-                            ...suite?.settings.debug,
-                        },
-                    },
-                    storageLoaded: true,
-                },
-                devices,
-                wallet: {
-                    ...initialState.wallet,
-                    blockchain: mergeObject(
-                        initialState.wallet.blockchain,
-                        backendSettings.reduce(
-                            (prev, { key, value }) => ({ ...prev, [key]: { backends: value } }),
-                            {},
-                        ),
-                    ),
-                    settings: {
-                        ...initialState.wallet.settings,
-                        ...walletSettings,
-                    },
-                    accounts,
-                    discovery,
-                    transactions: {
-                        ...initialState.wallet.transactions,
-                        transactions: mappedTxs,
-                    },
-                    fiat: { ...initialState.wallet.fiat, coins: fiatRates || [] },
-                    graph: {
-                        ...initialState.wallet.graph,
-                        data: walletGraphData || [],
-                    },
-                    coinmarket: {
-                        ...initialState.wallet.coinmarket,
-                        trades: coinmarketTrades,
-                    },
-                    send: {
-                        ...initialState.wallet.send,
-                        drafts,
-                    },
-                    formDrafts: {
-                        ...initialState.wallet.formDrafts,
-                        ...stateFormDrafts,
-                    },
-                },
-                analytics: {
-                    ...initialState.analytics,
-                    ...analytics,
-                    // Use stored value if it is already defined, otherwise check if enabled status has been stored previously to keep reporting for existing users.
-                    confirmed: analytics?.confirmed ?? typeof analytics?.enabled !== 'undefined',
-                },
-                metadata: {
-                    ...initialState.metadata,
-                    ...metadata,
-                },
-                messageSystem: {
-                    ...initialState.messageSystem,
-                    ...messageSystem,
-                },
-            },
-        });
-    }
 };
 
 export const init = () => async (dispatch: Dispatch) => {

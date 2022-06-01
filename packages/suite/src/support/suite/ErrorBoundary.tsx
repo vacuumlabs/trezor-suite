@@ -72,7 +72,8 @@ interface StateProps {
 const mapDispatchToProps = (dispatch: Dispatch) => bindActionCreators({ reportToSentry }, dispatch);
 
 type Props = ReturnType<typeof mapDispatchToProps> & {
-    children: JSX.Element[];
+    error?: Error;
+    children?: JSX.Element[];
 };
 
 /**
@@ -88,7 +89,7 @@ type Props = ReturnType<typeof mapDispatchToProps> & {
 class ErrorBoundary extends React.Component<Props, StateProps> {
     constructor(props: Props) {
         super(props);
-        this.state = { error: null };
+        this.state = { error: props.error };
     }
 
     componentDidCatch(error: Error | null, _errorInfo: React.ErrorInfo) {

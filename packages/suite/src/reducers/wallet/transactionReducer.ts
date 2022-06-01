@@ -139,8 +139,20 @@ const remove = (draft: State, account: Account, txs: WalletAccountTransaction[])
 const transactionReducer = (state: State = initialState, action: Action | WalletAction): State =>
     produce(state, draft => {
         switch (action.type) {
-            case STORAGE.LOADED:
-                return action.payload.wallet.transactions;
+            case STORAGE.LOAD: {
+                action.payload?.txs.forEach(item => {
+                    const k = getAccountKey(
+                        item.tx.descriptor,
+                        item.tx.symbol,
+                        item.tx.deviceState,
+                    );
+                    if (!draft.transactions[k]) {
+                        draft.transactions[k] = [];
+                    }
+                    draft.transactions[k][item.order] = item.tx;
+                });
+                break;
+            }
             case ACCOUNT.REMOVE:
                 action.payload.forEach(a => {
                     delete draft.transactions[getAccountKey(a.descriptor, a.symbol, a.deviceState)];
