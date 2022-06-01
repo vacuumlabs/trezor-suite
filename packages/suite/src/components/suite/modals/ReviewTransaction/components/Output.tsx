@@ -3,7 +3,7 @@ import BigNumber from 'bignumber.js';
 import { Translation } from '@suite-components';
 import { formatNetworkAmount, formatAmount, isTestnet } from '@wallet-utils/accountUtils';
 import { BTC_LOCKTIME_VALUE } from '@wallet-constants/sendForm';
-import { Network } from '@wallet-types';
+import { Network, NetworkSymbol } from '@wallet-types';
 import { TokenInfo } from '@trezor/connect';
 import Indicator, { Props as IndicatorProps } from './Indicator';
 import OutputElement, { OutputElementLine } from './OutputElement';
@@ -73,7 +73,7 @@ const Output = (props: Props) => {
     let fiatVisible = false;
     if (token) {
         outputValue = formatAmount(value, token.decimals);
-        outputSymbol = token.symbol;
+        outputSymbol = token.symbol as NetworkSymbol;
     } else if (type === 'regular' || type === 'fee') {
         outputValue = formatNetworkAmount(value, symbol);
         outputSymbol = symbol;

@@ -5,7 +5,7 @@ import { getFeeUnits } from '@wallet-utils/sendFormUtils';
 import { Icon, useTheme, CoinLogo, variables } from '@trezor/components';
 import { Translation, FormattedCryptoAmount } from '@suite-components';
 import { getTitleForNetwork, formatNetworkAmount, formatAmount } from '@wallet-utils/accountUtils';
-import { Account, Network } from '@wallet-types';
+import { Account, Network, NetworkSymbol } from '@wallet-types';
 import { formatDuration } from '@suite-utils/date';
 import { PrecomposedTransactionFinal, TxFinalCardano } from '@wallet-types/sendForm';
 import { isEnabled } from '@suite-utils/features';
@@ -208,7 +208,7 @@ const Summary = ({
                         <FormattedCryptoAmount
                             disableHiddenPlaceholder
                             value={amount}
-                            symbol={tx.token?.symbol ?? symbol}
+                            symbol={(tx.token?.symbol ?? symbol) as NetworkSymbol}
                         />
                     </HeadlineAmount>
                 </Headline>

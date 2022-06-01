@@ -28,6 +28,8 @@ const AddUrlButton = styled(Button)`
 `;
 
 const Heading = styled(H3)`
+    display: flex;
+    align-items: center;
     color: ${props => props.theme.TYPE_DARK_GREY};
     margin-bottom: 6px;
 `;
