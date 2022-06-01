@@ -57,7 +57,7 @@ export const getInitialState = (state?: InitialState) => {
         ? state.device
         : { state: 'device-state', connected: true, metadata: { status: 'disabled' } };
     const accounts = state ? state.accounts || [] : [];
-    const initAction: any = { type: STORAGE.LOADED, payload: { metadata } };
+    const initAction: any = { type: STORAGE.LOAD, payload: { metadata } };
     return {
         metadata: metadataReducer(metadata, initAction),
         devices: device ? [device] : [], // device is needed for notification/event

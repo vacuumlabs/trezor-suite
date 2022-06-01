@@ -365,11 +365,6 @@ export const removeDatabase = () => async (dispatch: Dispatch, getState: GetStat
     );
 };
 
-export const loadSuiteSettings = async () => {
-    if (!(await isDBAccessible())) return;
-    return db.getItemByPK('suiteSettings', 'suite');
-};
-
 export const init = () => async (dispatch: Dispatch) => {
     // should be called only once
     if (await isDBAccessible()) {

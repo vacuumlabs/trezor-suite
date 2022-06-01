@@ -49,7 +49,6 @@ export interface SuiteState {
     online: boolean;
     tor: boolean;
     loading: boolean;
-    storageLoaded: boolean;
     loaded: boolean;
     error?: string; // errors set from connect, should be renamed
     dbError?: 'blocking' | 'blocked' | undefined; // blocked if the instance cannot upgrade due to older version running, blocking in case instance is running older version thus blocking other instance
@@ -64,7 +63,6 @@ const initialState: SuiteState = {
     online: true,
     tor: false,
     loading: false,
-    storageLoaded: false,
     loaded: false,
     locks: [],
     flags: {
@@ -125,7 +123,6 @@ const suiteReducer = (state: SuiteState = initialState, action: Action): SuiteSt
                     ...draft.settings,
                     ...action.payload?.suiteSettings?.settings,
                 };
-                draft.storageLoaded = true;
                 break;
 
             case SUITE.READY:
