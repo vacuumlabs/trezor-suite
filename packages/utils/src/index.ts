@@ -14,6 +14,7 @@ export * from './isUrl';
 export * from './hasUppercaseLetter';
 export * from './isAscii';
 export * from './isNotUndefined';
+export * from './formatCurrencyAmount';
 export * as versionUtils from './versionUtils';
 export * from './objectPartition';
 export * from './parseHostname';

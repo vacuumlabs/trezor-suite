@@ -17,6 +17,7 @@ import {
     WIKI_ACCOUNT_BIP49_URL,
     WIKI_ACCOUNT_BIP44_URL,
 } from '@suite-constants/urls';
+import { NetworkFeature } from '@wallet-config/networks';
 
 export const isUtxoBased = (account: Account) =>
     account.networkType === 'bitcoin' || account.networkType === 'cardano';
@@ -176,6 +177,18 @@ export const amountToSatoshi = (amount: string, decimals: number) => {
     } catch (error) {
         // TODO: return null, so we can decide how to handle missing value in caller component
         return '-1';
+    }
+};
+
+export const satoshiToAmount = (amount: string, decimals = 8) => {
+    try {
+        const bAmount = new BigNumber(amount);
+        if (bAmount.isNaN()) {
+            throw new Error('Amount is not a number');
+        }
+        return bAmount.div(10 ** decimals).toString(10);
+    } catch (error) {
+        return '';
     }
 };
 
@@ -714,11 +727,28 @@ export const getPendingAccount = (
     };
 };
 
-export const hasSignVerify = (account: Account) =>
-    !!NETWORKS.find(
-        ({ networkType, symbol, accountType, features }) =>
+export const hasNetworkFeatures = (
+    account: Account,
+    features: NetworkFeature | Array<NetworkFeature>,
+) => {
+    const networkConfig = NETWORKS.find(
+        ({ networkType, symbol, accountType }) =>
             networkType === account.networkType &&
             symbol === account.symbol &&
-            (accountType || 'normal') === account.accountType &&
-            (features || []).includes('sign-verify'),
+            (accountType || 'normal') === account.accountType,
     );
+
+    if (!networkConfig) {
+        return false;
+    }
+
+    let areFeaturesPresent: boolean;
+
+    if (Array.isArray(features)) {
+        areFeaturesPresent = features.every(feature => !!networkConfig.features?.includes(feature));
+    } else {
+        areFeaturesPresent = !!networkConfig.features?.includes(features);
+    }
+
+    return areFeaturesPresent;
+};

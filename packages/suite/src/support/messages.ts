@@ -6665,4 +6665,16 @@ export default defineMessages({
         id: 'TR_ABORT',
         defaultMessage: 'Abort',
     },
+    TR_TO_SATOSHIS: {
+        id: 'TR_TO_SATOSHIS',
+        defaultMessage: 'To sats',
+    },
+    TR_TO_BTC: {
+        id: 'TR_TO_BTC',
+        defaultMessage: 'To BTC',
+    },
+    TR_BTC_UNITS: {
+        id: 'TR_BTC_UNITS',
+        defaultMessage: 'Bitcoin units',
+    },
 });

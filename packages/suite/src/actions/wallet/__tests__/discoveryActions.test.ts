@@ -139,6 +139,17 @@ jest.mock('@trezor/connect', () => {
         return scopedParamsError('Fixture response not defined');
     };
 
+    const AmountUnit = {
+        BITCOIN: 0,
+        MILLIBITCOIN: 1,
+        MICROBITCOIN: 2,
+        SATOSHI: 3,
+    };
+
+    const PROTO = {
+        AmountUnit,
+    };
+
     return {
         __esModule: true, // this property makes it work
         default: {
@@ -161,6 +172,7 @@ jest.mock('@trezor/connect', () => {
         setTestFixtures: (f: Fixture) => {
             fixture = f;
         },
+        PROTO,
     };
 });
 

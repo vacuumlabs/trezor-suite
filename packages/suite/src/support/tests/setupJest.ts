@@ -260,6 +260,17 @@ const getTrezorConnect = <M>(methods?: M) => {
         return fixtures;
     };
 
+    const AmountUnit = {
+        BITCOIN: 0,
+        MILLIBITCOIN: 1,
+        MICROBITCOIN: 2,
+        SATOSHI: 3,
+    };
+
+    const PROTO = {
+        AmountUnit,
+    };
+
     return {
         __esModule: true, // export as module
         default: {
@@ -378,6 +389,7 @@ const getTrezorConnect = <M>(methods?: M) => {
             REQUEST_PIN: 'ui-request_pin',
             REQUEST_BUTTON: 'ui-request_button',
         },
+        PROTO,
     };
 };
 

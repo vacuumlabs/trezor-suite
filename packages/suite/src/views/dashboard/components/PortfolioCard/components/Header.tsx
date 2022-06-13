@@ -1,8 +1,8 @@
 import React, { useCallback } from 'react';
 import styled, { css } from 'styled-components';
 import { H2, Button, LoadingContent } from '@trezor/components';
-import { Translation, FormattedNumber, HiddenPlaceholder } from '@suite-components';
-import RangeSelector from '@suite-components/TransactionsGraph/components/RangeSelector';
+import { Translation, FormattedFiatAmount, HiddenPlaceholder } from '@suite-components';
+import { RangeSelector } from '@suite-components/TransactionsGraph/components/RangeSelector';
 import { updateGraphData } from '@wallet-actions/graphActions';
 import { useFastAccounts } from '@wallet-hooks';
 import { GraphRange } from '@wallet-types/graph';
@@ -87,7 +87,7 @@ export const Header = (props: HeaderProps) => {
                     <ValueWrapper>
                         <HiddenPlaceholder intensity={7}>
                             <span>
-                                <FormattedNumber
+                                <FormattedFiatAmount
                                     value={props.portfolioValue}
                                     currency={props.localCurrency}
                                 />

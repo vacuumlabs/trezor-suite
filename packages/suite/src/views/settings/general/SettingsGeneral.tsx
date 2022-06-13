@@ -19,18 +19,26 @@ import { ShowLog } from './ShowLog';
 import { ClearStorage } from './ClearStorage';
 import { VersionWithUpdate } from './VersionWithUpdate';
 import { EarlyAccess } from './EarlyAccess';
+import { BitcoinAmountUnit } from './BitcoinAmountUnit';
+import { hasNetworkFeatures } from '@wallet-utils/accountUtils';
 
 export const SettingsGeneral = () => {
-    const { desktopUpdate, tor } = useSelector(state => ({
+    const { desktopUpdate, tor, accounts } = useSelector(state => ({
         desktopUpdate: state.desktopUpdate,
         tor: state.suite.tor,
+        accounts: state.wallet.accounts,
     }));
+
+    const hasBitcoinNetworks = !!accounts?.find(account =>
+        hasNetworkFeatures(account, 'amount-unit'),
+    );
 
     return (
         <SettingsLayout data-test="@settings/index">
             <SettingsSection title={<Translation id="TR_LOCALIZATION" />} icon="FLAG">
                 <Language />
                 <Fiat />
+                {hasBitcoinNetworks && <BitcoinAmountUnit />}
             </SettingsSection>
 
             <SettingsSection title={<Translation id="TR_LABELING" />} icon="TAG_MINIMAL">

@@ -22,6 +22,7 @@ import { NETWORKS } from '@wallet-config';
 import { ArrayElement } from '../utils';
 
 export type Network = ArrayElement<typeof NETWORKS>;
+export type NetworkSymbol = Network['symbol'];
 // reexport
 export type { NetworkToken, Token } from './tokenTypes';
 export type { Icon } from './iconTypes';
