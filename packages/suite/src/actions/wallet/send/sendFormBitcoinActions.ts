@@ -1,7 +1,7 @@
-import TrezorConnect, { FeeLevel, SignTransaction } from '@trezor/connect';
+import TrezorConnect, { FeeLevel, Params, SignTransaction } from '@trezor/connect';
 import BigNumber from 'bignumber.js';
 import * as notificationActions from '@suite-actions/notificationActions';
-import { formatNetworkAmount } from '@wallet-utils/accountUtils';
+import { formatNetworkAmount, hasNetworkFeatures } from '@wallet-utils/accountUtils';
 import { getBitcoinComposeOutputs, restoreOrigOutputsOrder } from '@wallet-utils/sendFormUtils';
 import { BTC_RBF_SEQUENCE, BTC_LOCKTIME_SEQUENCE } from '@wallet-constants/sendForm';
 import {
@@ -166,15 +166,20 @@ export const composeTransaction =
 export const signTransaction =
     (formValues: FormState, transactionInfo: PrecomposedTransactionFinal) =>
     async (dispatch: Dispatch, getState: GetState) => {
-        const { selectedAccount } = getState().wallet;
+        const {
+            selectedAccount,
+            settings: { bitcoinAmountUnit },
+        } = getState().wallet;
         const { device } = getState().suite;
+
         if (
             selectedAccount.status !== 'loaded' ||
             !device ||
             !transactionInfo ||
             transactionInfo.type !== 'final'
-        )
+        ) {
             return;
+        }
 
         // transactionInfo needs some additional changes:
         const { account } = selectedAccount;
@@ -207,7 +212,14 @@ export const signTransaction =
             signEnhancement.outputs = restoreOrigOutputsOrder(transaction.outputs, outputs, txid);
         }
 
-        const signPayload = {
+        if (
+            hasNetworkFeatures(account, 'amount-unit') &&
+            !device.unavailableCapabilities?.amountUnit
+        ) {
+            signEnhancement.amountUnit = bitcoinAmountUnit;
+        }
+
+        const signPayload: Params<SignTransaction> = {
             device: {
                 path: device.path,
                 instance: device.instance,

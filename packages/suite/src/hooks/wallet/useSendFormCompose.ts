@@ -9,9 +9,12 @@ import {
     PrecomposedLevels,
     PrecomposedLevelsCardano,
 } from '@wallet-types/sendForm';
-import { useActions, useAsyncDebounce } from '@suite-hooks';
+import { useActions, useAsyncDebounce, useDidUpdate } from '@suite-hooks';
 import * as sendFormActions from '@wallet-actions/sendFormActions';
 import { findComposeErrors } from '@wallet-utils/sendFormUtils';
+import { useBitcoinAmountUnit } from './useBitcoinAmountUnit';
+import { amountToSatoshi, satoshiToAmount } from '@wallet-utils/accountUtils';
+import { NETWORKS } from '@wallet-config';
 
 type Props = UseFormMethods<FormState> & {
     state: UseSendFormState;
@@ -34,37 +37,65 @@ export const useSendFormCompose = ({
 }: Props) => {
     const [composedLevels, setComposedLevels] =
         useState<SendContextValues['composedLevels']>(undefined);
-    const composeRequestRef = useRef<string | undefined>(undefined); // input name, caller of compose request
-    const composeRequestID = useRef(0); // compose ID, incremented with every compose request
     const [composeField, setComposeField] = useState<string | undefined>(undefined);
     const [draftSaveRequest, setDraftSaveRequest] = useState(false);
-
-    const debounce = useAsyncDebounce();
 
     const { composeTransaction } = useActions({
         composeTransaction: sendFormActions.composeTransaction,
     });
+
+    const composeRequestRef = useRef<string | undefined>(undefined); // input name, caller of compose request
+    const composeRequestID = useRef(0); // compose ID, incremented with every compose request
+
+    const debounce = useAsyncDebounce();
+
+    const { areSatsDisplayed, isSupportedByCurrentNetwork } = useBitcoinAmountUnit();
+    const areSatsUsed = areSatsDisplayed && isSupportedByCurrentNetwork;
 
     const composeDraft = useCallback(
         async (values: FormState) => {
             // start composing without debounce
             updateContext({ isLoading: true, isDirty: true });
             setComposedLevels(undefined);
+
+            if (areSatsUsed) {
+                const formattedOutputs = values.outputs.map(output => ({
+                    ...output,
+                    amount: satoshiToAmount(output.amount),
+                }));
+
+                values = { ...values, outputs: formattedOutputs };
+            }
+
             const result = await composeTransaction(values, state);
+
             setComposedLevels(result);
             updateContext({ isLoading: false, isDirty: true }); // isDirty needs to be set again, "state" is cached in updateContext callback
         },
-        [state, composeTransaction, updateContext],
+        [state, composeTransaction, updateContext, areSatsUsed],
     );
 
     // called from composeRequest useEffect
     const processComposeRequest = useCallback(async () => {
         // eslint-disable-next-line require-await
         const composeInner = async () => {
-            if (Object.keys(errors).length > 0) return;
-            const values = getValues();
+            if (Object.keys(errors).length > 0) {
+                return;
+            }
+
+            let values = getValues();
             // save draft (it could be changed later, after composing)
             setDraftSaveRequest(true);
+
+            if (areSatsUsed) {
+                const formattedOutputs = values.outputs.map(output => ({
+                    ...output,
+                    amount: satoshiToAmount(output.amount),
+                }));
+
+                values = { ...values, outputs: formattedOutputs };
+            }
+
             return composeTransaction(values, state);
         };
 
@@ -83,7 +114,7 @@ export const useSendFormCompose = ({
             // result undefined: (FormState got errors or sendFormActions got errors)
             updateContext({ isLoading: false });
         }
-    }, [state, updateContext, debounce, errors, getValues, composeTransaction]);
+    }, [state, updateContext, debounce, errors, getValues, composeTransaction, areSatsUsed]);
 
     // Create a compose request which should be processed in useEffect below
     // This function should be called from the UI (input.onChange, button.click etc...)
@@ -159,12 +190,40 @@ export const useSendFormCompose = ({
             const { setMaxOutputId } = values;
             // set calculated and formatted "max" value to `Amount` input
             if (typeof setMaxOutputId === 'number' && composed.max) {
-                setAmount(setMaxOutputId, composed.max);
+                const networkDecimals = NETWORKS.find(network => network.symbol === account.symbol)
+                    ?.decimals as number;
+
+                setAmount(
+                    setMaxOutputId,
+                    areSatsUsed ? amountToSatoshi(composed.max, networkDecimals) : composed.max,
+                );
                 setDraftSaveRequest(true);
             }
         },
-        [composeField, getValues, setAmount, errors, setError, clearErrors, setValue],
+        [
+            composeField,
+            getValues,
+            setAmount,
+            errors,
+            setError,
+            clearErrors,
+            setValue,
+            areSatsUsed,
+            account,
+        ],
     );
+
+    useDidUpdate(() => {
+        const { outputs } = getValues();
+
+        const conversionToUse = areSatsUsed ? amountToSatoshi : satoshiToAmount;
+
+        outputs.forEach((output, index) =>
+            setAmount(index, conversionToUse(output.amount || '0', state.network.decimals)),
+        );
+
+        composeRequest();
+    }, [areSatsUsed]);
 
     // handle composedLevels change, setValues or errors for composeField
     useEffect(() => {

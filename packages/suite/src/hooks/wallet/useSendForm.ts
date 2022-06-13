@@ -85,7 +85,10 @@ export const useSendForm = (props: UseSendFormProps): SendContextValues => {
     const { localCurrencyOption } = state;
 
     // register `react-hook-form`, defaultValues are set later in "loadDraft" useEffect block
-    const useFormMethods = useForm<FormState>({ mode: 'onChange', shouldUnregister: false });
+    const useFormMethods = useForm<FormState>({
+        mode: 'onChange',
+        shouldUnregister: false,
+    });
 
     const { control, reset, register, getValues, errors, setValue } = useFormMethods;
 
