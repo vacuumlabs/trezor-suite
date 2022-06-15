@@ -3,6 +3,7 @@ import {
     FeeLevel,
     TokenInfo,
     ComposeOutput,
+    AccountUtxo,
     PrecomposedTransaction as PrecomposedTransactionBase,
     CardanoInput,
     CardanoOutput,
@@ -46,6 +47,7 @@ export type Output = {
 
 export type FormOptions =
     | 'broadcast'
+    | 'utxoSelection'
     | 'bitcoinRBF'
     | 'bitcoinLockTime'
     | 'ethereumData'
@@ -69,6 +71,7 @@ export type FormState = {
     ethereumAdjustGasLimit?: string; // if used, final gas limit = estimated limit * ethereumAdjustGasLimit
     rippleDestinationTag?: string;
     rbfParams?: RbfTransactionParams;
+    selectedUtxos?: AccountUtxo[];
 };
 
 export interface FeeInfo {
@@ -232,6 +235,7 @@ export type SendContextValues = Omit<UseFormMethods<FormState>, 'register'> &
         calculateFiat: (outputIndex: number, amount?: string) => void;
         setAmount: (outputIndex: number, amount: string) => void;
         changeFeeLevel: (currentLevel: FeeLevel['label']) => void;
+        toggleUtxoSelection: (utxo: AccountUtxo) => void;
         resetDefaultValue: (field: string) => void;
         setMax: (index: number, active: boolean) => void;
         getDefaultValue: GetDefaultValue;
