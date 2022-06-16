@@ -1,5 +1,5 @@
 import { ListenerMethod, SendMethod, InvokeMethod } from './methods';
-import { SuiteThemeVariant, UpdateInfo, UpdateProgress, InvokeResult } from './messages';
+import { SuiteThemeVariant, Handshake, UpdateInfo, UpdateProgress, InvokeResult } from './messages';
 
 // Event messages from renderer to main process
 // Sent by DesktopApi.[method] via ipcRenderer.send (see ./main)
@@ -50,6 +50,7 @@ export interface RendererChannels {
 // Sent by DesktopApi.[method] via ipcRenderer.invoke (./main)
 // Handled by ipcMain.handle (see packages/suite-desktop/src-electron/modules/*)
 export interface InvokeChannels {
+    'client/handshake': () => InvokeResult<Handshake>;
     'metadata/read': (options: { file: string }) => InvokeResult<string>;
     'metadata/write': (options: { file: string; content: string }) => InvokeResult;
     'server/request-address': (route: string) => string | undefined;
@@ -82,6 +83,7 @@ export interface DesktopApi {
     // Theme
     themeChange: DesktopApiSend<'theme/change'>;
     // Client controls
+    handshake: DesktopApiInvoke<'client/handshake'>;
     clientReady: DesktopApiSend<'client/ready'>;
     // Metadata
     metadataWrite: DesktopApiInvoke<'metadata/write'>;

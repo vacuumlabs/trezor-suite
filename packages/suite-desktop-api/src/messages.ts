@@ -2,6 +2,12 @@ import { ExtractUndefined } from './methods';
 
 export type SuiteThemeVariant = 'light' | 'dark' | 'system';
 
+export interface Handshake {
+    theme: SuiteThemeVariant;
+    tor: boolean;
+    userDir: string;
+}
+
 export interface UpdateInfo {
     version: string;
     releaseDate: string;
