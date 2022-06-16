@@ -52,12 +52,15 @@ const Main = () => (
     </ThemeProvider>
 );
 
-window.onload = () => {
+window.onload = async () => {
     if (!isDev) {
         initSentry(SENTRY_CONFIG);
     }
 
-    desktopApi.clientReady();
+    desktopApi.clientReady(); // TODO: remove that later
+    const handshake = await desktopApi.handshake();
+    // @ts-expect-error TODO: use action creator
+    store.dispatch({ type: '@suite/desktop-handshake', payload: handshake });
 
     const root = document.getElementById('app');
 

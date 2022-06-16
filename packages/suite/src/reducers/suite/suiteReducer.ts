@@ -113,6 +113,11 @@ const setFlag = (draft: SuiteState, key: keyof Flags, value: boolean) => {
 const suiteReducer = (state: SuiteState = initialState, action: Action): SuiteState =>
     produce(state, draft => {
         switch (action.type) {
+            // @ts-expect-error
+            case '@suite/desktop-handshake':
+                // @ts-expect-error TODO: make it nicer
+                draft.desktopHandshakeData = action.payload;
+                break;
             case SUITE.INIT:
                 draft.loading = true;
                 break;

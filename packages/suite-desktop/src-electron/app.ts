@@ -1,7 +1,8 @@
 import path from 'path';
 import url from 'url';
-import { app, BrowserWindow, ipcMain, RelaunchOptions, session } from 'electron';
+import { app, BrowserWindow, RelaunchOptions, session } from 'electron';
 import { init as initSentry, ElectronOptions, IPCMode } from '@sentry/electron';
+import { ipcMain } from './typed-electron';
 
 import { SENTRY_CONFIG } from '@suite-config';
 import { isDev } from '@suite-utils/build';
@@ -148,6 +149,20 @@ ipcMain.on('app/restart', () => {
     }
     app.relaunch(options);
     app.quit();
+});
+
+ipcMain.handle('client/handshake', () => {
+    console.log('handshake!');
+    // TODO: gather all system info (see "init" fn)
+    // TODO: startup app process (tor, bridge etc, see "init" fn)
+    return {
+        success: true,
+        payload: {
+            tor: true,
+            theme: 'system' as const,
+            userDir: '/',
+        },
+    };
 });
 
 const sentryConfig: ElectronOptions = {
