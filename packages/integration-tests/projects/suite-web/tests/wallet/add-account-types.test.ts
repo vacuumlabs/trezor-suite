@@ -37,8 +37,12 @@ describe('Add-account-types', () => {
         cy.getTestElement('@accounts/add-account').click();
         cy.getTestElement('@modal').should('be.visible');
         cy.getTestElement('@settings/wallet/network/btc').should('be.visible').click();
-        cy.getTestElement('@add-account-type/blah').click();
-        cy.getTestElement('@add-account-type/blah/Taproot').contains('Taproot').click();
+        cy.getTestElement('@add-account-type/blah/input').click();
+        // cy.contains('$x//a[data-test*="@add-account-type/blah/input/"]', 'Taproot').click();
+        cy.getTestElement('@add-account-type/blah/option/[object Object]')
+            .contains('Taproot')
+            .click();
+        cy.getTestElement('@add-account').click();
         cy.wait(5000);
         // '
         // Assert
