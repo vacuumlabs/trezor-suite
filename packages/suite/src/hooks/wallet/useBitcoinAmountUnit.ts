@@ -5,6 +5,13 @@ import { useActions } from '@suite-hooks/useActions';
 import * as walletSettingsActions from '@settings-actions/walletSettingsActions';
 import { hasNetworkFeatures } from '@wallet-utils/accountUtils';
 
+export const BITCOIN_UNIT_ABBREVIATION = {
+    [PROTO.AmountUnit.BITCOIN]: 'BTC',
+    [PROTO.AmountUnit.MICROBITCOIN]: 'μBTC',
+    [PROTO.AmountUnit.MILLIBITCOIN]: 'mBTC',
+    [PROTO.AmountUnit.SATOSHI]: 'sat',
+};
+
 const UNIT_LABELS = {
     [PROTO.AmountUnit.BITCOIN]: 'Bitcoin',
     [PROTO.AmountUnit.SATOSHI]: 'Satoshis',

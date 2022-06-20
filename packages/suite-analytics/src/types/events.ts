@@ -10,6 +10,7 @@ export type SuiteAnalyticsEvent =
               enabledNetworks: string[];
               customBackends: string[];
               localCurrency: string;
+              bitcoinUnit: string;
               discreetMode: boolean;
               screenWidth: number;
               screenHeight: number;
@@ -263,6 +264,12 @@ export type SuiteAnalyticsEvent =
           type: EventType.SettingsGeneralChangeFiat;
           payload: {
               fiat: string;
+          };
+      }
+    | {
+          type: EventType.SettingsGeneralChangeBitcoinUnit;
+          payload: {
+              unit: string;
           };
       }
     | {
