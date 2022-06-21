@@ -1,6 +1,14 @@
 import React from 'react';
 import styled, { css } from 'styled-components';
-import { useTheme, Icon, IconProps, variables, HoverAnimation } from '@trezor/components';
+import {
+    useTheme,
+    Icon,
+    IconProps,
+    variables,
+    HoverAnimation,
+    FluidSpinner,
+} from '@trezor/components';
+import { FADE_IN } from '@trezor/components/src/config/animations';
 
 const Wrapper = styled.div<Pick<Props, 'isOpen' | 'marginLeft'>>`
     width: 44px;
@@ -48,7 +56,7 @@ const Label = styled.span`
     font-size: ${variables.FONT_SIZE.NORMAL};
 `;
 
-const AlertDotWrapper = styled.div`
+const AlertDotWrapper = styled.div<{ isLoading?: boolean }>`
     position: absolute;
     top: 9px;
     right: 10px;
@@ -59,12 +67,13 @@ const AlertDotWrapper = styled.div`
     align-items: center;
     justify-content: center;
     background: ${props => props.theme.BG_WHITE};
+    animation: ${FADE_IN} 0.2s ease-out;
 `;
 
 const AlertDot = styled.div`
     position: relative;
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
     border-radius: 50%;
     background: ${props => props.theme.TYPE_ORANGE};
 `;
@@ -73,19 +82,29 @@ const Indicator = styled.div`
     background: ${props => props.theme.BG_WHITE};
     display: flex;
     align-items: center;
+    justify-content: center;
     height: 10px;
     width: 10px;
     border-radius: 50%;
     position: absolute;
     top: 9px;
     right: 10px;
+
+    ${variables.SCREEN_QUERY.BELOW_TABLET} {
+        top: 0;
+        right: 0;
+    }
+
+    svg {
+        animation: ${FADE_IN} 0.2s ease-out;
+    }
 `;
 
 interface CommonProps extends Pick<React.HTMLAttributes<HTMLDivElement>, 'onClick'> {
     label: React.ReactNode;
     isActive?: boolean;
     isOpen?: boolean;
-    indicator?: 'check' | 'alert';
+    indicator?: 'check' | 'alert' | 'loading';
     isMobileLayout?: boolean;
     marginLeft?: boolean;
 }
@@ -105,6 +124,7 @@ type Props = CustomIconComponentProps | IconComponentProps;
 // In order to achieve that behavior, we need to pass reference to ActionItem
 export const ActionItem = React.forwardRef((props: Props, ref: React.Ref<HTMLDivElement>) => {
     const theme = useTheme();
+
     const iconComponent = props.icon ? (
         <Icon
             color={props.isActive ? theme.TYPE_DARK_GREY : theme.TYPE_LIGHT_GREY}
@@ -115,22 +135,31 @@ export const ActionItem = React.forwardRef((props: Props, ref: React.Ref<HTMLDiv
         props.iconComponent
     );
 
+    const Content = (
+        <>
+            {iconComponent}
+            {props.indicator === 'alert' && (
+                <AlertDotWrapper>
+                    <AlertDot />
+                </AlertDotWrapper>
+            )}
+            {props.indicator === 'loading' && (
+                <Indicator>
+                    <FluidSpinner size={6} />
+                </Indicator>
+            )}
+            {props.indicator === 'check' && (
+                <Indicator>
+                    <Icon icon="CHECK" size={10} color={theme.TYPE_GREEN} />
+                </Indicator>
+            )}
+        </>
+    );
+
     if (props.isMobileLayout) {
         return (
             <MobileWrapper {...props}>
-                <MobileIconWrapper isActive={props.isActive}>
-                    {iconComponent}
-                    {props.indicator === 'alert' && (
-                        <AlertDotWrapper>
-                            <AlertDot />
-                        </AlertDotWrapper>
-                    )}
-                    {props.indicator === 'check' && (
-                        <Indicator>
-                            <Icon icon="CHECK" size={10} color={theme.TYPE_GREEN} />
-                        </Indicator>
-                    )}
-                </MobileIconWrapper>
+                <MobileIconWrapper isActive={props.isActive}>{Content}</MobileIconWrapper>
                 <Label>{props.label}</Label>
             </MobileWrapper>
         );
@@ -139,17 +168,7 @@ export const ActionItem = React.forwardRef((props: Props, ref: React.Ref<HTMLDiv
     return (
         <HoverAnimation isHoverable={!props.isOpen}>
             <Wrapper isActive={props.isActive} isOpen={props.isOpen} ref={ref} {...props}>
-                {iconComponent}
-                {props.indicator === 'alert' && (
-                    <AlertDotWrapper>
-                        <AlertDot />
-                    </AlertDotWrapper>
-                )}
-                {props.indicator === 'check' && (
-                    <Indicator>
-                        <Icon icon="CHECK" size={10} color={theme.TYPE_GREEN} />
-                    </Indicator>
-                )}
+                {Content}
             </Wrapper>
         </HoverAnimation>
     );

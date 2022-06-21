@@ -3456,7 +3456,7 @@ export default defineMessages({
     },
     TR_TOR_ENABLE_TITLE: {
         id: 'TR_TOR_ENABLE_TITLE',
-        defaultMessage: 'Tor enable',
+        defaultMessage: 'Enable Tor',
     },
     TR_ONION_LINKS_DESCRIPTION: {
         id: 'TR_ONION_LINKS_DESCRIPTION',
@@ -6677,5 +6677,13 @@ export default defineMessages({
     FAILED_TO_DISABLE_TOR: {
         id: 'FAILED_TO_DISABLE_TOR',
         defaultMessage: 'Failed to disable Tor',
+    },
+    ENABLING_TOR: {
+        id: 'ENABLING_TOR',
+        defaultMessage: 'Enabling Tor',
+    },
+    DISABLING_TOR: {
+        id: 'DISABLING_TOR',
+        defaultMessage: 'Disabling Tor',
     },
 });

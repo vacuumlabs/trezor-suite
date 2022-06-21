@@ -14,9 +14,10 @@ const Wrapper = styled.div`
 
 interface TorProps {
     isActive?: boolean;
+    isLoading?: boolean;
 }
 
-export const NavTor = ({ isActive }: TorProps) => {
+export const NavTor = ({ isActive, isLoading }: TorProps) => {
     const { goto } = useActions({
         goto: routerActions.goto,
     });
@@ -26,7 +27,7 @@ export const NavTor = ({ isActive }: TorProps) => {
             <ActionItem
                 label={<Translation id="TR_TOR" />}
                 icon="TOR"
-                indicator={isActive ? 'check' : undefined}
+                indicator={isActive ? 'check' : isLoading ? 'loading' : undefined} //  eslint-disable-line no-nested-ternary
                 onClick={() => goto('settings-index', { anchor: SettingsAnchor.Tor })}
             />
         </Wrapper>

@@ -17,7 +17,7 @@ import { NavSettings } from './components/NavSettings';
 import { variables } from '@trezor/components';
 import { NavBackends } from './components/NavBackends';
 import { useGuide } from '@guide-hooks/useGuide';
-import { getIsTorEnabled } from '@suite-utils/tor';
+import { getIsTorEnabled, getIsTorLoading } from '@suite-utils/tor';
 
 import type { Route } from '@suite-types';
 
@@ -55,22 +55,16 @@ export const NavigationActions: React.FC<NavigationActionsProps> = ({
     closeMainNavigation,
     isMobileLayout,
 }) => {
-    const {
-        activeApp,
-        notifications,
-        discreetMode,
-        isTorEnabled,
-        allowPrerelease,
-        enabledNetworks,
-    } = useSelector(state => ({
-        activeApp: state.router.app,
-        notifications: state.notifications,
-        discreetMode: state.wallet.settings.discreetMode,
-        isTorEnabled: getIsTorEnabled(state.suite.torStatus),
-        theme: state.suite.settings.theme,
-        allowPrerelease: state.desktopUpdate.allowPrerelease,
-        enabledNetworks: state.wallet.settings.enabledNetworks,
-    }));
+    const { activeApp, notifications, discreetMode, torStatus, allowPrerelease, enabledNetworks } =
+        useSelector(state => ({
+            activeApp: state.router.app,
+            notifications: state.notifications,
+            discreetMode: state.wallet.settings.discreetMode,
+            torStatus: state.suite.torStatus,
+            theme: state.suite.settings.theme,
+            allowPrerelease: state.desktopUpdate.allowPrerelease,
+            enabledNetworks: state.wallet.settings.enabledNetworks,
+        }));
 
     const { goto, setDiscreetMode, toggleTor } = useActions({
         goto: routerActions.goto,
@@ -103,6 +97,9 @@ export const NavigationActions: React.FC<NavigationActionsProps> = ({
         enabledNetworks.includes(backend.coin),
     );
 
+    const isTorEnabled = getIsTorEnabled(torStatus);
+    const isTorLoading = getIsTorLoading(torStatus);
+
     return (
         <WrapperComponent>
             <ActionItem
@@ -129,17 +126,15 @@ export const NavigationActions: React.FC<NavigationActionsProps> = ({
             {isDesktop() &&
                 (isMobileLayout ? (
                     <ActionItem
-                        onClick={() => {
-                            toggleTor(!isTorEnabled);
-                        }}
+                        onClick={() => toggleTor(!isTorEnabled)}
                         label={<Translation id="TR_TOR" />}
                         icon="TOR"
                         isMobileLayout
                         marginLeft
-                        indicator={isTorEnabled ? 'check' : undefined}
+                        indicator={isTorEnabled ? 'check' : isTorLoading ? 'alert' : undefined} //  eslint-disable-line no-nested-ternary
                     />
                 ) : (
-                    <NavTor isActive={isTorEnabled} />
+                    <NavTor isActive={isTorEnabled} isLoading={isTorLoading} />
                 ))}
 
             {allowPrerelease &&
