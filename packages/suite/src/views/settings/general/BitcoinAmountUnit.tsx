@@ -6,10 +6,7 @@ import { ActionColumn, ActionSelect, SectionItem, TextColumn } from '@suite-comp
 import { Translation } from '@suite-components/Translation';
 import { useAnchor } from '@suite-hooks/useAnchor';
 import { SettingsAnchor } from '@suite-constants/anchors';
-import {
-    BITCOIN_UNIT_ABBREVIATION,
-    useBitcoinAmountUnit,
-} from '@wallet-hooks/useBitcoinAmountUnit';
+import { UNIT_ABBREVIATIONS, useBitcoinAmountUnit } from '@wallet-hooks/useBitcoinAmountUnit';
 
 export const BitcoinAmountUnit = () => {
     const { bitcoinAmountUnit, setBitcoinAmountUnits, UNIT_LABELS, UNIT_OPTIONS } =
@@ -21,7 +18,7 @@ export const BitcoinAmountUnit = () => {
         analytics.report({
             type: EventType.SettingsGeneralChangeBitcoinUnit,
             payload: {
-                unit: BITCOIN_UNIT_ABBREVIATION[value],
+                unit: UNIT_ABBREVIATIONS[value],
             },
         });
     };

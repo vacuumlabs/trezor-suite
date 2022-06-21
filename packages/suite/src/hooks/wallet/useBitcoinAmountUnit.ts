@@ -1,11 +1,12 @@
 import { useMemo } from 'react';
 import { PROTO } from '@trezor/connect';
+
 import { useSelector } from '@suite-hooks/useSelector';
 import { useActions } from '@suite-hooks/useActions';
 import * as walletSettingsActions from '@settings-actions/walletSettingsActions';
 import { hasNetworkFeatures } from '@wallet-utils/accountUtils';
 
-export const BITCOIN_UNIT_ABBREVIATION = {
+export const UNIT_ABBREVIATIONS = {
     [PROTO.AmountUnit.BITCOIN]: 'BTC',
     [PROTO.AmountUnit.MICROBITCOIN]: 'μBTC',
     [PROTO.AmountUnit.MILLIBITCOIN]: 'mBTC',
