@@ -1,5 +1,5 @@
 import React from 'react';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import {
     useTheme,
     Icon,
@@ -10,7 +10,7 @@ import {
 } from '@trezor/components';
 import { FADE_IN } from '@trezor/components/src/config/animations';
 
-const Wrapper = styled.div<Pick<Props, 'isOpen' | 'marginLeft'>>`
+const Wrapper = styled.div<Pick<ActionItemProps, 'isOpen' | 'marginLeft'>>`
     width: 44px;
     height: 44px;
     display: flex;
@@ -19,29 +19,24 @@ const Wrapper = styled.div<Pick<Props, 'isOpen' | 'marginLeft'>>`
     align-items: center;
     justify-content: center;
     border-radius: 8px;
-    ${props => props.marginLeft && `margin-left: 8px`};
-    transition: ${props =>
-        `background ${props.theme.HOVER_TRANSITION_TIME} ${props.theme.HOVER_TRANSITION_EFFECT}`};
-
-    ${props =>
-        props.isOpen &&
-        css`
-            background: ${props.theme.BG_GREY_OPEN};
-        `}
+    margin-left: ${({ marginLeft }) => marginLeft && ` 8px`};
+    background: ${({ isOpen, theme }) => isOpen && theme.BG_GREY_OPEN};
+    transition: ${({ theme }) =>
+        `background ${theme.HOVER_TRANSITION_TIME} ${theme.HOVER_TRANSITION_EFFECT}`};
 `;
 
-const MobileWrapper = styled.div<Pick<Props, 'isActive'>>`
+const MobileWrapper = styled.div<Pick<ActionItemProps, 'isActive'>>`
     display: flex;
     position: relative;
     cursor: pointer;
     align-items: center;
 
     & + & {
-        border-top: 1px solid ${props => props.theme.STROKE_GREY};
+        border-top: 1px solid ${({ theme }) => theme.STROKE_GREY};
     }
 `;
 
-const MobileIconWrapper = styled.div<Pick<Props, 'isActive'>>`
+const MobileIconWrapper = styled.div<Pick<ActionItemProps, 'isActive'>>`
     display: flex;
     position: relative;
     cursor: pointer;
@@ -51,7 +46,7 @@ const MobileIconWrapper = styled.div<Pick<Props, 'isActive'>>`
 
 const Label = styled.span`
     padding: 16px 8px;
-    color: ${props => props.theme.TYPE_LIGHT_GREY};
+    color: ${({ theme }) => theme.TYPE_LIGHT_GREY};
     font-weight: ${variables.FONT_WEIGHT.MEDIUM};
     font-size: ${variables.FONT_SIZE.NORMAL};
 `;
@@ -66,7 +61,7 @@ const AlertDotWrapper = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
-    background: ${props => props.theme.BG_WHITE};
+    background: ${({ theme }) => theme.BG_WHITE};
     animation: ${FADE_IN} 0.2s ease-out;
 `;
 
@@ -75,11 +70,11 @@ const AlertDot = styled.div`
     width: 5px;
     height: 5px;
     border-radius: 50%;
-    background: ${props => props.theme.TYPE_ORANGE};
+    background: ${({ theme }) => theme.TYPE_ORANGE};
 `;
 
 const Indicator = styled.div`
-    background: ${props => props.theme.BG_WHITE};
+    background: ${({ theme }) => theme.BG_WHITE};
     display: flex;
     align-items: center;
     justify-content: center;
@@ -118,58 +113,60 @@ interface IconComponentProps extends CommonProps {
     iconComponent?: never;
 }
 
-type Props = CustomIconComponentProps | IconComponentProps;
+type ActionItemProps = CustomIconComponentProps | IconComponentProps;
 
 // Reason to use forwardRef: We want the user to be able to close Notifications dropdown by clicking somewhere else.
 // In order to achieve that behavior, we need to pass reference to ActionItem
-export const ActionItem = React.forwardRef((props: Props, ref: React.Ref<HTMLDivElement>) => {
-    const theme = useTheme();
+export const ActionItem = React.forwardRef(
+    (props: ActionItemProps, ref: React.Ref<HTMLDivElement>) => {
+        const theme = useTheme();
 
-    const iconComponent = props.icon ? (
-        <Icon
-            color={props.isActive ? theme.TYPE_DARK_GREY : theme.TYPE_LIGHT_GREY}
-            size={24}
-            icon={props.icon}
-        />
-    ) : (
-        props.iconComponent
-    );
-
-    const Content = (
-        <>
-            {iconComponent}
-            {props.indicator === 'alert' && (
-                <AlertDotWrapper>
-                    <AlertDot />
-                </AlertDotWrapper>
-            )}
-            {props.indicator === 'loading' && (
-                <Indicator>
-                    <FluidSpinner size={6} />
-                </Indicator>
-            )}
-            {props.indicator === 'check' && (
-                <Indicator>
-                    <Icon icon="CHECK" size={10} color={theme.TYPE_GREEN} />
-                </Indicator>
-            )}
-        </>
-    );
-
-    if (props.isMobileLayout) {
-        return (
-            <MobileWrapper {...props}>
-                <MobileIconWrapper isActive={props.isActive}>{Content}</MobileIconWrapper>
-                <Label>{props.label}</Label>
-            </MobileWrapper>
+        const iconComponent = props.icon ? (
+            <Icon
+                color={props.isActive ? theme.TYPE_DARK_GREY : theme.TYPE_LIGHT_GREY}
+                size={24}
+                icon={props.icon}
+            />
+        ) : (
+            props.iconComponent
         );
-    }
 
-    return (
-        <HoverAnimation isHoverable={!props.isOpen}>
-            <Wrapper isActive={props.isActive} isOpen={props.isOpen} ref={ref} {...props}>
-                {Content}
-            </Wrapper>
-        </HoverAnimation>
-    );
-});
+        const Content = (
+            <>
+                {iconComponent}
+                {props.indicator === 'alert' && (
+                    <AlertDotWrapper>
+                        <AlertDot />
+                    </AlertDotWrapper>
+                )}
+                {props.indicator === 'loading' && (
+                    <Indicator>
+                        <FluidSpinner size={6} />
+                    </Indicator>
+                )}
+                {props.indicator === 'check' && (
+                    <Indicator>
+                        <Icon icon="CHECK" size={10} color={theme.TYPE_GREEN} />
+                    </Indicator>
+                )}
+            </>
+        );
+
+        if (props.isMobileLayout) {
+            return (
+                <MobileWrapper {...props}>
+                    <MobileIconWrapper isActive={props.isActive}>{Content}</MobileIconWrapper>
+                    <Label>{props.label}</Label>
+                </MobileWrapper>
+            );
+        }
+
+        return (
+            <HoverAnimation isHoverable={!props.isOpen}>
+                <Wrapper isActive={props.isActive} isOpen={props.isOpen} ref={ref} {...props}>
+                    {Content}
+                </Wrapper>
+            </HoverAnimation>
+        );
+    },
+);
