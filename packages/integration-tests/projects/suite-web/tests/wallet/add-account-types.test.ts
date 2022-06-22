@@ -20,11 +20,15 @@ describe('Add-account-types', () => {
         cy.task('stopEmu');
     });
 
-    /* Test case
-    1. Go to Account
-    2. Add every account type
-    3. Check new account type has been added
-    */
+    /**
+     * Test case
+     * 1. Go to Accounts
+     * 2. Unpack all account types by clicking on account header, using data-test attr with account type and a forEach, with if condition to filter out the "normal" acc
+     * 3. Using a different forEach, get the number of accounts using example selector '[type="segwit"] > [data-test^="@account-menu/btc/segwit"]'
+     * 4. Using a cypress command that takes name of the coin and the name of the desired acc (watchout for normal vs segwit acc type, this needs to be handled on the test level), create an account for each type
+     * 5. At the end of the cycle iteration, get the number of accounts again (the same way as step three)
+     * 6. Verify that the current number is equeal to previous number + 1
+     */
     it('Add-account-types-BTC', () => {
         //
         // Test preparation
