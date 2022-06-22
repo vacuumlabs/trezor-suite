@@ -56,7 +56,7 @@ const Label = styled.span`
     font-size: ${variables.FONT_SIZE.NORMAL};
 `;
 
-const AlertDotWrapper = styled.div<{ isLoading?: boolean }>`
+const AlertDotWrapper = styled.div`
     position: absolute;
     top: 9px;
     right: 10px;
