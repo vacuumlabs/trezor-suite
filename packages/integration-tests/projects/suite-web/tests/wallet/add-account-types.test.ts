@@ -29,26 +29,46 @@ describe('Add-account-types', () => {
         //
         // Test preparation
         //
-
+        const coin = 'btc';
+        const accountTypes = ['normal', 'taproot', 'segwit', 'legacy'];
+        const accAdds = ['', ' (Taproot)', ' (Legacy Segwit)', ' (Legacy)'];
+        let accountTypeAdd: string;
+        let acctoAdd: string;
         //
         // Test execution
         //
         cy.getTestElement('@suite/menu/wallet-index', { timeout: 30000 }).click();
-        cy.getTestElement('@accounts/add-account').click();
-        cy.getTestElement('@modal').should('be.visible');
-        cy.getTestElement('@settings/wallet/network/btc').should('be.visible').click();
-        cy.getTestElement('@add-account-type/blah/input').click();
-        // cy.contains('$x//a[data-test*="@add-account-type/blah/input/"]', 'Taproot').click();
-        cy.getTestElement('@add-account-type/blah/option/[object Object]')
-            .contains('Taproot')
-            .click();
-        cy.getTestElement('@add-account').click();
+
+        accountTypes.forEach(accountType => {
+            accountTypeAdd = `Bitcoin(${accountType})`;
+
+            accAdds.forEach(accAdd => {
+                acctoAdd = `Bitcoin${accAdd}`;
+                if (accountType !== 'normal') {
+                    cy.getTestElement('@account-menu/arrow').click({ multiple: true });
+                }
+
+                cy.get(
+                    `[type="${accountType}"] > [data-test="@account-menu/${coin}/${accountType}/0"]`,
+                ).then(specificAccounts => {
+                    const numberOfAccounts1 = specificAccounts.length;
+
+                    cy.createAccount(coin, acctoAdd);
+
+                    cy.get(
+                        `[type="${accountType}"] > [data-test="@account-menu/${coin}/${accountType}/0"]`,
+                    ).then(specificAccounts => {
+                        const numberOfAccounts2 = specificAccounts.length;
+
+                        expect(numberOfAccounts2).to.be.equal(numberOfAccounts1 + 1);
+                    });
+                });
+            });
+        });
         cy.wait(5000);
-        // '
+        // @account-menu/taproot
+        //
         // Assert
         //
-        // when graph becomes visible, discovery was finished
-        //  cy.discoveryShouldFinish();
-        //  cy.getTestElement('@dashboard/graph', { timeout: 30000 }).should('exist');
     });
 });

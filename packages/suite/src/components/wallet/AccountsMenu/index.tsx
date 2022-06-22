@@ -314,7 +314,7 @@ const AccountsMenu = ({ isMenuInline }: AccountsMenuProps) => {
                             </LoadingContent>
                         </Heading>
                         <AddAccountButton
-                            data-test="@accounts/add-account"
+                            data-test="@account-menu/add-account"
                             device={device}
                             noButtonLabel
                         />
