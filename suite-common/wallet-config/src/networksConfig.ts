@@ -399,6 +399,27 @@ export const networks = {
             },
         },
     },
+    sol: {
+        name: 'Solana',
+        networkType: 'solana',
+        bip43Path: "m/44'/501'/i",
+        decimals: 9,
+        testnet: false,
+        explorer: {
+            tx: 'https://solscan.io/tx/',
+            account: 'https://solscan.io/account/',
+        },
+        features: [],
+        customBackends: [],
+        accountTypes: {
+            solflare: {
+                bip43Path: "m/44'/501'/0'/i",
+            },
+            sollet: {
+                bip43Path: "m/44'/501'/0'/0/i",
+            },
+        },
+    },
 } as const;
 
 export const TREZOR_CONNECT_BACKENDS = ['blockbook', 'electrum', 'ripple', 'blockfrost'] as const;
