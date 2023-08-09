@@ -1942,6 +1942,41 @@ export type RippleSignedTx = {
     serialized_tx: string;
 };
 
+// SolanaGetPublicKey
+export type SolanaGetPublicKey = {
+    address_n: number[];
+    show_display?: boolean;
+};
+
+// SolanaPublicKey
+export type SolanaPublicKey = {
+    xpub: string;
+    node: HDNodeType;
+};
+
+// SolanaGetAddress
+export type SolanaGetAddress = {
+    address_n: number[];
+    show_display?: boolean;
+};
+
+// SolanaAddress
+export type SolanaAddress = {
+    address: string;
+};
+
+// SolanaSignTx
+export type SolanaSignTx = {
+    signer_path_n: number[];
+    serialized_tx: string;
+};
+
+// SolanaSignedTx
+export type SolanaSignedTx = {
+    serialized_tx: string;
+    signature: string;
+};
+
 export enum StellarAssetType {
     NATIVE = 0,
     ALPHANUM4 = 1,
@@ -2481,6 +2516,12 @@ export type MessageType = {
     RipplePayment: RipplePayment;
     RippleSignTx: RippleSignTx;
     RippleSignedTx: RippleSignedTx;
+    SolanaGetPublicKey: SolanaGetPublicKey;
+    SolanaPublicKey: SolanaPublicKey;
+    SolanaGetAddress: SolanaGetAddress;
+    SolanaAddress: SolanaAddress;
+    SolanaSignTx: SolanaSignTx;
+    SolanaSignedTx: SolanaSignedTx;
     StellarAsset: StellarAsset;
     StellarGetAddress: StellarGetAddress;
     StellarAddress: StellarAddress;
