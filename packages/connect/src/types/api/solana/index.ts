@@ -3,6 +3,7 @@ import type { GetAddress, Address, GetPublicKey, PublicKey } from '../../params'
 
 // solanaGetPublicKey
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SolanaGetPublicKey extends GetPublicKey {}
 
 export interface SolanaPublicKey extends PublicKey {
@@ -11,8 +12,10 @@ export interface SolanaPublicKey extends PublicKey {
 
 // solanaGetAddress
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SolanaGetAddress extends GetAddress {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SolanaAddress extends Address {}
 
 // solanaSignTransaction
