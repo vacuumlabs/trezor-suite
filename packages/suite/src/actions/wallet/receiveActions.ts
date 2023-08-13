@@ -48,6 +48,7 @@ export const showAddress =
     (path: string, address: string) => async (dispatch: Dispatch, getState: GetState) => {
         const { device } = getState().suite;
         const { account } = getState().wallet.selectedAccount;
+
         if (!device || !account) return;
 
         const modalPayload = {
@@ -103,6 +104,18 @@ export const showAddress =
                 break;
             case 'bitcoin':
                 response = await TrezorConnect.getAddress(params);
+                break;
+            case 'solana':
+                // TODO(vl): Remove mock and replace with connect method
+                response = await Promise.resolve({
+                    success: true,
+                    id: 69,
+                    payload: {
+                        path: [2147483732, 2147483648, 2147483648, 0, 0],
+                        serializedPath: "m/44'/501'/0'/0/0",
+                        address: 'bc1qmhm0ex8m4ktgrfmuvhhu43e2hzqcxyf7a56qn8',
+                    },
+                });
                 break;
             default:
                 response = {
