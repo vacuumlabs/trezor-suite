@@ -106,23 +106,8 @@ export const showAddress =
                 response = await TrezorConnect.getAddress(params);
                 break;
             case 'solana':
-                // TODO(vl): Remove mock and replace with connect method
-                params.path = "m/44'/1'/0'/0/0";
-                params.coin = 'tgor';
-                response = await TrezorConnect.ethereumGetAddress(params);
+                response = await TrezorConnect.solanaGetAddress(params);
                 break;
-            /*
-                response = await Promise.resolve({
-                    success: true,
-                    id: 69,
-                    payload: {
-                        path: [2147483732, 2147483648, 2147483648, 0, 0],
-                        serializedPath: "m/44'/501'/0'/0/0",
-                        address: 'bc1qmhm0ex8m4ktgrfmuvhhu43e2hzqcxyf7a56qn8',
-                    },
-                });
-                break;
-                */
             default:
                 response = {
                     success: false,
@@ -133,7 +118,6 @@ export const showAddress =
 
         if (response.success) {
             // show second part of the "confirm address" modal
-            console.log('modalPayload', modalPayload);
             dispatch(
                 modalActions.openModal({
                     type: 'address',
@@ -146,7 +130,7 @@ export const showAddress =
             dispatch({
                 type: RECEIVE.SHOW_ADDRESS,
                 path,
-                address, //: response.payload.address,
+                address,
             });
         } else {
             dispatch(modalActions.onCancel());
