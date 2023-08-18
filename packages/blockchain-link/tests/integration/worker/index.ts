@@ -48,3 +48,5 @@ export const blockfrostWorkerFactory = () => {
 };
 
 export const blockfrostModuleFactory = BlockfrostWorkerModule;
+
+// TODO(vl): solana backend

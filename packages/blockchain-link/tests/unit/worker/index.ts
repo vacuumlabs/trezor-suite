@@ -6,4 +6,5 @@ export default [
     { name: 'blockbook', worker: Blockbook },
     { name: 'ripple', worker: Ripple },
     { name: 'blockfrost', worker: Blockfrost },
+    // TODO(vl): solana backend
 ] as const;
