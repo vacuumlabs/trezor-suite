@@ -477,4 +477,4 @@ export const getExcludedUtxos = ({
 };
 
 export const getLamportsFromSol = (amountInSol: string) =>
-    BigInt(new BigNumber(amountInSol).times(new BigNumber(10 ** 9)).toString());
+    BigInt(new BigNumber(amountInSol).times(10 ** 9).toString());
