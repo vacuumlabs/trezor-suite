@@ -9,6 +9,7 @@ import { getUtxoOutpoint } from '../accountUtils';
 import {
     calculateEthFee,
     calculateMax,
+    calculateSolFee,
     calculateTotal,
     findComposeErrors,
     getBitcoinComposeOutputs,
@@ -16,6 +17,7 @@ import {
     getExternalComposeOutput,
     getFiatRate,
     getInputState,
+    getLamportsFromSol,
     prepareEthereumTransaction,
     restoreOrigOutputsOrder,
     serializeEthereumTx,
@@ -411,5 +413,16 @@ describe('sendForm utils', () => {
         expect(excludedUtxos[getUtxoOutpoint(lowAnonymityDustUtxo)]).toBe('dust');
         expect(excludedUtxos[getUtxoOutpoint(lowAnonymityUtxo)]).toBe('low-anonymity');
         expect(excludedUtxos[getUtxoOutpoint(spendableUtxo)]).toBe(undefined);
+    });
+
+    it('calculateSolFee', () => {
+        expect(calculateSolFee(1, 0, 0)).toEqual('5000');
+        expect(calculateSolFee(1, 1000000, 1)).toEqual('5001');
+        expect(calculateSolFee()).toEqual('16000');
+    });
+
+    it('getLamportsFromSol', () => {
+        expect(getLamportsFromSol('1')).toEqual(1000000000n);
+        expect(getLamportsFromSol('0.000000001')).toEqual(1n);
     });
 });

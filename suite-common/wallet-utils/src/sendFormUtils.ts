@@ -476,5 +476,23 @@ export const getExcludedUtxos = ({
     return excludedUtxos;
 };
 
+// SOL Specific
+
+const MICRO_LAMPORTS_IN_LAMPORT = 1000000;
+const DEFAULT_COMPUTE_BUDGET = 200000;
+const DEFAULT_COMPUTE_UNIT_PRICE = 55000; // in microLamports = 0.000001 Lamport
+const SOL_PRICE_PER_SIGNATURE = 5000;
+
+// Default fee comes out to 0.000016 SOL, with the priority fee comprising 0.000011 SOL
+export const calculateSolFee = (
+    signatures = 1,
+    computeBudget: number = DEFAULT_COMPUTE_BUDGET,
+    computeUnitPrice: number = DEFAULT_COMPUTE_UNIT_PRICE,
+): string =>
+    new BigNumber(signatures)
+        .times(SOL_PRICE_PER_SIGNATURE)
+        .plus(new BigNumber(computeBudget).times(computeUnitPrice).div(MICRO_LAMPORTS_IN_LAMPORT))
+        .toString();
+
 export const getLamportsFromSol = (amountInSol: string) =>
     BigInt(new BigNumber(amountInSol).times(10 ** 9).toString());
