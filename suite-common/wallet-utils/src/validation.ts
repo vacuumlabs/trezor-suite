@@ -30,9 +30,6 @@ export const isAddressValid = (address: string, symbol: Account['symbol']) => {
     const networkType = getNetworkType(symbol);
     const updatedSymbol = getCoinFromTestnet(symbol);
 
-    // TODO(vl): validate address
-    if (updatedSymbol === 'sol') return true;
-
     return addressValidator.validate(address, updatedSymbol.toUpperCase(), networkType);
 };
 
