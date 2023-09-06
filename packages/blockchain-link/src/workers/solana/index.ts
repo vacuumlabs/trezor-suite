@@ -11,9 +11,11 @@ type Context = ContextType<SolanaAPI>;
 type Request<T> = T & Context;
 
 const pushTransaction = async (request: Request<MessageTypes.PushTransaction>) => {
-    const txHash = request.payload.startsWith('0x') ? request.payload.slice(2) : request.payload;
+    // We allow the transaction hex to start with 0x, in which case we remove it
+    // Solana web3js generates transactions without it, but some users may be used to the 0x prefix
+    const txHex = request.payload.startsWith('0x') ? request.payload.slice(2) : request.payload;
     const api = await request.connect();
-    const payload = await api.sendRawTransaction(Buffer.from(txHash, 'hex'));
+    const payload = await api.sendRawTransaction(Buffer.from(txHex, 'hex'));
     return {
         type: RESPONSES.PUSH_TRANSACTION,
         payload,
