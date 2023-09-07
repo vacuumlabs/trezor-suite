@@ -13,26 +13,7 @@ import BigNumber from 'bignumber.js';
 const FEE_PER_SIGNATURE = new BigNumber(500);
 
 // TODO(vl): Implement send-max
-// TODO(vl), phase 2: Implement custom Prioritization Fees
-
-// TODO(vl): Replace with appropriate call!
-const getRecentBlockhash = async () => {
-    const response = await fetch('https://api.devnet.solana.com', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            jsonrpc: '2.0',
-            id: 1,
-            method: 'getRecentBlockhash',
-            params: [],
-        }),
-    });
-    const { result } = await response.json();
-
-    return result.value.blockhash;
-};
+// TODO(vl), phase 2: Implement custom Prioritization Feetat
 
 export const composeTransaction =
     (formValues: FormState, formState: ComposeActionContext) => () => {
@@ -90,7 +71,7 @@ export const signTransaction =
         const { account, network } = selectedAccount;
         if (account.networkType !== 'solana' || !network.chainId) return;
 
-        const blockhash = await getRecentBlockhash();
+        const blockhash = getState().wallet.blockchain.sol.blockHash;
 
         const tx = new Transaction({
             blockhash,
