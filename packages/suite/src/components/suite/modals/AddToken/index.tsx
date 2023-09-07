@@ -42,6 +42,8 @@ export const AddToken = ({ onCancel }: AddTokenProps) => {
                 contractFilter: contractAddress,
             });
 
+            console.log('solana loadTokenInfo getAccountInfo response', response);
+
             if (response.success) {
                 const isInvalidToken = response.payload.tokens?.find(
                     t => t.contract === t.name && t.decimals === 0 && !t.symbol,
@@ -67,12 +69,15 @@ export const AddToken = ({ onCancel }: AddTokenProps) => {
 
     useEffect(() => {
         if (account && !error && contractAddress) {
+            console.log('solana Fired loadTokenInfo with contractAddress', contractAddress);
             loadTokenInfo(account, contractAddress);
         }
     }, [account, contractAddress, error, loadTokenInfo]);
 
     // it shouldn't be possible to open this modal without having selected account
     if (!account) return null;
+
+    console.log('solana loadTokenInfo account', account);
 
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const addr = e.target.value;
@@ -118,7 +123,13 @@ export const AddToken = ({ onCancel }: AddTokenProps) => {
         <Modal
             isCancelable
             onCancel={onCancel}
-            heading={<Translation id="TR_ADD_TOKEN_TITLE" />}
+            heading={
+                account.networkType === 'ethereum' ? (
+                    <Translation id="TR_ADD_TOKEN_TITLE_ETH" />
+                ) : (
+                    <Translation id="TR_ADD_TOKEN_TITLE_SOL" />
+                )
+            }
             bottomBar={
                 <Button
                     onClick={handleAddTokenButtonClick}
@@ -132,8 +143,21 @@ export const AddToken = ({ onCancel }: AddTokenProps) => {
             <Wrapper>
                 <Input
                     label={
-                        <Tooltip content={<Translation id="TR_ADD_TOKEN_TOOLTIP" />} dashed>
-                            <Translation id="TR_ADD_TOKEN_LABEL" />
+                        <Tooltip
+                            content={
+                                account.networkType === 'ethereum' ? (
+                                    <Translation id="TR_ADD_TOKEN_TOOLTIP_ETH" />
+                                ) : (
+                                    <Translation id="TR_ADD_TOKEN_TOOLTIP_SOL" />
+                                )
+                            }
+                            dashed
+                        >
+                            {account.networkType === 'ethereum' ? (
+                                <Translation id="TR_ADD_TOKEN_LABEL_ETH" />
+                            ) : (
+                                <Translation id="TR_ADD_TOKEN_LABEL_SOL" />
+                            )}
                         </Tooltip>
                     }
                     placeholder={translationString('TR_ADD_TOKEN_PLACEHOLDER')}

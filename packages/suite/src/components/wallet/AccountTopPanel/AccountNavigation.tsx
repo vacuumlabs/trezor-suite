@@ -55,7 +55,7 @@ export const AccountNavigation = ({
             },
             title: <Translation id="TR_NAV_TOKENS" />,
             position: 'primary',
-            isHidden: !['cardano', 'ethereum'].includes(networkType),
+            isHidden: !['cardano', 'ethereum', 'solana'].includes(networkType),
         },
         {
             id: 'wallet-staking',
@@ -101,7 +101,7 @@ export const AccountNavigation = ({
             title: <Translation id="TR_TOKENS_ADD" />,
             position: 'secondary',
             extra: true,
-            isHidden: !['ethereum'].includes(networkType),
+            isHidden: !['ethereum', 'solana'].includes(networkType),
         },
         {
             id: 'wallet-sign-verify',

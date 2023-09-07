@@ -5321,13 +5321,21 @@ export default defineMessages({
         id: 'TR_TOKENS_EMPTY',
         defaultMessage: 'No tokens... yet.',
     },
-    TR_ADD_TOKEN_TITLE: {
-        id: 'TR_ADD_TOKEN_TITLE',
+    TR_ADD_ETH_TOKEN_TITLE: {
+        id: 'TR_ADD_ETH_TOKEN_TITLE',
         defaultMessage: 'Add ERC20 token',
     },
-    TR_ADD_TOKEN_LABEL: {
-        id: 'TR_ADD_TOKEN_LABEL',
+    TR_ADD_SOL_TOKEN_TITLE: {
+        id: 'TR_ADD_SOL_TOKEN_TITLE',
+        defaultMessage: 'Add SPL token',
+    },
+    TR_ADD_ETH_TOKEN_LABEL: {
+        id: 'TR_ADD_ETH_TOKEN_LABEL',
         defaultMessage: 'ERC20 token address',
+    },
+    TR_ADD_SOL_TOKEN_LABEL: {
+        id: 'TR_ADD_SOL_TOKEN_LABEL',
+        defaultMessage: 'SPL token address',
     },
     TR_ADD_TOKEN_SUBMIT: {
         id: 'TR_ADD_TOKEN_SUBMIT',
@@ -5337,9 +5345,13 @@ export default defineMessages({
         id: 'TR_ADD_TOKEN_PLACEHOLDER',
         defaultMessage: 'Paste token address',
     },
-    TR_ADD_TOKEN_TOOLTIP: {
+    TR_ADD_ETH_TOKEN_TOOLTIP: {
         id: 'TR_ADD_TOKEN_TOOLTIP',
         defaultMessage: 'Enter an ERC20 token contract address',
+    },
+    TR_ADD_SOL_TOKEN_TOOLTIP: {
+        id: 'TR_ADD_TOKEN_TOOLTIP',
+        defaultMessage: 'Enter a SPL token contract address',
     },
     TR_ADD_TOKEN_ADDRESS_NOT_VALID: {
         id: 'TR_ADD_TOKEN_ADDRESS_NOT_VALID',
