@@ -1,14 +1,18 @@
+import { A, F, pipe } from '@mobily/ts-belt';
 import type { Response, AccountInfo } from '@trezor/blockchain-link-types';
 import type * as MessageTypes from '@trezor/blockchain-link-types/lib/messages';
 import { CustomError } from '@trezor/blockchain-link-types/lib/constants/errors';
 import { BaseWorker, ContextType, CONTEXT } from '../baseWorker';
 import { MESSAGES, RESPONSES } from '@trezor/blockchain-link-types/lib/constants';
 import { Connection, PublicKey } from '@solana/web3.js';
+import { TokenInfo } from 'packages/blockchain-link-types/lib';
 
 export type SolanaAPI = Connection;
 
 type Context = ContextType<SolanaAPI>;
 type Request<T> = T & Context;
+
+const TOKEN_PROGRAM_PUBLIC_KEY = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
 
 const pushTransaction = async (request: Request<MessageTypes.PushTransaction>) => {
     const txHash = request.payload.startsWith('0x') ? request.payload.slice(2) : request.payload;
@@ -24,7 +28,13 @@ const getAccountInfo = async (request: Request<MessageTypes.GetAccountInfo>) => 
     const { payload } = request;
     const api = await request.connect();
 
-    const accountInfo = await api.getAccountInfo(new PublicKey(payload.descriptor));
+    const publicKey = new PublicKey(payload.descriptor);
+
+    const accountInfo = await api.getAccountInfo(publicKey);
+    const tokenInfo = await api.getParsedTokenAccountsByOwner(publicKey, {
+        programId: TOKEN_PROGRAM_PUBLIC_KEY,
+    });
+    console.log('solana token Info', tokenInfo);
 
     if (!accountInfo) {
         // return empty account
@@ -45,6 +55,27 @@ const getAccountInfo = async (request: Request<MessageTypes.GetAccountInfo>) => 
         } as const);
     }
 
+    const tokens: TokenInfo[] = !tokenInfo
+        ? []
+        : F.toMutable(
+              pipe(
+                  tokenInfo.value,
+                  A.map((token: any): TokenInfo => {
+                      const { info } = token.account.data.parsed;
+
+                      return {
+                          type: 'SPL',
+                          contract: info.mint,
+                          balance: info.tokenAmount.amount,
+                          decimals: info.tokenAmount.decimals,
+                          // name: info.mint, // TODO(vl): parse token names
+                          // symbol: `info.mint.slice(0, 3)...` // TODO(vl): parse token symbols
+                      };
+                  }),
+                  A.uniqBy(token => token.contract),
+              ),
+          );
+
     const account: AccountInfo = {
         descriptor: payload.descriptor,
         balance: accountInfo.lamports.toString(),
@@ -56,7 +87,9 @@ const getAccountInfo = async (request: Request<MessageTypes.GetAccountInfo>) => 
             unconfirmed: 0,
             transactions: undefined,
         },
+        tokens,
     };
+    console.log('solana account info', account);
     return Promise.resolve({
         type: RESPONSES.GET_ACCOUNT_INFO,
         payload: account,
@@ -67,9 +100,10 @@ const getInfo = async (request: Request<MessageTypes.GetInfo>) => {
     const api = await request.connect();
     const { blockhash: blockHash, lastValidBlockHeight: blockHeight } =
         await api.getLatestBlockhash('finalized');
+    console.log('getInfo fetched blockhash', blockHash);
     const serverInfo = {
         // genesisHash is reliable identifier of the network, for mainnet the genesis hash is 5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d
-        testnet: (await api.getGenesisHash()) !== '5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d',
+        testnet: (await api.getGenesisHash()) !== 'EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG',
         blockHeight,
         blockHash,
         shortcut: 'sol',
@@ -114,8 +148,6 @@ const subscribeBlock = async ({ state, connect, post }: Context) => {
 
 const unsubscribeBlock = ({ state }: Context) => {
     if (!state.getSubscription('block')) return;
-    const interval = state.getSubscription('block') as NodeJS.Timer;
-    clearInterval(interval);
     state.removeSubscription('block');
 };
 
