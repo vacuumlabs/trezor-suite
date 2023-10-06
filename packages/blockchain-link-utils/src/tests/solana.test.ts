@@ -1,4 +1,5 @@
 import { ParsedTransactionWithMeta } from '@solana/web3.js';
+import { TokenTransfer } from 'packages/blockchain-link-types/lib';
 
 import { Transaction } from '@trezor/blockchain-link-types';
 
@@ -7,7 +8,8 @@ import {
     getAmount,
     getDetails,
     getTargets,
-    getTransactionEffects,
+    getTokens,
+    getNativeEffects,
     getTxType,
     transformTransaction,
 } from '../solana';
@@ -29,9 +31,7 @@ describe('solana/utils', () => {
     describe('getTransactionEffects', () => {
         fixtures.getTransactionEffects.forEach(({ description, input, expectedOutput }) => {
             it(description, () => {
-                const result = getTransactionEffects(
-                    input.transaction as ParsedTransactionWithMeta,
-                );
+                const result = getNativeEffects(input.transaction as ParsedTransactionWithMeta);
                 expect(result).toEqual(expectedOutput);
             });
         });
@@ -44,6 +44,7 @@ describe('solana/utils', () => {
                     input.transaction as ParsedTransactionWithMeta,
                     input.effects,
                     input.accountAddress,
+                    input.tokenEffects as TokenTransfer[],
                 );
                 expect(result).toEqual(expectedOutput);
             });
@@ -78,6 +79,18 @@ describe('solana/utils', () => {
                 const result = getDetails(
                     input.transaction as ParsedTransactionWithMeta,
                     input.effects,
+                    input.accountAddress,
+                );
+                expect(result).toEqual(expectedOutput);
+            });
+        });
+    });
+
+    describe('getTokens', () => {
+        fixtures.getTokens.forEach(({ description, input, expectedOutput }) => {
+            it(description, () => {
+                const result = getTokens(
+                    input.transaction as ParsedTransactionWithMeta,
                     input.accountAddress,
                 );
                 expect(result).toEqual(expectedOutput);
