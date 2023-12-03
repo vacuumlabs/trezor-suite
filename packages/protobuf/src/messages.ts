@@ -643,6 +643,16 @@ export enum CardanoCertificateType {
     STAKE_DEREGISTRATION = 1,
     STAKE_DELEGATION = 2,
     STAKE_POOL_REGISTRATION = 3,
+    STAKE_REGISTRATION_CONWAY = 7,
+    STAKE_DEREGISTRATION_CONWAY = 8,
+    VOTE_DELEGATION = 9,
+}
+
+export enum CardanoDRepType {
+    KEY_HASH = 0,
+    SCRIPT_HASH = 1,
+    ABSTAIN = 2,
+    NO_CONFIDENCE = 3,
 }
 
 export enum CardanoPoolRelayType {
@@ -844,6 +854,13 @@ export type CardanoPoolParametersType = {
     relays_count: number;
 };
 
+// CardanoDRep
+export type CardanoDRep = {
+    type: CardanoDRepType;
+    key_hash?: string;
+    script_hash?: string;
+};
+
 // CardanoTxCertificate
 export type CardanoTxCertificate = {
     type: CardanoCertificateType;
@@ -852,6 +869,8 @@ export type CardanoTxCertificate = {
     pool_parameters?: CardanoPoolParametersType;
     script_hash?: string;
     key_hash?: string;
+    deposit?: UintType;
+    drep?: CardanoDRep;
 };
 
 // CardanoTxWithdrawal
@@ -2446,6 +2465,7 @@ export type MessageType = {
     CardanoPoolRelayParameters: CardanoPoolRelayParameters;
     CardanoPoolMetadataType: CardanoPoolMetadataType;
     CardanoPoolParametersType: CardanoPoolParametersType;
+    CardanoDRep: CardanoDRep;
     CardanoTxCertificate: CardanoTxCertificate;
     CardanoTxWithdrawal: CardanoTxWithdrawal;
     CardanoCVoteRegistrationDelegation: CardanoCVoteRegistrationDelegation;

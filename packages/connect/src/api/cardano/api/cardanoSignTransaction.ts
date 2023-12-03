@@ -51,6 +51,7 @@ const CardanoSignTransactionFeatures = Object.freeze({
     Babbage: ['0', '2.5.2'],
     CIP36Registration: ['0', '2.5.3'],
     CIP36RegistrationExternalPaymentAddress: ['0', '2.5.4'],
+    Conway: ['0', '2.6.5'],
 });
 
 export type CardanoSignTransactionParams = {
@@ -262,6 +263,13 @@ export default class CardanoSignTransaction extends AbstractMethod<
         params.certificatesWithPoolOwnersAndRelays.forEach(({ certificate }) => {
             if (certificate.key_hash) {
                 this._ensureFeatureIsSupported('KeyHashStakeCredential');
+            }
+            if (
+                certificate.type === PROTO.CardanoCertificateType.STAKE_REGISTRATION_CONWAY ||
+                certificate.type === PROTO.CardanoCertificateType.STAKE_DEREGISTRATION_CONWAY ||
+                certificate.type === PROTO.CardanoCertificateType.VOTE_DELEGATION
+            ) {
+                this._ensureFeatureIsSupported('Conway');
             }
         });
 
