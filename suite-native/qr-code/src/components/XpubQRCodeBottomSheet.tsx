@@ -18,7 +18,7 @@ const networkTypeToSheetTitleMap: Record<NetworkType, string> = {
     cardano: 'Public key (XPUB)',
     ethereum: 'Receive address',
     ripple: 'Receive address',
-    solana: 'Public key (XPUB)',
+    solana: 'Receive address',
 };
 
 const buttonStyle = prepareNativeStyle(utils => ({
