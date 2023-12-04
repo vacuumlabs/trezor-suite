@@ -242,7 +242,10 @@ const constructNewFlow = ({
     } else {
         precomposedTx.outputs.forEach(o => {
             if (typeof o.address === 'string') {
-                const tokenOutput: ReviewOutput = { type: 'contract', value: precomposedTx.token.contract }
+                const tokenOutput: ReviewOutput = {
+                    type: 'contract',
+                    value: precomposedTx.token ? precomposedTx.token.contract : '',
+                };
 
                 // this is displayed only for tokens without definitions
                 if (precomposedTx.token && !precomposedTx.isTokenKnown && !isSolana) {
