@@ -81,7 +81,7 @@ const calculate = (
                     address:
                         destinationAddress && destinationAddress !== output.address
                             ? `${destinationAddress} (Token account for: ${output.address} ${
-                                  isCreatingAccount && ', Account will be created.'
+                                  isCreatingAccount ? ', Account will be created.' : ''
                               })`
                             : output.address,
                     amount,
