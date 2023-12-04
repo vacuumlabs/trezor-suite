@@ -56,7 +56,7 @@ const Raw = ({ network }: RawProps) => {
     const error = errors[inputName];
     const inputState = getInputState(error, inputValue);
     const prefix =
-        network.networkType === 'ethereum' || network.networkType === 'solana' ? '0x' : undefined;
+        network.networkType === 'ethereum' ? '0x' : undefined;
     const { ref: inputRef, ...inputField } = register(inputName, {
         required: translationString('RAW_TX_NOT_SET'),
         validate: (value: string) => {
