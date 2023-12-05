@@ -77,13 +77,7 @@ const calculate = (
             outputsPermutation: [0],
             outputs: [
                 {
-                    // TODO: internationalise this!
-                    address:
-                        destinationAddress && destinationAddress !== output.address
-                            ? `${destinationAddress} (Token account for: ${output.address} ${
-                                  isCreatingAccount ? ', Account will be created.' : ''
-                              })`
-                            : output.address,
+                    address: output.address,
                     amount,
                     script_type: 'PAYTOADDRESS',
                 },
