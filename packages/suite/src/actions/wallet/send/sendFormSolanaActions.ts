@@ -150,7 +150,7 @@ export const composeTransaction =
                       tokenInfo.accounts,
                       recipientTokenAccount,
                       blockhash,
-                      50,
+                      150,
                   )
                 : undefined;
 
@@ -259,9 +259,9 @@ export const signTransaction =
         if (token && !token.accounts) return;
 
         // The last block height for which the transaction will be considered valid, after which it can no longer be processed.
-        // The current block time is set to 800ms, meaning this transaction should be valid when submitted within for 40 seconds
+        // https://solana.stackexchange.com/questions/6238/why-is-lastvalidblockheight-300-blocks-ahead-than-current-blockheight-if-hashes
         // For more information see: https://docs.solana.com/cluster/synchronization
-        const lastValidBlockHeight = 50;
+        const lastValidBlockHeight = 150;
 
         const tokenTransferTxAndDestinationAddress =
             token && token.accounts
@@ -275,7 +275,7 @@ export const signTransaction =
                       token.accounts,
                       recipientTokenAccounts,
                       blockhash,
-                      50,
+                      lastValidBlockHeight,
                   )
                 : undefined;
 
