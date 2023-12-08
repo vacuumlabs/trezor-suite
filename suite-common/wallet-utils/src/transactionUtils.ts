@@ -321,8 +321,19 @@ const filterAnalyzeResult = (result: Analyze) => {
 export const analyzeTransactions = (
     fresh: AccountTransaction[],
     known: WalletAccountTransaction[],
-    context: { blockHeight: number },
+    context: { blockHeight: number; networkType?: Account['networkType'] },
 ) => {
+    if (context?.networkType === 'solana') {
+        const newTransactions = fresh.filter(freshTx =>
+            known.every(currentTx => currentTx.txid !== freshTx.txid),
+        );
+        return {
+            newTransactions,
+            add: newTransactions,
+            remove: known.slice(-newTransactions.length),
+        };
+    }
+
     const { blockHeight } = context;
     let addTxs: AccountTransaction[] = [];
     const newTxs: AccountTransaction[] = [];

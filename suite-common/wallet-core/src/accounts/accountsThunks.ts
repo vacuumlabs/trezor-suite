@@ -118,6 +118,7 @@ export const fetchAndUpdateAccountThunk = createThunk(
 
             const analyze = analyzeTransactions(payload.history.transactions || [], accountTxs, {
                 blockHeight,
+                networkType: account.networkType,
             });
 
             if (analyze.remove.length > 0) {
