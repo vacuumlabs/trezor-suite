@@ -329,7 +329,7 @@ export const analyzeTransactions = (
         return {
             newTransactions,
             add: newTransactions,
-            remove: known.slice(-newTransactions.length),
+            remove: newTransactions.length > 0 ? known.slice(-newTransactions.length) : [],
         };
     }
 
