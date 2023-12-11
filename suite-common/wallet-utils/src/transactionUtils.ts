@@ -324,9 +324,8 @@ export const analyzeTransactions = (
     context: { blockHeight: number; networkType?: Account['networkType'] },
 ) => {
     if (context?.networkType === 'solana') {
-        const newTransactions = fresh.filter(freshTx =>
-            known.every(currentTx => currentTx.txid !== freshTx.txid),
-        );
+        const knownIdsSet = new Set(known.map(tx => tx.txid));
+        const newTransactions = fresh.filter(freshTx => !knownIdsSet.has(freshTx.txid));
         return {
             newTransactions,
             add: newTransactions,
