@@ -776,6 +776,7 @@ export type CardanoSignTxInit = {
     total_collateral?: UintType;
     reference_inputs_count?: number;
     chunkify?: boolean;
+    tag_cbor_sets?: boolean;
 };
 
 // CardanoTxInput

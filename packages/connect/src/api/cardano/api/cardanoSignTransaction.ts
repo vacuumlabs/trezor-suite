@@ -77,6 +77,7 @@ export type CardanoSignTransactionParams = {
     additionalWitnessRequests: Path[];
     derivationType: PROTO.CardanoDerivationType;
     includeNetworkId?: boolean;
+    tagCborSets?: boolean;
     unsignedTx?: { body: string; hash: string };
     testnet?: boolean;
     chunkify?: boolean;
@@ -231,6 +232,7 @@ export default class CardanoSignTransaction extends AbstractMethod<
                     ? payload.derivationType
                     : PROTO.CardanoDerivationType.ICARUS_TREZOR,
             includeNetworkId: payload.includeNetworkId,
+            tagCborSets: payload.tagCborSets,
             unsignedTx: 'unsignedTx' in payload ? payload.unsignedTx : undefined,
             testnet: 'testnet' in payload ? payload.testnet : undefined,
             chunkify: typeof payload.chunkify === 'boolean' ? payload.chunkify : false,
@@ -298,6 +300,10 @@ export default class CardanoSignTransaction extends AbstractMethod<
 
         if (params.includeNetworkId) {
             this._ensureFeatureIsSupported('NetworkIdInTxBody');
+        }
+
+        if (params.tagCborSets) {
+            this._ensureFeatureIsSupported('Conway');
         }
 
         if (params.scriptDataHash) {
@@ -379,6 +385,7 @@ export default class CardanoSignTransaction extends AbstractMethod<
             derivation_type: this.params.derivationType,
             include_network_id: this.params.includeNetworkId,
             chunkify: this.params.chunkify,
+            tag_cbor_sets: this.params.tagCborSets,
         };
 
         // init

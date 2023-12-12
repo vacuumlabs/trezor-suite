@@ -864,6 +864,7 @@ export const CardanoSignTxInit = Type.Object({
     total_collateral: Type.Optional(Type.Uint()),
     reference_inputs_count: Type.Optional(Type.Number()),
     chunkify: Type.Optional(Type.Boolean()),
+    tag_cbor_sets: Type.Optional(Type.Boolean()),
 });
 
 export type CardanoTxInput = Static<typeof CardanoTxInput>;

@@ -2012,6 +2012,13 @@
                 "chunkify": {
                     "type": "bool",
                     "id": 22
+                },
+                "tag_cbor_sets": {
+                    "type": "bool",
+                    "id": 23,
+                    "options": {
+                        "default": false
+                    }
                 }
             }
         },
