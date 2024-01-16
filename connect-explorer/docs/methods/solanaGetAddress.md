@@ -1,7 +1,5 @@
 ## Solana: get address
 
-⚠️ **BETA**: This api is unstable and may change!
-
 Display requested address derived by given [BIP44 path](../path.md) on device and return it to the caller. User is presented with a description of the requested address and asked to confirm the export on Trezor.
 
 ```javascript
@@ -19,6 +17,7 @@ const result = await TrezorConnect.solanaGetAddress(params);
 -   `path` — _required_ `string | Array<number>` minimum length is `2`. [read more](../path.md)
 -   `address` — _required_ `string` address for validation (read `Handle button request` section below)
 -   `showOnTrezor` — _optional_ `boolean` determines if address will be displayed on device. Default is set to `true`
+-   `chunkify` — _optional_ `boolean` determines if address will be displayed in chunks of 4 characters. Default is set to `false`
 
 #### Exporting bundle of addresses
 
