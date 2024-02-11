@@ -953,7 +953,7 @@ export type CardanoSignMessageInit = {
     signing_path: number[];
     payload_size: number;
     hash_payload: boolean;
-    display_ascii: boolean;
+    prefer_hex_display: boolean;
     address_parameters?: CardanoAddressParametersType;
     derivation_type: CardanoDerivationType;
 };
@@ -973,6 +973,7 @@ export type CardanoMessageItemHostAck = {};
 export type CardanoSignMessageFinished = {
     signature: string;
     address: string;
+    pub_key: string;
 };
 
 // Success

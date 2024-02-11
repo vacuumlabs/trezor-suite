@@ -1321,7 +1321,7 @@ export const CardanoSignMessageInit = Type.Object({
     signing_path: Type.Array(Type.Number()),
     payload_size: Type.Number(),
     hash_payload: Type.Boolean(),
-    display_ascii: Type.Boolean(),
+    prefer_hex_display: Type.Boolean(),
     address_parameters: Type.Optional(CardanoAddressParametersType),
     derivation_type: EnumCardanoDerivationType,
 });
@@ -1341,6 +1341,7 @@ export type CardanoSignMessageFinished = Static<typeof CardanoSignMessageFinishe
 export const CardanoSignMessageFinished = Type.Object({
     signature: Type.String(),
     address: Type.String(),
+    pub_key: Type.String(),
 });
 
 export type Success = Static<typeof Success>;
