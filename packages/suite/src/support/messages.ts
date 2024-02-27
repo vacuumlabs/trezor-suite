@@ -609,7 +609,7 @@ export default defineMessages({
         id: 'TR_EXCHANGE_APPROVAL_TO_SWAP_BUTTON',
     },
     TR_EXCHANGE_SWAP_SEND_TO: {
-        defaultMessage: "{provider}'s contract",
+        defaultMessage: '{provider} contract address',
         id: 'TR_EXCHANGE_SWAP_SEND_TO',
     },
     TR_EXCHANGE_SWAP_DATA: {
@@ -2805,6 +2805,14 @@ export default defineMessages({
         defaultMessage: 'Community',
         id: 'TR_COMMUNITY_LANGUAGES',
     },
+    TR_TOKEN_UNRECOGNIZED_BY_TREZOR: {
+        defaultMessage: 'Unrecognized tokens',
+        id: 'TR_TOKEN_UNRECOGNIZED_BY_TREZOR',
+    },
+    TR_TOKEN_UNRECOGNIZED_BY_TREZOR_TOOLTIP: {
+        defaultMessage: 'Unrecognized tokens pose potential risks. Use caution.',
+        id: 'TR_TOKEN_UNRECOGNIZED_BY_TREZOR_TOOLTIP',
+    },
     TR_LEARN: {
         defaultMessage: 'Learn',
         description: 'Link to Suite Guide.',
@@ -2984,6 +2992,14 @@ export default defineMessages({
     TR_NETWORK_NEM: {
         defaultMessage: 'NEM',
         id: 'TR_NETWORK_NEM',
+    },
+    TR_NETWORK_POLYGON: {
+        defaultMessage: 'Polygon PoS',
+        id: 'TR_NETWORK_POLYGON',
+    },
+    TR_NETWORK_POLYGON_LABEL: {
+        defaultMessage: 'Incl. MRC20 tokens',
+        id: 'TR_NETWORK_POLYGON_LABEL',
     },
     TR_NETWORK_STELLAR: {
         defaultMessage: 'Stellar',
@@ -5423,21 +5439,18 @@ export default defineMessages({
         id: 'TR_ADD_TOKEN_TITLE',
         defaultMessage: 'Add ERC20 token',
     },
+    TR_ADD_TOKEN_DESCRIPTION: {
+        id: 'TR_ADD_TOKEN_DESCRIPTION',
+        defaultMessage:
+            "Enter a contract address of a token you wish to add to your wallet. This is typically a 42-character alphanumeric string starting with '0x'.",
+    },
     TR_ADD_TOKEN_LABEL: {
         id: 'TR_ADD_TOKEN_LABEL',
-        defaultMessage: 'ERC20 token address',
+        defaultMessage: 'Token address',
     },
     TR_ADD_TOKEN_SUBMIT: {
         id: 'TR_ADD_TOKEN_SUBMIT',
         defaultMessage: 'Add token',
-    },
-    TR_ADD_TOKEN_PLACEHOLDER: {
-        id: 'TR_ADD_TOKEN_PLACEHOLDER',
-        defaultMessage: 'Paste token address',
-    },
-    TR_ADD_TOKEN_TOOLTIP: {
-        id: 'TR_ADD_TOKEN_TOOLTIP',
-        defaultMessage: 'Enter an ERC20 token contract address',
     },
     TR_ADD_TOKEN_ADDRESS_NOT_VALID: {
         id: 'TR_ADD_TOKEN_ADDRESS_NOT_VALID',
@@ -5766,7 +5779,7 @@ export default defineMessages({
     },
     CUSTOM_FEE_IS_NOT_SET: {
         defaultMessage:
-            'How much do you want to spend on fees to make this transaction go through.',
+            'Enter the fee rate you want to spend in order to complete this transaction.',
         id: 'CUSTOM_FEE_IS_NOT_SET',
     },
     CUSTOM_FEE_IS_NOT_INTEGER: {
@@ -5903,25 +5916,25 @@ export default defineMessages({
         id: 'TR_CONNECTED_TO_PROVIDER',
     },
     TR_CONNECTED_TO_PROVIDER_LOCALLY: {
-        defaultMessage: 'Saving labels locally',
+        defaultMessage: 'Labels saved locally',
         id: 'TR_CONNECTED_TO_PROVIDER_LOCALLY',
     },
     TR_YOUR_LABELING_IS_SYNCED: {
         defaultMessage:
-            'Your labeling is synced with a cloud storage provider. Your data is safe, as only your Trezor can decrypt it.',
+            'Your labels are synced with a cloud storage provider. Your data is safe, as only your Trezor can decrypt it.',
         id: 'TR_YOUR_LABELING_IS_SYNCED',
     },
     TR_YOUR_LABELING_IS_SYNCED_LOCALLY: {
-        defaultMessage: 'Labels are saved locally on your machine.',
+        defaultMessage: 'Your labels are saved locally on your machine.',
         id: 'TR_YOUR_LABELING_IS_SYNCED_LOCALLY',
     },
     TR_LABELING_NOT_SYNCED: {
-        defaultMessage: 'Labeling not synced.',
+        defaultMessage: 'Labels not synced',
         id: 'TR_LABELING_NOT_SYNCED',
     },
     TR_TO_MAKE_YOUR_LABELS_PERSISTENT: {
         defaultMessage:
-            'To make your labels persistent and available on different devices connect to a cloud storage provider.',
+            'To make your labels consistent and available on different devices, connect to a cloud storage provider.',
         id: 'TR_TO_MAKE_YOUR_LABELS_PERSISTENT',
     },
     TR_DROPBOX: {
@@ -5946,7 +5959,7 @@ export default defineMessages({
     },
     METADATA_MODAL_DESCRIPTION: {
         defaultMessage:
-            'Please select a cloud provider for saving your labels. Your data is encrypted by Trezor.',
+            'Select a cloud storage provider to sync your labels or save them locally. Your data is encrypted by Trezor.',
         id: 'METADATA_MODAL_DESCRIPTION',
     },
     TR_DISABLED_SWITCH_TOOLTIP: {
@@ -6133,7 +6146,7 @@ export default defineMessages({
     TR_GRAPH_MISSING_DATA: {
         id: 'TR_GRAPH_MISSING_DATA',
         defaultMessage:
-            'XRP, SOL and any token transactions are included in the balance, but not currently supported in the graph view.',
+            "XRP, SOL, and other token transactions are included in portfolio balance, but aren't currently supported in graph view.",
     },
     METADATA_PROVIDER_NOT_FOUND_ERROR: {
         id: 'METADATA_PROVIDER_NOT_FOUND_ERROR',
@@ -6142,12 +6155,12 @@ export default defineMessages({
     METADATA_PROVIDER_AUTH_ERROR: {
         id: 'METADATA_PROVIDER_AUTH_ERROR',
         defaultMessage:
-            'Failed to sync labeling data with cloud provider {provider}. User was logged out.',
+            'Failed to sync labels with cloud storage provider {provider}. User was logged out.',
     },
     METADATA_PROVIDER_UNEXPECTED_ERROR: {
         id: 'METADATA_PROVIDER_UNEXPECTED_ERROR',
         defaultMessage:
-            'Failed to sync labeling data with cloud provider {provider}. User was logged out.',
+            'Failed to sync labels with cloud storage provider {provider}. User was logged out.',
     },
     TR_REVEAL_ADDRESS: {
         id: 'TR_REVEAL_ADDRESS',
@@ -6540,7 +6553,7 @@ export default defineMessages({
     TR_TRANSACTIONS_SEARCH_TIP_2: {
         id: 'TR_TRANSACTIONS_SEARCH_TIP_2',
         defaultMessage:
-            'Tip: You can use the greater than (>) and less than (<) symbols on amount searches. For example <strong>> 1</strong> will show all transactions that have an amount of 1 or higher.',
+            'Tip: Use the greater than (>) and less than (<) symbols for amount searches. For example <strong>> 1</strong> will show all transactions that have an amount of 1 and higher.',
     },
     TR_TRANSACTIONS_SEARCH_TIP_3: {
         id: 'TR_TRANSACTIONS_SEARCH_TIP_3',
@@ -6555,32 +6568,32 @@ export default defineMessages({
     TR_TRANSACTIONS_SEARCH_TIP_5: {
         id: 'TR_TRANSACTIONS_SEARCH_TIP_5',
         defaultMessage:
-            'Tip: Dates can be searched using the <strong>YYYY-MM-DD</strong> format. For example <strong>2020-12-14</strong> will show all transactions on December 14th, 2020.',
+            'Tip: Dates can be searched using the <strong>YYYY-MM-DD</strong> format. For example <strong>{lastYear}-12-14</strong> will show all transactions on December 14th, {lastYear}.',
     },
     TR_TRANSACTIONS_SEARCH_TIP_6: {
         id: 'TR_TRANSACTIONS_SEARCH_TIP_6',
         defaultMessage:
-            'Tip: You can use greater than (>) and lesser than (<) symbols on date searches. For example <strong>> 2020-12-01<strong> will show all transactions on and after December 1st, 2020.',
+            'Tip: Use greater than (>) and lesser than (<) symbols on date searches. For example <strong>> {lastYear}-12-01</strong> will show all transactions on and after December 1st, {lastYear}.',
     },
     TR_TRANSACTIONS_SEARCH_TIP_7: {
         id: 'TR_TRANSACTIONS_SEARCH_TIP_7',
         defaultMessage:
-            'Tip: You can exclude a date by using the exlamation mark and equal symbols together (!=). For example <strong>!= 2020-12-14</strong> will show all transactions except the ones on December 14th, 2020.',
+            'Tip: You can exclude a date by using the exclamation mark and equal symbols together (!=). For example <strong>!= {lastYear}-12-14</strong> will show all transactions except the ones on December 14th, {lastYear}.',
     },
     TR_TRANSACTIONS_SEARCH_TIP_8: {
         id: 'TR_TRANSACTIONS_SEARCH_TIP_8',
         defaultMessage:
-            'Tip: You can display results matching at least one of multiple searches by grouping them with the OR operator (|). For example <strong>2022-12-31 | 2023-01-01</strong> will show all transactions that have happened on the 31st of December 2022 or the 1st of January 2023.',
+            'Tip: You can display results matching at least one of multiple searches by grouping them with the OR operator (|). For example <strong>{lastYear}-11-30 | {lastYear}-12-01</strong> will show all transactions that have happened on the 30th of November or the 1st of December {lastYear}.',
     },
     TR_TRANSACTIONS_SEARCH_TIP_9: {
         id: 'TR_TRANSACTIONS_SEARCH_TIP_9',
         defaultMessage:
-            'Tip: You can display results matching multiple searches by grouping them with the AND operator (&). For example <strong>> 2020-12-01 & < 2020-12-31 & > 0</strong> will show all incoming (amount higher than 0) transactions in December 2020.',
+            'Tip: Display results matching multiple searches by grouping them with the AND operator (&). For example <strong>> {lastYear}-12-01 & < {lastYear}-12-31 & > 0</strong> will show all incoming (amount higher than 0) transactions in December {lastYear}.',
     },
     TR_TRANSACTIONS_SEARCH_TIP_10: {
         id: 'TR_TRANSACTIONS_SEARCH_TIP_10',
         defaultMessage:
-            'Tip: You can combine AND (&) and OR (|) operators for more complex searches. For example <strong>> 2022-01-01 & < 2022-01-31 | > 2022-12-01 & < 2022-12-31</strong> will show all transactions in January 2022 or December 2022.',
+            'Tip: Combine AND (&) and OR (|) operators for more complex searches. For example <strong>> {lastYear}-01-01 & < {lastYear}-01-31 | > {lastYear}-12-01 & < {lastYear}-12-31</strong> will show all transactions in January or December {lastYear}.',
     },
     TR_INTERNAL_TRANSACTIONS: {
         id: 'TR_INTERNAL_TRANSACTIONS',
@@ -7917,7 +7930,7 @@ export default defineMessages({
     },
     TR_LOADING_ACCOUNTS_DESCRIPTION: {
         id: 'TR_LOADING_ACCOUNTS_DESCRIPTION',
-        defaultMessage: 'You can change these settings after accounts are loaded.',
+        defaultMessage: 'You can change these settings after accounts have loaded.',
     },
     TR_LOADING_FACT_TITLE: {
         id: 'TR_LOADING_FACT_TITLE',
@@ -8398,10 +8411,78 @@ export default defineMessages({
     },
     TR_DISCOVERY_NEW_COINS_TEXT: {
         id: 'TR_DISCOVERY_NEW_COINS_TEXT',
-        defaultMessage: "Don't see an account after activating coin?",
+        defaultMessage: "Don't see an account after activating a coin?",
     },
     TR_SIDEBAR_ADD_COIN: {
         id: 'TR_SIDEBAR_ADD_COIN',
         defaultMessage: 'Add a coin',
+    },
+    TR_EVM_EXPLANATION_TITLE: {
+        id: 'TR_EVM_EXPLANATION_TITLE',
+        defaultMessage: '{network} is its own network',
+    },
+    TR_EVM_EXPLANATION_DESCRIPTION: {
+        id: 'TR_EVM_EXPLANATION_DESCRIPTION',
+        defaultMessage:
+            "It shares the same address style as Ethereum but has its own unique coins and tokens that can't be used on other networks.",
+    },
+    TR_CONFIRM_EVM_EXPLANATION_RECEIVE_TITLE: {
+        id: 'TR_CONFIRM_EVM_EXPLANATION_RECEIVE_TITLE',
+        defaultMessage: 'Receive through the {network} network',
+    },
+    TR_CONFIRM_EVM_EXPLANATION_RECEIVE_DESCRIPTION_ETH: {
+        id: 'TR_CONFIRM_EVM_EXPLANATION_RECEIVE_DESCRIPTION_ETH',
+        defaultMessage:
+            'Make sure you receive your crypto only through the Ethereum network. If coins or tokens are sent outside the Ethereum network (e.g., Polygon or Avalanche), you may not be able to access them.',
+    },
+    TR_CONFIRM_EVM_EXPLANATION_RECEIVE_DESCRIPTION_OTHER: {
+        id: 'TR_CONFIRM_EVM_EXPLANATION_RECEIVE_DESCRIPTION_OTHER',
+        defaultMessage:
+            'Make sure you receive your crypto only through the {network} network. If coins or tokens are sent outside the {network} network, you may not be able to access them.',
+    },
+    TR_CONFIRM_EVM_EXPLANATION_SEND_TITLE: {
+        id: 'TR_CONFIRM_EVM_EXPLANATION_SEND_TITLE',
+        defaultMessage: 'Send through the {network} network',
+    },
+    TR_CONFIRM_EVM_EXPLANATION_SEND_DESCRIPTION: {
+        id: 'TR_CONFIRM_EVM_EXPLANATION_SEND_DESCRIPTION',
+        defaultMessage:
+            'Make sure you send your crypto only through the {network} network. If coins or tokens are sent outside the {network} network, the receiver may not be able to access them.',
+    },
+    TR_EVM_EXPLANATION_RECEIVE_DESCRIPTION: {
+        id: 'TR_EVM_EXPLANATION_RECEIVE_DESCRIPTION',
+        defaultMessage:
+            'This receive address is only for {network} coins and tokens. If someone sends you crypto from outside the {network} network, you may not receive them.',
+    },
+    TR_EVM_EXPLANATION_SEND_TITLE: {
+        id: 'TR_EVM_EXPLANATION_SEND_TITLE',
+        defaultMessage: 'Send through the {network} network',
+    },
+    TR_EVM_EXPLANATION_SEND_DESCRIPTION: {
+        id: 'TR_EVM_EXPLANATION_SEND_DESCRIPTION',
+        defaultMessage:
+            'Send only through the {network} network. The address must be on the {network} network for the crypto to be received.',
+    },
+    TR_EVM_EXPLANATION_EXCHANGE_TITLE: {
+        id: 'TR_EVM_EXPLANATION_EXCHANGE_TITLE',
+        defaultMessage: 'Did you choose the correct network?',
+    },
+    TR_EVM_EXPLANATION_EXCHANGE_DESCRIPTION: {
+        id: 'TR_EVM_EXPLANATION_EXCHANGE_DESCRIPTION',
+        defaultMessage:
+            "You selected {coin} on the {network} network, but it seems you don't have any {networkSymbol} coins. Did you mean to choose {coin} on another network?",
+    },
+    TR_EVM_EXPLANATION_SEND_MODAL_DESCRIPTION: {
+        id: 'TR_EVM_EXPLANATION_SEND_MODAL_DESCRIPTION',
+        defaultMessage:
+            'You can only send {network} tokens to a <b>receive address on the {network} network</b>, otherwise your tokens <b>may be lost</b>.',
+    },
+    TR_FROM: {
+        id: 'TR_FROM',
+        defaultMessage: 'From',
+    },
+    TR_TO: {
+        id: 'TR_TO',
+        defaultMessage: 'To',
     },
 });

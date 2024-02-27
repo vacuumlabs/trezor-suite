@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 import { Type, Static } from '@trezor/schema-utils';
 
 export enum DeviceModelInternal {
@@ -1030,6 +1029,36 @@ export const CardanoTxBodyHash = Type.Object({
 export type CardanoSignTxFinished = Static<typeof CardanoSignTxFinished>;
 export const CardanoSignTxFinished = Type.Object({});
 
+export type CardanoSignMessageInit = Static<typeof CardanoSignMessageInit>;
+export const CardanoSignMessageInit = Type.Object({
+    protocol_magic: Type.Optional(Type.Number()),
+    network_id: Type.Optional(Type.Number()),
+    signing_path: Type.Array(Type.Number()),
+    payload_size: Type.Number(),
+    hash_payload: Type.Boolean(),
+    prefer_hex_display: Type.Boolean(),
+    address_parameters: Type.Optional(CardanoAddressParametersType),
+    derivation_type: EnumCardanoDerivationType,
+});
+
+export type CardanoMessageItemAck = Static<typeof CardanoMessageItemAck>;
+export const CardanoMessageItemAck = Type.Object({});
+
+export type CardanoMessagePayloadChunk = Static<typeof CardanoMessagePayloadChunk>;
+export const CardanoMessagePayloadChunk = Type.Object({
+    data: Type.String(),
+});
+
+export type CardanoMessageItemHostAck = Static<typeof CardanoMessageItemHostAck>;
+export const CardanoMessageItemHostAck = Type.Object({});
+
+export type CardanoSignMessageFinished = Static<typeof CardanoSignMessageFinished>;
+export const CardanoSignMessageFinished = Type.Object({
+    signature: Type.String(),
+    address: Type.String(),
+    pub_key: Type.String(),
+});
+
 export type Success = Static<typeof Success>;
 export const Success = Type.Object({
     message: Type.String(),
@@ -1780,6 +1809,23 @@ export const ApplySettings = Type.Object({
     hide_passphrase_from_host: Type.Optional(Type.Boolean()),
 });
 
+export type ChangeLanguage = Static<typeof ChangeLanguage>;
+export const ChangeLanguage = Type.Object({
+    data_length: Type.Number(),
+    show_display: Type.Optional(Type.Boolean()),
+});
+
+export type TranslationDataRequest = Static<typeof TranslationDataRequest>;
+export const TranslationDataRequest = Type.Object({
+    data_length: Type.Number(),
+    data_offset: Type.Number(),
+});
+
+export type TranslationDataAck = Static<typeof TranslationDataAck>;
+export const TranslationDataAck = Type.Object({
+    data_chunk: Type.String(),
+});
+
 export type ApplyFlags = Static<typeof ApplyFlags>;
 export const ApplyFlags = Type.Object({
     flags: Type.Number(),
@@ -1954,6 +2000,7 @@ export type RebootToBootloader = Static<typeof RebootToBootloader>;
 export const RebootToBootloader = Type.Object({
     boot_command: Type.Optional(EnumBootCommand),
     firmware_header: Type.Optional(Type.String()),
+    language_data_length: Type.Optional(Type.Number()),
 });
 
 export type GetNonce = Static<typeof GetNonce>;
@@ -2433,6 +2480,12 @@ export const StellarBumpSequenceOp = Type.Object({
     bump_to: Type.Uint(),
 });
 
+export type StellarClaimClaimableBalanceOp = Static<typeof StellarClaimClaimableBalanceOp>;
+export const StellarClaimClaimableBalanceOp = Type.Object({
+    source_account: Type.Optional(Type.String()),
+    balance_id: Type.String(),
+});
+
 export type StellarSignedTx = Static<typeof StellarSignedTx>;
 export const StellarSignedTx = Type.Object({
     public_key: Type.String(),
@@ -2685,6 +2738,11 @@ export const MessageType = Type.Object({
     CardanoTxHostAck,
     CardanoTxBodyHash,
     CardanoSignTxFinished,
+    CardanoSignMessageInit,
+    CardanoMessageItemAck,
+    CardanoMessagePayloadChunk,
+    CardanoMessageItemHostAck,
+    CardanoSignMessageFinished,
     Success,
     Failure,
     ButtonRequest,
@@ -2762,6 +2820,9 @@ export const MessageType = Type.Object({
     SetBusy,
     EndSession,
     ApplySettings,
+    ChangeLanguage,
+    TranslationDataRequest,
+    TranslationDataAck,
     ApplyFlags,
     ChangePin,
     ChangeWipeCode,
@@ -2842,6 +2903,7 @@ export const MessageType = Type.Object({
     StellarAccountMergeOp,
     StellarManageDataOp,
     StellarBumpSequenceOp,
+    StellarClaimClaimableBalanceOp,
     StellarSignedTx,
     TezosGetAddress,
     TezosAddress,

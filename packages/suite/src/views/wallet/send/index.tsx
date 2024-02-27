@@ -15,10 +15,10 @@ import {
     selectTargetAnonymityByAccountKey,
     selectRegisteredUtxosByAccountKey,
 } from 'src/reducers/wallet/coinjoinReducer';
-import { selectCoinsLegacy } from '@suite-common/wallet-core';
 import { Translation } from 'src/components/suite';
 import { spacingsPx } from '@trezor/theme';
 import { breakpointMediaQueries } from '@trezor/styles';
+import { ConfirmEvmExplanationModal } from 'src/components/suite/modals';
 
 const SendLayout = styled(WalletLayout)`
     display: flex;
@@ -68,22 +68,20 @@ const SendLoaded = ({ children, selectedAccount }: SendLoadedProps) => {
         prison: selectRegisteredUtxosByAccountKey(state, selectedAccount.account.key),
     }));
 
-    const coins = useSelector(selectCoinsLegacy);
-
-    const sendContextValues = useSendForm({ ...props, selectedAccount, coins });
+    const sendContextValues = useSendForm({ ...props, selectedAccount });
 
     const { symbol } = selectedAccount.account;
 
     if (props.sendRaw) {
         return (
-            <WalletLayout title="TR_NAV_SEND" account={selectedAccount}>
+            <WalletLayout title="TR_NAV_SEND" isSubpage account={selectedAccount}>
                 <Raw network={selectedAccount.network} />
             </WalletLayout>
         );
     }
 
     return (
-        <SendLayout title="TR_NAV_SEND" account={selectedAccount}>
+        <SendLayout title="TR_NAV_SEND" isSubpage account={selectedAccount}>
             <SendContext.Provider value={sendContextValues}>
                 <Header />
 
@@ -103,6 +101,8 @@ const SendLoaded = ({ children, selectedAccount }: SendLoadedProps) => {
 
                 {children}
             </SendContext.Provider>
+
+            <ConfirmEvmExplanationModal account={selectedAccount.account} route="wallet-send" />
         </SendLayout>
     );
 };

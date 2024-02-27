@@ -8,6 +8,7 @@ import cardanoGetAddressDerivations from './cardanoGetAddressDerivations';
 import cardanoGetNativeScriptHash from './cardanoGetNativeScriptHash';
 import cardanoGetPublicKey from './cardanoGetPublicKey';
 import cardanoSignTransaction from './cardanoSignTransaction';
+import cardanoSignMessage from './cardanoSignMessage';
 import composeTransaction from './composeTransaction';
 import eosGetPublicKey from './eosGetPublicKey';
 import eosSignTransaction from './eosSignTransaction';
@@ -105,6 +106,7 @@ let fixtures = [
     cardanoGetNativeScriptHash,
     cardanoGetPublicKey,
     cardanoSignTransaction,
+    cardanoSignMessage,
     composeTransaction,
     eosGetPublicKey,
     eosSignTransaction,
@@ -180,6 +182,7 @@ const result = fixtures.sort((a, b) => {
     if (!a.setup.mnemonic || !b.setup.mnemonic) return 0;
     if (a.setup.mnemonic > b.setup.mnemonic) return 1;
     if (b.setup.mnemonic > a.setup.mnemonic) return -1;
+
     return 0;
 });
 

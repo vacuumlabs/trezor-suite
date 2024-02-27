@@ -49,7 +49,6 @@ const createProviderInstance = (
     environment: OAuthServerEnvironment = 'production',
     clientId?: string,
 ) => {
-    // eslint-disable-next-line default-case
     switch (type) {
         case 'dropbox':
             return new DropboxProvider({
@@ -207,6 +206,7 @@ export const handleProviderError =
 export const initProvider = () => (dispatch: Dispatch) => {
     const decision = createDeferred<boolean>();
     dispatch(modalActions.openModal({ type: 'metadata-provider', decision }));
+
     return decision.promise;
 };
 
@@ -257,6 +257,7 @@ export const connectProvider =
                     clientId: providerInstance.clientId,
                 }),
             );
+
             return;
         }
 

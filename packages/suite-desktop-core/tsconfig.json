@@ -1,7 +1,8 @@
 {
-    "extends": "../../tsconfig.json",
+    "extends": "../../tsconfig.base.json",
     "compilerOptions": {
         "module": "commonjs",
+        "moduleResolution": "node",
         "outDir": "libDev"
     },
     "include": ["src", "e2e", "**/*.json"],
@@ -24,6 +25,7 @@
         { "path": "../node-utils" },
         { "path": "../request-manager" },
         { "path": "../suite-desktop-api" },
+        { "path": "../transport-bridge" },
         { "path": "../urls" },
         { "path": "../utils" },
         { "path": "../trezor-user-env-link" },

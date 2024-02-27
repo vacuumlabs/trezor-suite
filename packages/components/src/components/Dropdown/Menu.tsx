@@ -89,7 +89,7 @@ const MenuItemContainer = styled.li<MenuItemsProps & { elevation: Elevation }>`
     border-radius: ${borders.radii.xxs};
     background: ${({ isFocused, noHoverEffect, theme, elevation }) =>
         isFocused && !noHoverEffect
-            ? theme[mapElevationToBackground[nextElevation[elevation]]]
+            ? mapElevationToBackground({ theme, elevation: nextElevation[elevation] })
             : undefined};
     color: ${({ isDisabled, theme }) => (!isDisabled ? theme.textDefault : theme.textDisabled)};
     white-space: nowrap;
@@ -233,6 +233,7 @@ const Group = ({
                     isKeyboardSelected={itemId === keyboardFocusedItemId}
                     onMouseOver={() => !item.isDisabled && handleItemHover(itemId)}
                     {...item}
+                    key={itemId}
                 />
             );
         })}
@@ -441,6 +442,7 @@ export const Menu = forwardRef<HTMLUListElement, MenuProps>(
                         keyboardFocusedItemId={keyboardFocusedItemId}
                         handleItemHover={handleItemHover}
                         {...group}
+                        key={group.key}
                     />
                 ))}
             </Container>

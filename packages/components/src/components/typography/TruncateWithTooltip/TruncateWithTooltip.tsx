@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { useEffect, useRef, useState } from 'react';
-import { Tooltip } from '../../Tooltip/Tooltip';
+import { TooltipDelay, Tooltip } from '../../Tooltip/Tooltip';
 
 const EllipsisContainer = styled.div`
     text-overflow: ellipsis;
@@ -9,26 +9,30 @@ const EllipsisContainer = styled.div`
 
 export interface TruncateWithTooltipProps {
     children: React.ReactNode;
+    delayShow?: TooltipDelay;
 }
 
-export const TruncateWithTooltip = ({ children }: TruncateWithTooltipProps) => {
+export const TruncateWithTooltip = ({ children, delayShow }: TruncateWithTooltipProps) => {
     const [isTooltipVisible, setIsTooltipVisible] = useState(false);
     const containerRef = useRef(null);
 
     useEffect(() => {
-        if (containerRef.current) {
-            const { scrollWidth, clientWidth } = containerRef.current;
+        if (!containerRef.current) return;
+        const { scrollWidth, scrollHeight } = containerRef.current;
+        const resizeObserver = new ResizeObserver(entries => {
+            const { inlineSize: elementWidth, blockSize: elementHeight } =
+                entries[0].borderBoxSize?.[0];
+            setIsTooltipVisible(scrollWidth > elementWidth || scrollHeight > elementHeight);
+        });
+        resizeObserver.observe(containerRef.current);
 
-            if (scrollWidth > clientWidth) {
-                setIsTooltipVisible(true);
-            }
-        }
+        return () => resizeObserver.disconnect();
     }, [children, containerRef]);
 
     return (
         <EllipsisContainer ref={containerRef}>
             {isTooltipVisible ? (
-                <Tooltip content={children}>
+                <Tooltip delayShow={delayShow} content={children}>
                     <EllipsisContainer>{children}</EllipsisContainer>
                 </Tooltip>
             ) : (

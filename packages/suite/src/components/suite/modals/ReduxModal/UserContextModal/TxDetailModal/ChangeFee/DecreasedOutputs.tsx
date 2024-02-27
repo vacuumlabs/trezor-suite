@@ -122,9 +122,10 @@ export const DecreasedOutputs = () => {
                         {formValues.outputs.flatMap((o, i) => {
                             if (typeof o.address !== 'string') return null;
                             const isChecked = setMaxOutputId === i;
+
                             return (
                                 // it's safe to use array index as key since outputs do not change
-                                // eslint-disable-next-line react/no-array-index-key
+
                                 <Output key={i}>
                                     {useRadio && (
                                         <StyledRadio

@@ -2,13 +2,13 @@ import BigNumber from 'bignumber.js';
 import styled, { useTheme } from 'styled-components';
 
 import { Button, variables, Icon, H3, Card } from '@trezor/components';
-import { selectCoinsLegacy } from '@suite-common/wallet-core';
+import { selectFiatRatesByFiatRateKey } from '@suite-common/wallet-core';
 
 import { FormattedCryptoAmount, QuestionTooltip, Translation } from 'src/components/suite';
 import { useFormatters } from '@suite-common/formatters';
 import { ExchangeTrade } from 'invity-api';
 import { useSelector, useTranslation } from 'src/hooks/suite';
-import { toFiatCurrency } from '@suite-common/wallet-utils';
+import { getFiatRateKey, toFiatCurrency } from '@suite-common/wallet-utils';
 import { getTagAndInfoNote } from 'src/utils/wallet/coinmarket/coinmarketUtils';
 import { isQuoteError } from 'src/utils/wallet/coinmarket/exchangeUtils';
 import { useCoinmarketExchangeOffersContext } from 'src/hooks/wallet/useCoinmarketExchangeOffers';
@@ -17,6 +17,8 @@ import {
     CoinmarketProviderInfo,
     CoinmarketTag,
 } from 'src/views/wallet/coinmarket/common';
+import { cryptoToCoinSymbol } from 'src/utils/wallet/coinmarket/cryptoSymbolUtils';
+import { selectLocalCurrency } from 'src/reducers/wallet/settingsReducer';
 
 const Details = styled.div`
     display: flex;
@@ -41,6 +43,9 @@ const Column = styled.div<ColumnProps>`
     flex-direction: column;
     justify-content: flex-start;
     max-width: ${({ maxWidth }) => maxWidth ?? '100%'};
+`;
+const ColumnButton = styled(Column)`
+    align-items: flex-end;
 `;
 
 const Heading = styled.div`
@@ -121,8 +126,18 @@ function getQuoteError(quote: ExchangeTrade) {
             <Translation
                 id="TR_OFFER_ERROR_MINIMUM_CRYPTO"
                 values={{
-                    amount: <CoinmarketCryptoAmount amount={cryptoAmount} symbol={symbol} />,
-                    min: <CoinmarketCryptoAmount amount={quote.min} symbol={symbol} />,
+                    amount: (
+                        <CoinmarketCryptoAmount
+                            amount={cryptoAmount}
+                            symbol={cryptoToCoinSymbol(symbol!)}
+                        />
+                    ),
+                    min: (
+                        <CoinmarketCryptoAmount
+                            amount={quote.min}
+                            symbol={cryptoToCoinSymbol(symbol!)}
+                        />
+                    ),
                 }}
             />
         );
@@ -132,12 +147,23 @@ function getQuoteError(quote: ExchangeTrade) {
             <Translation
                 id="TR_OFFER_ERROR_MAXIMUM_CRYPTO"
                 values={{
-                    amount: <CoinmarketCryptoAmount amount={cryptoAmount} symbol={symbol} />,
-                    max: <CoinmarketCryptoAmount amount={quote.max} symbol={symbol} />,
+                    amount: (
+                        <CoinmarketCryptoAmount
+                            amount={cryptoAmount}
+                            symbol={cryptoToCoinSymbol(symbol!)}
+                        />
+                    ),
+                    max: (
+                        <CoinmarketCryptoAmount
+                            amount={quote.max}
+                            symbol={cryptoToCoinSymbol(symbol!)}
+                        />
+                    ),
                 }}
             />
         );
     }
+
     return quote.error;
 }
 
@@ -158,8 +184,9 @@ export const ExchangeQuote = ({ className, quote }: QuoteProps) => {
     const feePerByte = useSelector(
         state => state.wallet.coinmarket.composedTransactionInfo.composed?.feePerByte,
     );
-    const coins = useSelector(selectCoinsLegacy);
-    const localCurrency = useSelector(state => state.wallet.settings.localCurrency);
+    const localCurrency = useSelector(selectLocalCurrency);
+    const fiatRateKey = getFiatRateKey(account.symbol, localCurrency);
+    const fiatRate = useSelector(state => selectFiatRatesByFiatRateKey(state, fiatRateKey));
 
     const { tag, infoNote } = getTagAndInfoNote(quote);
     const { exchange, receive, receiveStringAmount } = quote;
@@ -174,15 +201,10 @@ export const ExchangeQuote = ({ className, quote }: QuoteProps) => {
     let swapFee: number | undefined;
     let swapFeeFiat: string | null = null;
     if (quote.isDex && quote.approvalGasEstimate && quote.swapGasEstimate && feePerByte) {
-        const fiatRates = coins.find(item => item.symbol === account.symbol);
         approvalFee = quote.approvalGasEstimate * Number(feePerByte) * 1e-9;
-        approvalFeeFiat = toFiatCurrency(
-            approvalFee.toString(),
-            localCurrency,
-            fiatRates?.current?.rates,
-        );
+        approvalFeeFiat = toFiatCurrency(approvalFee.toString(), localCurrency, fiatRate, 2, false);
         swapFee = quote.swapGasEstimate * Number(feePerByte) * 1e-9;
-        swapFeeFiat = toFiatCurrency(swapFee.toString(), localCurrency, fiatRates?.current?.rates);
+        swapFeeFiat = toFiatCurrency(swapFee.toString(), localCurrency, fiatRate, 2, false);
 
         if (quote.send === account.symbol.toUpperCase() && !errorQuote) {
             // if base currency, it is necessary to check that there is some value left for the fees
@@ -204,7 +226,10 @@ export const ExchangeQuote = ({ className, quote }: QuoteProps) => {
                     {errorQuote && !noFundsForFeesError && <H3>N/A</H3>}
                     {(!errorQuote || noFundsForFeesError) && (
                         <H3>
-                            <FormattedCryptoAmount value={receiveStringAmount} symbol={receive} />
+                            <FormattedCryptoAmount
+                                value={receiveStringAmount}
+                                symbol={cryptoToCoinSymbol(receive!)}
+                            />
                             <CoinmarketTag tag={tag} />
                         </H3>
                     )}
@@ -227,7 +252,7 @@ export const ExchangeQuote = ({ className, quote }: QuoteProps) => {
                     </Heading>
                     <Value>{provider?.kycPolicy}</Value>
                 </Column>
-                <Column>
+                <ColumnButton>
                     <StyledButton
                         isLoading={callInProgress}
                         isDisabled={errorQuote || callInProgress}
@@ -236,7 +261,7 @@ export const ExchangeQuote = ({ className, quote }: QuoteProps) => {
                     >
                         <Translation id="TR_EXCHANGE_GET_THIS_OFFER" />
                     </StyledButton>
-                </Column>
+                </ColumnButton>
             </Details>
             {approvalFee && swapFee && localCurrency && (
                 <DexFooter>

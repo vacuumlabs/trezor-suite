@@ -9,7 +9,6 @@ class SettingsActions {
         await settingsHeader.waitFor({ state: 'visible', timeout: 10_000 });
         const timesClickToSetDebugMode = 5;
         for (let i = 0; i < timesClickToSetDebugMode; i++) {
-            // eslint-disable-next-line no-await-in-loop
             await settingsHeader.click();
         }
         await window.getByTestId('@settings/menu/debug').waitFor({ state: 'visible' });
@@ -67,6 +66,19 @@ class SettingsActions {
         const electrumAddressInput = await window.getByTestId('@settings/advance/url');
         await electrumAddressInput.fill(backendUrl);
         await window.getByTestId('@settings/advance/button/save').click();
+    }
+
+    async joinEarlyAccessProgram(window: Page) {
+        await window.getByTestId('@settings/early-access-join-button').scrollIntoViewIfNeeded();
+        await window.getByTestId('@settings/early-access-join-button').click();
+        const eapModal = window.getByTestId('@modal');
+        await eapModal.waitFor({ state: 'visible' });
+        await eapModal.getByTestId('@settings/early-access-confirm-check').click();
+        await eapModal.getByTestId('@settings/early-access-confirm-button').click();
+        await eapModal.getByTestId('@settings/early-access-skip-button').click();
+    }
+    getEarlyAccessButtonText(window: Page) {
+        return window.getByTestId('@settings/early-access-join-button').textContent();
     }
 }
 

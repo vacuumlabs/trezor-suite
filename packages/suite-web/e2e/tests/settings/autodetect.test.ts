@@ -3,13 +3,13 @@
 
 describe('Language and theme detection', () => {
     beforeEach(() => {
-        cy.viewport(1080, 1440).resetDb();
+        cy.viewport(1440, 2560).resetDb();
     });
 
     // TODO: [low prio] extend the test to work even when the user has dark settings
     it('Light English', () => {
         cy.prefixedVisit('/');
-        cy.contains('Welcome').should('have.css', 'color', 'rgb(23, 23, 23)');
+        cy.contains('Welcome').should('have.css', 'color', 'rgb(22, 22, 22)');
         cy.get('body').should('have.css', 'background-color', 'rgb(246, 246, 246)');
     });
 
@@ -29,7 +29,7 @@ describe('Language and theme detection', () => {
             },
         });
         cy.contains('¡Te damos la bienvenida!').should('have.css', 'color', 'rgb(255, 255, 255)');
-        cy.get('body').should('have.css', 'background-color', 'rgb(10, 10, 10)');
+        cy.get('body').should('have.css', 'background-color', 'rgb(22, 22, 22)');
     });
 });
 

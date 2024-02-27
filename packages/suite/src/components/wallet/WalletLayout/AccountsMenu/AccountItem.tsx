@@ -3,21 +3,22 @@ import styled from 'styled-components';
 
 import { isTestnet } from '@suite-common/wallet-utils';
 import { spacingsPx, typography } from '@trezor/theme';
-import { CoinLogo, SkeletonRectangle, SkeletonStack } from '@trezor/components';
+import {
+    CoinLogo,
+    SkeletonRectangle,
+    SkeletonStack,
+    TOOLTIP_DELAY_LONG,
+    TruncateWithTooltip,
+} from '@trezor/components';
 
 import { AccountLabel, CoinBalance, FiatValue } from 'src/components/suite';
 import { useDispatch, useLoadingSkeleton } from 'src/hooks/suite';
 import { Account } from 'src/types/wallet';
 import { goto } from 'src/actions/suite/routerActions';
-import { NavigationItemBase } from 'src/components/suite/Preloader/SuiteLayout/Sidebar/NavigationItem';
+import { NavigationItemBase } from 'src/components/suite/layouts/SuiteLayout/Sidebar/NavigationItem';
 
-interface WrapperProps {
-    selected: boolean;
-    type: string;
-}
-
-const Wrapper = styled(NavigationItemBase)<WrapperProps>`
-    background: ${({ theme, selected }) => selected && theme.backgroundSurfaceElevation1};
+const Wrapper = styled(NavigationItemBase)<{ isSelected: boolean }>`
+    background: ${({ theme, isSelected }) => isSelected && theme.backgroundSurfaceElevation1};
     gap: 0;
     display: flex;
     justify-content: space-between;
@@ -29,27 +30,26 @@ const Wrapper = styled(NavigationItemBase)<WrapperProps>`
     :hover {
         position: relative;
         z-index: 2;
-        background: ${({ theme, selected }) =>
-            !selected && theme.backgroundTertiaryPressedOnElevation0};
+        background: ${({ theme, isSelected }) =>
+            !isSelected && theme.backgroundTertiaryPressedOnElevation0};
     }
 `;
 
 export const Left = styled.div`
-    padding-top: 3px;
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
 `;
 
-export const Center = styled.div`
+export const Right = styled.div`
     flex: 1;
     flex-direction: column;
     padding-left: ${spacingsPx.md};
     padding-right: ${spacingsPx.xxs};
     overflow: hidden;
 `;
-export const Right = styled.div`
+export const FiatAmount = styled.div`
     overflow: hidden;
     text-align: right;
 `;
@@ -61,13 +61,15 @@ const Row = styled.div`
     white-space: nowrap;
 `;
 
-const AccountName = styled.div`
+const AccountName = styled.div<{ isSelected: boolean }>`
     display: flex;
+    gap: ${spacingsPx.xxs};
+    width: 100%;
     overflow-x: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    ${typography.highlight};
-    color: ${({ theme }) => theme.textDefault};
+    ${typography.hint};
+    color: ${({ theme, isSelected }) => (isSelected ? theme.textDefault : theme.textSubdued)};
     line-height: 1.5;
     font-variant-numeric: tabular-nums;
 `;
@@ -89,18 +91,24 @@ const TokensCount = styled.div`
     color: ${({ theme }) => theme.textSubdued};
     line-height: 1.57;
 `;
+const AccountLabelContainer = styled.div`
+    flex: 1;
+    min-width: 60px;
+    overflow: hidden;
+    color: ${({ theme }) => theme.textDefault};
+`;
 
 interface AccountItemProps {
     account: Account;
     accountLabel?: string;
-    selected: boolean;
+    isSelected: boolean;
     closeMenu?: () => void;
 }
 
 // Using `forwardRef` to be able to pass `ref` (item) TO parent (Menu/index)
 export const AccountItem = forwardRef(
     (
-        { account, accountLabel, selected, closeMenu }: AccountItemProps,
+        { account, accountLabel, isSelected, closeMenu }: AccountItemProps,
         ref: Ref<HTMLDivElement>,
     ) => {
         const dispatch = useDispatch();
@@ -131,8 +139,7 @@ export const AccountItem = forwardRef(
 
         return (
             <Wrapper
-                selected={selected}
-                type={accountType}
+                isSelected={isSelected}
                 ref={ref}
                 onClick={handleHeaderClick}
                 data-test={dataTestKey}
@@ -142,15 +149,37 @@ export const AccountItem = forwardRef(
                     <CoinLogo size={24} symbol={symbol} />
                     {isTokensCountShown && <TokensCount>{tokens.length}</TokensCount>}
                 </Left>
-                <Center>
+                <Right>
                     <Row>
-                        <AccountName data-test={`${dataTestKey}/label`}>
-                            <AccountLabel
-                                accountLabel={accountLabel}
-                                accountType={accountType}
-                                symbol={symbol}
-                                index={index}
-                            />
+                        <AccountName isSelected={isSelected} data-test={`${dataTestKey}/label`}>
+                            <AccountLabelContainer>
+                                <AccountLabel
+                                    accountLabel={accountLabel}
+                                    accountType={accountType}
+                                    symbol={symbol}
+                                    index={index}
+                                />
+                            </AccountLabelContainer>
+                            <FiatAmount>
+                                <FiatValue
+                                    amount={formattedBalance}
+                                    symbol={symbol}
+                                    fiatAmountFormatterOptions={{
+                                        minimumFractionDigits: 0,
+                                        maximumFractionDigits: 0,
+                                    }}
+                                >
+                                    {({ value }) =>
+                                        value ? (
+                                            <FiatValueWrapper>
+                                                <TruncateWithTooltip delayShow={TOOLTIP_DELAY_LONG}>
+                                                    {value}
+                                                </TruncateWithTooltip>
+                                            </FiatValueWrapper>
+                                        ) : null
+                                    }
+                                </FiatValue>
+                            </FiatAmount>
                         </AccountName>
                     </Row>
                     {isBalanceShown && (
@@ -179,13 +208,6 @@ export const AccountItem = forwardRef(
                             )}
                         </SkeletonStack>
                     )}
-                </Center>
-                <Right>
-                    <FiatValue amount={formattedBalance} symbol={symbol}>
-                        {({ value }) =>
-                            value ? <FiatValueWrapper>{value}</FiatValueWrapper> : null
-                        }
-                    </FiatValue>
                 </Right>
             </Wrapper>
         );

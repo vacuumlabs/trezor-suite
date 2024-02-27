@@ -10,11 +10,12 @@ import {
     formatAmount,
     fromFiatCurrency,
     getFeeLevels,
+    getFiatRateKey,
 } from '@suite-common/wallet-utils';
 import { useDidUpdate } from '@trezor/react-utils';
 import { COMPOSE_ERROR_TYPES } from '@suite-common/wallet-constants';
 import { isChanged } from '@suite-common/suite-utils';
-import { selectDevice, selectCoinsLegacy } from '@suite-common/wallet-core';
+import { selectDevice, selectFiatRatesByFiatRateKey } from '@suite-common/wallet-core';
 
 import { useDispatch, useSelector, useTranslation } from 'src/hooks/suite';
 import invityAPI from 'src/services/suite/invityAPI';
@@ -50,6 +51,9 @@ import { useCoinmarketExchangeFormDefaultValues } from './useCoinmarketExchangeF
 import { useCompose } from './form/useCompose';
 import { useFees } from './form/useFees';
 import { AddressDisplayOptions, selectAddressDisplayType } from 'src/reducers/suite/suiteReducer';
+import { networkToCryptoSymbol } from 'src/utils/wallet/coinmarket/cryptoSymbolUtils';
+import { FiatCurrencyCode } from '@suite-common/suite-config';
+import { selectLocalCurrency } from 'src/reducers/wallet/settingsReducer';
 
 export const ExchangeFormContext = createContext<ExchangeFormContextValues | null>(null);
 ExchangeFormContext.displayName = 'CoinmarketExchangeContext';
@@ -84,12 +88,10 @@ export const useCoinmarketExchangeForm = ({
     const [state, setState] = useState<ReturnType<typeof useExchangeState>>(undefined);
 
     const accounts = useSelector(state => state.wallet.accounts);
-    const { exchangeInfo, quotesRequest, exchangeCoinInfo } = useSelector(
-        state => state.wallet.coinmarket.exchange,
-    );
+    const { exchangeInfo, quotesRequest } = useSelector(state => state.wallet.coinmarket.exchange);
+    const { symbolsInfo } = useSelector(state => state.wallet.coinmarket.info);
     const device = useSelector(selectDevice);
-    const coins = useSelector(selectCoinsLegacy);
-    const localCurrency = useSelector(state => state.wallet.settings.localCurrency);
+    const localCurrency = useSelector(selectLocalCurrency);
     const fees = useSelector(state => state.wallet.fees);
     const dispatch = useDispatch();
     const addressDisplayType = useSelector(selectAddressDisplayType);
@@ -106,7 +108,6 @@ export const useCoinmarketExchangeForm = ({
     const coinFees = fees[symbol];
     const levels = getFeeLevels(networkType, coinFees);
     const feeInfo = { ...coinFees, levels };
-    const fiatRates = coins.find(item => item.symbol === symbol);
 
     const { getDraft, saveDraft, removeDraft } =
         useFormDraft<ExchangeFormState>('coinmarket-exchange');
@@ -162,8 +163,25 @@ export const useCoinmarketExchangeForm = ({
 
     const values = useWatch({ control });
 
+    const currency: { value: string; label: string } | undefined = getValues(FIAT_CURRENCY);
+
+    const fiatRateKey = getFiatRateKey(symbol, currency?.value as FiatCurrencyCode);
+    const fiatRate = useSelector(state => selectFiatRatesByFiatRateKey(state, fiatRateKey));
+
     useEffect(() => {
         if (!isChanged(defaultValues, values)) {
+            removeDraft(account.key);
+
+            return;
+        }
+
+        if (values.sendCryptoSelect && !values.sendCryptoSelect?.cryptoSymbol) {
+            removeDraft(account.key);
+
+            return;
+        }
+
+        if (values.receiveCryptoSelect && !values.receiveCryptoSelect?.cryptoSymbol) {
             removeDraft(account.key);
         }
     }, [defaultValues, values, removeDraft, account.key]);
@@ -221,21 +239,21 @@ export const useCoinmarketExchangeForm = ({
     const updateFiatValue = useCallback(
         (amount: string) => {
             const currency: { value: string; label: string } | undefined = getValues(FIAT_CURRENCY);
-            if (!fiatRates || !fiatRates.current || !currency) return;
+            if (!fiatRate?.rate || !currency) return;
             const cryptoAmount =
                 amount && shouldSendInSats ? formatAmount(amount, network.decimals) : amount;
-            const fiatValue = toFiatCurrency(cryptoAmount, currency.value, fiatRates.current.rates);
+            const fiatValue = toFiatCurrency(cryptoAmount, currency.value, fiatRate, 2, false);
             setValue(FIAT_INPUT, fiatValue || '', { shouldValidate: true });
         },
-        [shouldSendInSats, fiatRates, getValues, network.decimals, setValue],
+        [shouldSendInSats, fiatRate, getValues, network.decimals, setValue],
     );
 
     const updateFiatCurrency = (currency: { label: string; value: string }) => {
-        if (!fiatRates || !fiatRates.current || !currency) return;
+        if (!fiatRate?.rate || !currency) return;
         const amount = getValues(CRYPTO_INPUT) as string;
         const cryptoAmount =
             amount && shouldSendInSats ? formatAmount(amount, network.decimals) : amount;
-        const fiatValue = toFiatCurrency(cryptoAmount, currency.value, fiatRates.current.rates);
+        const fiatValue = toFiatCurrency(cryptoAmount, currency.value, fiatRate, 2, false);
         if (fiatValue) {
             setValue(FIAT_INPUT, fiatValue, { shouldValidate: true });
         }
@@ -243,13 +261,8 @@ export const useCoinmarketExchangeForm = ({
 
     const updateSendCryptoValue = (amount: string, decimals: number) => {
         const currency: { value: string; label: string } | undefined = getValues(FIAT_CURRENCY);
-        if (!fiatRates || !fiatRates.current || !currency) return;
-        const cryptoValue = fromFiatCurrency(
-            amount,
-            currency.value,
-            fiatRates.current.rates,
-            decimals,
-        );
+        if (!fiatRate?.rate || !currency) return;
+        const cryptoValue = fromFiatCurrency(amount, currency.value, fiatRate, decimals, false);
         const formattedCryptoValue =
             cryptoValue && shouldSendInSats
                 ? amountToSatoshi(cryptoValue, network.decimals)
@@ -264,7 +277,8 @@ export const useCoinmarketExchangeForm = ({
         !state?.formValues?.outputs[0].address;
 
     const noProviders =
-        exchangeInfo?.exchangeList?.length === 0 || !exchangeInfo?.sellSymbols.has(account.symbol);
+        exchangeInfo?.exchangeList?.length === 0 ||
+        !exchangeInfo?.sellSymbols.has(networkToCryptoSymbol(account.symbol)!);
 
     // sub-hook, FeeLevels handler
     const { changeFeeLevel, selectedFee } = useFees({
@@ -332,12 +346,10 @@ export const useCoinmarketExchangeForm = ({
             unformattedOutputAmount && shouldSendInSats
                 ? formatAmount(unformattedOutputAmount, network.decimals)
                 : unformattedOutputAmount;
-        const send = formValues.sendCryptoSelect.value.toUpperCase();
         if (formValues.receiveCryptoSelect) {
-            const receive = formValues.receiveCryptoSelect.value;
             const request: ExchangeTradeQuoteRequest = {
-                receive,
-                send,
+                receive: formValues.receiveCryptoSelect.cryptoSymbol!,
+                send: formValues.sendCryptoSelect.cryptoSymbol!,
                 sendStringAmount,
                 dex: 'enable',
             };
@@ -375,16 +387,16 @@ export const useCoinmarketExchangeForm = ({
         updateFiatValue,
         register,
         exchangeInfo,
+        symbolsInfo,
         changeFeeLevel,
         quotesRequest,
         composedLevels,
         defaultCurrency,
-        exchangeCoinInfo,
         updateFiatCurrency,
         updateSendCryptoValue,
         feeInfo,
         composeRequest,
-        fiatRates,
+        fiatRate,
         isComposing,
         amountLimits,
         setAmountLimits,
@@ -402,5 +414,6 @@ export const useCoinmarketExchangeForm = ({
 export const useCoinmarketExchangeFormContext = () => {
     const context = useContext(ExchangeFormContext);
     if (context === null) throw Error('ExchangeFormContext used without Context');
+
     return context;
 };

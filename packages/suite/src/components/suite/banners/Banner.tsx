@@ -2,9 +2,9 @@ import { ReactNode } from 'react';
 import styled, { DefaultTheme, useTheme } from 'styled-components';
 import { Button, Icon, variables } from '@trezor/components';
 import { borders, spacingsPx, typography } from '@trezor/theme';
-import { ButtonVariant } from '@trezor/components/src/components/buttons/buttonStyleUtils';
+import { UIVariant } from '@trezor/components/src/config/types';
 
-export type BannerVariant = Extract<ButtonVariant, 'info' | 'warning' | 'destructive'>;
+export type BannerVariant = Extract<UIVariant, 'info' | 'warning' | 'destructive'>;
 
 interface BannerProps {
     body: ReactNode;
@@ -37,23 +37,23 @@ const getBackgroundColor = (variant: BannerVariant, theme: DefaultTheme) => {
 const getForegroundColor = (variant: BannerVariant, theme: DefaultTheme) => {
     switch (variant) {
         case 'info':
-            return theme.textDefaultInverse;
+            return theme.textDefaultInverted;
         case 'warning':
-            return theme.textDefaultInverse;
+            return theme.textDefaultInverted;
         case 'destructive':
-            return theme.textDefaultInverse;
+            return theme.textDefaultInverted;
         default:
-            return theme.textDefaultInverse;
+            return theme.textDefaultInverted;
     }
 };
 const getIcon = (variant: BannerVariant, theme: DefaultTheme) => {
     switch (variant) {
         case 'info':
-            return <Icon icon="INFO" size={22} color={theme.textDefaultInverse} />; // @TODO iconDefaultInverse
+            return <Icon icon="INFO" size={22} color={theme.textDefaultInverted} />; // @TODO iconDefaultInverted;
         case 'warning':
-            return <Icon icon="WARNING" size={22} color={theme.textDefaultInverse} />; // @TODO iconDefaultInverse
+            return <Icon icon="WARNING" size={22} color={theme.textDefaultInverted} />; // @TODO iconDefaultInverted;
         case 'destructive':
-            return <Icon icon="WARNING" size={22} color={theme.textDefaultInverse} />; // @TODO iconDefaultInverse
+            return <Icon icon="WARNING" size={22} color={theme.textDefaultInverted} />; // @TODO iconDefaultInverted;
         default:
             return null;
     }
@@ -135,6 +135,7 @@ export const Banner = ({ body, variant, action, dismissal, className }: BannerPr
     const theme = useTheme();
 
     const iconElement = getIcon(variant, theme);
+
     return (
         <Wrapper variant={variant} className={className}>
             <BlankLeft />

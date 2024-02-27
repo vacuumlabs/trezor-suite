@@ -27,15 +27,20 @@ const MoreIcon = styled(IconButton)<{ $isToggled: boolean }>`
     }
 `;
 
-const Container = styled.div<{ disabled?: boolean }>`
+const Container = styled.div<{ disabled?: boolean; $hasCustomChildren: boolean }>`
     all: unset;
     width: fit-content;
     height: fit-content;
-    border-radius: 50%;
     transition: ${focusStyleTransition};
     border: 1px solid transparent;
     ${getFocusShadowStyle()};
     cursor: ${({ disabled }) => (disabled ? 'default' : 'pointer')};
+
+    /** 
+        This must be here to reduce clickable area to the "circle" of the (...) children.
+        However, if you use custom children its your own responsibility to handle it.
+    */
+    ${({ $hasCustomChildren }) => ($hasCustomChildren ? undefined : '50%;')}
 `;
 
 const getPlacementData = (
@@ -101,7 +106,7 @@ export const Dropdown = forwardRef(
     ) => {
         const [isToggled, setIsToggledState] = useState(false);
         const [coords, setCoords] = useState<Coords>();
-        const [clickPos, setСlickPos] = useState<Coords>();
+        const [clickPos, setClickPos] = useState<Coords>();
 
         const menuRef = useRef<HTMLUListElement>(null);
         const toggleRef = useRef<HTMLDivElement>(null);
@@ -172,15 +177,17 @@ export const Dropdown = forwardRef(
             // do not loose focus when clicking within the menu
             if (!content && document.activeElement === menuRef.current) {
                 toggleRef.current?.focus();
+
                 return;
             }
 
             setToggled(!isToggled);
             if (renderOnClickPosition) {
-                setСlickPos({ x: e.pageX, y: e.pageY });
+                setClickPos({ x: e.pageX, y: e.pageY });
             }
         };
 
+        const hasCustomChildren = children !== undefined && children !== null;
         const childComponent = typeof children === 'function' ? children(isToggled) : children;
 
         const ToggleComponent = childComponent ? (
@@ -227,6 +234,7 @@ export const Dropdown = forwardRef(
                 onClick={onToggleClick}
                 onFocus={() => !isDisabled && !renderOnClickPosition && setToggled(true)}
                 onBlur={e => !menuRef.current?.contains(e.relatedTarget) && setToggled(false)}
+                $hasCustomChildren={hasCustomChildren}
             >
                 {ToggleComponent}
                 {isToggled && PortalMenu}

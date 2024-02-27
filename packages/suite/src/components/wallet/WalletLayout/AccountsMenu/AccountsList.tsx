@@ -96,11 +96,12 @@ export const AccountsList = ({ onItemClick }: AccountListProps) => {
             >
                 {accounts.map(account => {
                     const selected = !!isSelected(account);
+
                     return (
                         <AccountItem
                             key={`${account.descriptor}-${account.symbol}`}
                             account={account}
-                            selected={selected}
+                            isSelected={selected}
                             closeMenu={onItemClick}
                             accountLabel={accountLabels[account.key]}
                         />

@@ -22,7 +22,7 @@ const fixtures = [
 
 describe('Metadata - suite is watching cloud provider and syncs periodically', () => {
     beforeEach(() => {
-        cy.viewport(1080, 1440).resetDb();
+        cy.viewport(1440, 2560).resetDb();
     });
     fixtures.forEach(f => {
         it(`${f.provider}-${f.desc}`, () => {
@@ -70,8 +70,7 @@ describe('Metadata - suite is watching cloud provider and syncs periodically', (
                 'contain',
                 'already existing label',
             );
-            cy.get('body').type('{enter}');
-
+            // now change data in provider and fast forward time, see if it updated
             cy.task('metadataSetFileContent', {
                 provider: f.provider,
                 file: f.file,

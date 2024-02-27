@@ -112,6 +112,7 @@ export const ReviewButton = () => {
                 ? 'TR_SEND_NOT_ANONYMIZED_COINS'
                 : 'TR_SIGN_WITH_NOT_ANONYMIZED_COINS';
         }
+
         return broadcastEnabled ? 'REVIEW_AND_SEND_TRANSACTION' : 'SIGN_TRANSACTION';
     };
 
@@ -150,9 +151,9 @@ export const ReviewButton = () => {
     return (
         <Container>
             {showCoinControlWarning && (
-                <StyledWarning variant="critical">
+                <StyledWarning variant="destructive">
                     <Checkbox
-                        variant="alert-red"
+                        variant="destructive"
                         isChecked={anonymityWarningChecked}
                         onClick={toggleAnonymityWarning}
                     >

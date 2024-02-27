@@ -375,6 +375,8 @@ export type TxOutputType =
           orig_index?: number;
           payment_req_index?: number;
       }
+    // NOTE: the type was loosened for compatibility (issue #10474)
+    // It is not originally intended to use address instead of address_n with change output
     | {
           address: string;
           address_n?: typeof undefined;
@@ -942,6 +944,36 @@ export type CardanoTxBodyHash = {
 
 // CardanoSignTxFinished
 export type CardanoSignTxFinished = {};
+
+// CardanoSignMessageInit
+export type CardanoSignMessageInit = {
+    protocol_magic?: number;
+    network_id?: number;
+    signing_path: number[];
+    payload_size: number;
+    hash_payload: boolean;
+    prefer_hex_display: boolean;
+    address_parameters?: CardanoAddressParametersType;
+    derivation_type: CardanoDerivationType;
+};
+
+// CardanoMessageItemAck
+export type CardanoMessageItemAck = {};
+
+// CardanoMessagePayloadChunk
+export type CardanoMessagePayloadChunk = {
+    data: string;
+};
+
+// CardanoMessageItemHostAck
+export type CardanoMessageItemHostAck = {};
+
+// CardanoSignMessageFinished
+export type CardanoSignMessageFinished = {
+    signature: string;
+    address: string;
+    pub_key: string;
+};
 
 // Success
 export type Success = {
@@ -1627,6 +1659,23 @@ export type ApplySettings = {
     hide_passphrase_from_host?: boolean;
 };
 
+// ChangeLanguage
+export type ChangeLanguage = {
+    data_length: number;
+    show_display?: boolean;
+};
+
+// TranslationDataRequest
+export type TranslationDataRequest = {
+    data_length: number;
+    data_offset: number;
+};
+
+// TranslationDataAck
+export type TranslationDataAck = {
+    data_chunk: string;
+};
+
 // ApplyFlags
 export type ApplyFlags = {
     flags: number;
@@ -1788,6 +1837,7 @@ export enum BootCommand {
 export type RebootToBootloader = {
     boot_command?: BootCommand;
     firmware_header?: string;
+    language_data_length?: number;
 };
 
 // GetNonce
@@ -2462,6 +2512,11 @@ export type MessageType = {
     CardanoTxHostAck: CardanoTxHostAck;
     CardanoTxBodyHash: CardanoTxBodyHash;
     CardanoSignTxFinished: CardanoSignTxFinished;
+    CardanoSignMessageInit: CardanoSignMessageInit;
+    CardanoMessageItemAck: CardanoMessageItemAck;
+    CardanoMessagePayloadChunk: CardanoMessagePayloadChunk;
+    CardanoMessageItemHostAck: CardanoMessageItemHostAck;
+    CardanoSignMessageFinished: CardanoSignMessageFinished;
     Success: Success;
     Failure: Failure;
     ButtonRequest: ButtonRequest;
@@ -2539,6 +2594,9 @@ export type MessageType = {
     SetBusy: SetBusy;
     EndSession: EndSession;
     ApplySettings: ApplySettings;
+    ChangeLanguage: ChangeLanguage;
+    TranslationDataRequest: TranslationDataRequest;
+    TranslationDataAck: TranslationDataAck;
     ApplyFlags: ApplyFlags;
     ChangePin: ChangePin;
     ChangeWipeCode: ChangeWipeCode;

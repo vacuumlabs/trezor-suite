@@ -1,6 +1,14 @@
 import { ReactElement, ReactNode } from 'react';
 import styled, { css, useTheme } from 'styled-components';
 
+import {
+    Elevation,
+    borders,
+    mapElevationToBackground,
+    mapElevationToBorder,
+    spacingsPx,
+    typography,
+} from '@trezor/theme';
 import { WalletAccountTransaction } from '@suite-common/wallet-types';
 import { formatAmount, formatNetworkAmount, isNftTokenTransfer } from '@suite-common/wallet-utils';
 import { FormattedCryptoAmount, Translation } from 'src/components/suite';
@@ -12,14 +20,6 @@ import { AnalyzeInExplorerBanner } from './AnalyzeInExplorerBanner';
 import { FormattedNftAmount } from 'src/components/suite/FormattedNftAmount';
 import { useExplorerTxUrl } from 'src/hooks/suite/useExplorerTxUrl';
 import { IOAddress } from '../../IOAddress';
-import {
-    Elevation,
-    borders,
-    mapElevationToBackground,
-    mapElevationToBorder,
-    spacingsPx,
-    typography,
-} from '@trezor/theme';
 
 export const blurFix = css`
     margin-left: -10px;
@@ -45,7 +45,7 @@ const StyledCollapsibleBox = styled(CollapsibleBox)<{ elevation: Elevation }>`
     ${blurFix}
 
     & + & {
-        border-top: 1px solid ${({ theme, elevation }) => theme[mapElevationToBorder[elevation]]};
+        border-top: 1px solid ${mapElevationToBorder};
 
         padding-top: ${spacingsPx.md};
     }
@@ -56,8 +56,7 @@ const StyledCollapsibleBox = styled(CollapsibleBox)<{ elevation: Elevation }>`
         ${blurFix}
 
         :hover {
-            background-color: ${({ theme, elevation }) =>
-                theme[mapElevationToBackground[elevation]]};
+            background-color: ${mapElevationToBackground};
         }
     }
 
@@ -150,12 +149,14 @@ interface IOGridRow {
     anonymitySet?: AnonymitySet;
     tx: WalletAccountTransaction;
     vinvout: WalletAccountTransaction['details']['vin'][number];
+    isPhishingTransaction?: boolean;
 }
 
 const IOGridRow = ({
     anonymitySet,
     tx: { symbol },
     vinvout: { isAccountOwned, addresses, value },
+    isPhishingTransaction,
 }: IOGridRow) => {
     const anonymity = addresses?.length && anonymitySet?.[addresses[0]];
 
@@ -167,9 +168,11 @@ const IOGridRow = ({
                 txAddress={addresses?.length ? addresses[0] : ''}
                 explorerUrl={explorerTxUrl}
                 explorerUrlQueryString={explorerUrlQueryString}
+                shouldAllowCopy={!isPhishingTransaction}
             />
 
             <br />
+
             <AmountRow>
                 {anonymity && <UtxoAnonymity anonymity={anonymity} />}
                 {value && (
@@ -220,9 +223,16 @@ interface GridRowGroupComponentProps {
     to?: string;
     symbol: string;
     amount?: string | ReactNode;
+    isPhishingTransaction?: boolean;
 }
 
-const GridRowGroupComponent = ({ from, to, symbol, amount }: GridRowGroupComponentProps) => {
+const GridRowGroupComponent = ({
+    from,
+    to,
+    symbol,
+    amount,
+    isPhishingTransaction,
+}: GridRowGroupComponentProps) => {
     const theme = useTheme();
     const { explorerTxUrl, explorerUrlQueryString } = useExplorerTxUrl();
 
@@ -233,6 +243,7 @@ const GridRowGroupComponent = ({ from, to, symbol, amount }: GridRowGroupCompone
                     txAddress={from}
                     explorerUrl={explorerTxUrl}
                     explorerUrlQueryString={explorerUrlQueryString}
+                    shouldAllowCopy={!isPhishingTransaction}
                 />
                 <br />
                 {typeof amount === 'string' ? (
@@ -249,6 +260,7 @@ const GridRowGroupComponent = ({ from, to, symbol, amount }: GridRowGroupCompone
                     txAddress={to}
                     explorerUrl={explorerTxUrl}
                     explorerUrlQueryString={explorerUrlQueryString}
+                    shouldAllowCopy={!isPhishingTransaction}
                 />
             </RowGridItem>
         </RowGrid>
@@ -261,9 +273,13 @@ interface TokensByStandard {
 
 interface EthereumSpecificBalanceDetailsRowProps {
     tx: WalletAccountTransaction;
+    isPhishingTransaction?: boolean;
 }
 
-const EthereumSpecificBalanceDetailsRow = ({ tx }: EthereumSpecificBalanceDetailsRowProps) => {
+const EthereumSpecificBalanceDetailsRow = ({
+    tx,
+    isPhishingTransaction,
+}: EthereumSpecificBalanceDetailsRowProps) => {
     const tokensByStandard: TokensByStandard = tx.tokens.reduce(
         (acc: TokensByStandard, value: TokenTransfer) => {
             const { standard } = value;
@@ -288,12 +304,12 @@ const EthereumSpecificBalanceDetailsRow = ({ tx }: EthereumSpecificBalanceDetail
                     <IOGridGroupWrapper heading={<Translation id="TR_INTERNAL_TRANSACTIONS" />}>
                         {tx.internalTransfers.map((transfer, index) => (
                             <GridRowGroupComponent
-                                // eslint-disable-next-line react/no-array-index-key
                                 key={index}
                                 from={transfer.from}
                                 to={transfer.to}
                                 amount={formatNetworkAmount(transfer.amount, tx.symbol)}
                                 symbol={tx.symbol}
+                                isPhishingTransaction={isPhishingTransaction}
                             />
                         ))}
                     </IOGridGroupWrapper>
@@ -312,7 +328,6 @@ const EthereumSpecificBalanceDetailsRow = ({ tx }: EthereumSpecificBalanceDetail
                     >
                         {tokens.map((transfer, index) => (
                             <GridRowGroupComponent
-                                // eslint-disable-next-line react/no-array-index-key
                                 key={index}
                                 from={transfer.from}
                                 to={transfer.to}
@@ -324,6 +339,7 @@ const EthereumSpecificBalanceDetailsRow = ({ tx }: EthereumSpecificBalanceDetail
                                     )
                                 }
                                 symbol={transfer.symbol}
+                                isPhishingTransaction={isPhishingTransaction}
                             />
                         ))}
                     </IOGridGroupWrapper>
@@ -333,18 +349,27 @@ const EthereumSpecificBalanceDetailsRow = ({ tx }: EthereumSpecificBalanceDetail
     );
 };
 
-const SolanaSpecificBalanceDetailsRow = ({ tx }: { tx: WalletAccountTransaction }) => {
+type SolanaSpecificBalanceDetailsRowProps = {
+    tx: WalletAccountTransaction;
+    isPhishingTransaction?: boolean;
+};
+
+const SolanaSpecificBalanceDetailsRow = ({
+    tx,
+    isPhishingTransaction,
+}: SolanaSpecificBalanceDetailsRowProps) => {
     const { tokens } = tx;
+
     return (
         <>
             {tokens.map((transfer, index) => (
                 <GridRowGroupComponent
-                    // eslint-disable-next-line react/no-array-index-key
                     key={index}
                     from={transfer.from}
                     to={transfer.to}
                     amount={formatAmount(transfer.amount, transfer.decimals)}
                     symbol={transfer.symbol}
+                    isPhishingTransaction={isPhishingTransaction}
                 />
             ))}
         </>
@@ -353,9 +378,10 @@ const SolanaSpecificBalanceDetailsRow = ({ tx }: { tx: WalletAccountTransaction 
 
 interface BalanceDetailsRowProps {
     tx: WalletAccountTransaction;
+    isPhishingTransaction?: boolean;
 }
 
-const BalanceDetailsRow = ({ tx }: BalanceDetailsRowProps) => {
+const BalanceDetailsRow = ({ tx, isPhishingTransaction }: BalanceDetailsRowProps) => {
     const vout = tx?.details?.vout[0];
     const vin = tx?.details?.vin[0];
     const value = formatNetworkAmount(vin.value || vout.value || '', tx.symbol);
@@ -372,6 +398,7 @@ const BalanceDetailsRow = ({ tx }: BalanceDetailsRowProps) => {
                     to={vout.addresses[0]}
                     amount={value}
                     symbol={tx.symbol}
+                    isPhishingTransaction={isPhishingTransaction}
                 />
             </IOGridGroupWrapper>
         </GridGroup>
@@ -382,9 +409,10 @@ type IOSectionColumnProps = {
     tx: WalletAccountTransaction;
     inputs: WalletAccountTransaction['details']['vin'][number][];
     outputs: WalletAccountTransaction['details']['vin'][number][];
+    isPhishingTransaction?: boolean;
 };
 
-const IOSectionColumn = ({ tx, inputs, outputs }: IOSectionColumnProps) => {
+const IOSectionColumn = ({ tx, inputs, outputs, isPhishingTransaction }: IOSectionColumnProps) => {
     const theme = useTheme();
 
     const { selectedAccount } = useSelector(state => state.wallet);
@@ -404,6 +432,7 @@ const IOSectionColumn = ({ tx, inputs, outputs }: IOSectionColumnProps) => {
                                 anonymitySet={anonymitySet}
                                 tx={tx}
                                 vinvout={input}
+                                isPhishingTransaction={isPhishingTransaction}
                             />
                         ))}
                     </div>
@@ -419,6 +448,7 @@ const IOSectionColumn = ({ tx, inputs, outputs }: IOSectionColumnProps) => {
                                 anonymitySet={anonymitySet}
                                 tx={tx}
                                 vinvout={output}
+                                isPhishingTransaction={isPhishingTransaction}
                             />
                         ))}
                     </div>
@@ -439,8 +469,10 @@ const CollapsibleIOSection = ({
     outputs,
     heading,
     opened,
+    isPhishingTransaction,
 }: CollapsibleIOSectionProps) => {
     const { elevation } = useElevation();
+
     return inputs?.length || outputs?.length ? (
         <StyledCollapsibleBox
             elevation={elevation}
@@ -448,17 +480,23 @@ const CollapsibleIOSection = ({
             isOpen={opened}
             variant="large"
         >
-            <IOSectionColumn tx={tx} inputs={inputs} outputs={outputs} />
+            <IOSectionColumn
+                tx={tx}
+                inputs={inputs}
+                outputs={outputs}
+                isPhishingTransaction={isPhishingTransaction}
+            />
         </StyledCollapsibleBox>
     ) : null;
 };
 
 interface IODetailsProps {
     tx: WalletAccountTransaction;
+    isPhishingTransaction: boolean;
 }
 
 // Not ready for Cardano tokens, they will not be visible, probably
-export const IODetails = ({ tx }: IODetailsProps) => {
+export const IODetails = ({ tx, isPhishingTransaction }: IODetailsProps) => {
     const { selectedAccount } = useSelector(state => state.wallet);
     const { network } = selectedAccount;
 
@@ -466,8 +504,11 @@ export const IODetails = ({ tx }: IODetailsProps) => {
         return (
             <Wrapper>
                 <AnalyzeInExplorerBanner txid={tx.txid} />
-                <BalanceDetailsRow tx={tx} />
-                <EthereumSpecificBalanceDetailsRow tx={tx} />
+                <BalanceDetailsRow tx={tx} isPhishingTransaction={isPhishingTransaction} />
+                <EthereumSpecificBalanceDetailsRow
+                    tx={tx}
+                    isPhishingTransaction={isPhishingTransaction}
+                />
             </Wrapper>
         );
     }
@@ -476,8 +517,16 @@ export const IODetails = ({ tx }: IODetailsProps) => {
         return (
             <Wrapper>
                 <AnalyzeInExplorerBanner txid={tx.txid} />
-                <IOSectionColumn tx={tx} inputs={tx.details.vin} outputs={tx.details.vout} />
-                <SolanaSpecificBalanceDetailsRow tx={tx} />
+                <IOSectionColumn
+                    tx={tx}
+                    inputs={tx.details.vin}
+                    outputs={tx.details.vout}
+                    isPhishingTransaction={isPhishingTransaction}
+                />
+                <SolanaSpecificBalanceDetailsRow
+                    tx={tx}
+                    isPhishingTransaction={isPhishingTransaction}
+                />
             </Wrapper>
         );
     }

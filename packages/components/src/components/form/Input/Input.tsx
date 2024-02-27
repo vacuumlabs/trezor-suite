@@ -15,6 +15,7 @@ import { BOTTOM_TEXT_MIN_HEIGHT, BottomText } from '../BottomText';
 import { InputState, InputSize } from '../inputTypes';
 import { TopAddons } from '../TopAddons';
 import { useElevation } from '../../ElevationContext/ElevationContext';
+import { UIHorizontalAlignment } from 'packages/components/src/config/types';
 
 const Wrapper = styled.div<Pick<InputProps, 'width'> & { hasBottomPadding: boolean }>`
     display: inline-flex;
@@ -70,7 +71,7 @@ const InputLabel = styled(Label)`
     }
 `;
 
-type innerAddonAlignment = 'left' | 'right';
+type innerAddonAlignment = Extract<UIHorizontalAlignment, 'left' | 'right'>;
 
 export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> {
     value?: string;
@@ -135,7 +136,6 @@ const Input = ({
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
             hasBottomPadding={hasBottomPadding === true && bottomText === null}
-            data-test={dataTest}
             className={className}
         >
             <TopAddons isHovered={isHovered} hoverAddon={labelHoverAddon} addonRight={labelRight} />
@@ -179,6 +179,7 @@ const Input = ({
                     rightAddonWidth={rightAddonWidth}
                     isWithLabel={!!label}
                     placeholder={placeholder || ''} // needed for uncontrolled inputs
+                    data-test={dataTest}
                     {...rest}
                 />
 

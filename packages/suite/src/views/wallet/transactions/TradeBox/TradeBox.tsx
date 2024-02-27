@@ -3,7 +3,7 @@ import { differenceInMinutes } from 'date-fns';
 import { FormattedRelativeTime } from 'react-intl';
 
 import { getMainnets } from '@suite-common/wallet-config';
-import { selectCoinsLegacy } from '@suite-common/wallet-core';
+import { selectFiatRatesByFiatRateKey } from '@suite-common/wallet-core';
 import { spacingsPx, typography } from '@trezor/theme';
 import { useSelector } from 'src/hooks/suite';
 import { Account } from 'src/types/wallet';
@@ -11,13 +11,14 @@ import { Translation } from 'src/components/suite';
 import { Card, CoinLogo, variables } from '@trezor/components';
 import { TradeBoxMenu } from './TradeBoxMenu';
 import { TradeBoxPrices } from './TradeBoxPrices';
+import { getFiatRateKey } from '@suite-common/wallet-utils';
+import { selectLocalCurrency } from 'src/reducers/wallet/settingsReducer';
 
 const StyledCard = styled(Card)`
     flex-flow: row wrap;
     align-items: center;
     justify-content: space-between;
     gap: ${spacingsPx.lg};
-    margin-bottom: ${spacingsPx.lg};
 
     ${variables.SCREEN_QUERY.BELOW_TABLET} {
         flex-direction: column;
@@ -27,7 +28,7 @@ const StyledCard = styled(Card)`
 
 const Title = styled.div`
     ${typography.titleSmall}
-    margin-bottom: 10px;
+    margin-bottom: ${spacingsPx.md};
 `;
 
 const Left = styled.div`
@@ -77,18 +78,19 @@ interface TradeBoxProps {
 
 export const TradeBox = ({ account }: TradeBoxProps) => {
     const network = getMainnets().find(n => n.symbol === account.symbol);
-    const coins = useSelector(selectCoinsLegacy);
-    const fiatRates = coins.find(item => item.symbol === network?.symbol);
+    const localCurrency = useSelector(selectLocalCurrency);
+    const fiatRateKey = getFiatRateKey(account.symbol, localCurrency);
+    const fiatRates = useSelector(state => selectFiatRatesByFiatRateKey(state, fiatRateKey));
 
     if (!network) {
         return null;
     }
 
-    const currentRateTimestamp = fiatRates?.current?.ts;
+    const currentRateTimestamp = fiatRates?.lastSuccessfulFetchTimestamp;
     const getRateAge = (timestamp: number) => differenceInMinutes(new Date(timestamp), new Date());
 
     return (
-        <>
+        <div>
             <Title>
                 <Translation id="TR_NAV_TRADE" />
             </Title>
@@ -125,6 +127,6 @@ export const TradeBox = ({ account }: TradeBoxProps) => {
                     <TradeBoxMenu account={account} />
                 </Right>
             </StyledCard>
-        </>
+        </div>
     );
 };

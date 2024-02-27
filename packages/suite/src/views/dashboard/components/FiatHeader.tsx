@@ -2,6 +2,7 @@ import { useFormatters } from '@suite-common/formatters';
 import { typography } from '@trezor/theme';
 import { HiddenPlaceholder } from 'src/components/suite';
 import { useSelector } from 'src/hooks/suite';
+import { selectLanguage } from 'src/reducers/suite/suiteReducer';
 import styled from 'styled-components';
 
 const ValueWrapper = styled.div`
@@ -26,22 +27,22 @@ const DecimalValue = styled.div<{ size: 'large' | 'medium' }>`
 
 interface FiatHeaderProps {
     size: 'large' | 'medium';
-    portfolioValue: string;
+    fiatAmount: string;
     localCurrency: string;
 }
 
-export const FiatHeader = ({ size, portfolioValue, localCurrency }: FiatHeaderProps) => {
-    const language = useSelector(state => state.suite.settings.language);
+export const FiatHeader = ({ size, fiatAmount, localCurrency }: FiatHeaderProps) => {
+    const language = useSelector(selectLanguage);
     const { FiatAmountFormatter } = useFormatters();
-    const formattedValue = FiatAmountFormatter({
-        value: portfolioValue,
+    const formattedAmount = FiatAmountFormatter({
+        value: fiatAmount,
         currency: localCurrency,
     });
 
-    const formattedFiatValue = formattedValue?.props.children;
+    const formattedFiatAmount = formattedAmount?.props.children;
     const [whole, separator, fractional] = ['en', 'ja'].includes(language)
-        ? formattedFiatValue.split(/(\.)/)
-        : formattedFiatValue.split(/(,)/);
+        ? formattedFiatAmount.split(/(\.)/)
+        : formattedFiatAmount.split(/(,)/);
 
     return (
         <HiddenPlaceholder enforceIntensity={10}>

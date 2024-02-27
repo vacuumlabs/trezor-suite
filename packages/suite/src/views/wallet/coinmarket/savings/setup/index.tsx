@@ -14,6 +14,11 @@ import { NoProviders, StyledSelectBar } from 'src/views/wallet/coinmarket';
 import { getTitleForNetwork } from '@suite-common/wallet-utils';
 import { AllFeesIncluded } from '../AllFeesIncluded';
 import { withCoinmarket } from '../withCoinmarket';
+import { useEffect } from 'react';
+import { updateFiatRatesThunk } from '@suite-common/wallet-core';
+import { FiatCurrencyCode } from '@suite-common/suite-config';
+import { Timestamp } from '@suite-common/wallet-types';
+import { useDispatch } from 'src/hooks/suite';
 
 const Header = styled.div`
     font-weight: 500;
@@ -115,6 +120,24 @@ const CoinmarketSavingsSetup = (props: WithSelectedAccountLoadedProps) => {
         defaultCountryOption,
     } = useSavingsSetup(props);
 
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        const fetchRates = async () => {
+            await dispatch(
+                updateFiatRatesThunk({
+                    ticker: {
+                        symbol: 'btc',
+                    },
+                    localCurrency: fiatCurrency?.toLowerCase() as FiatCurrencyCode,
+                    rateType: 'current',
+                    lastSuccessfulFetchTimestamp: Date.now() as Timestamp,
+                }),
+            );
+        };
+        fetchRates();
+    }, [fiatCurrency, dispatch]);
+
     if (isSavingsTradeLoading) {
         return <Translation id="TR_LOADING" />;
     }
@@ -148,8 +171,8 @@ const CoinmarketSavingsSetup = (props: WithSelectedAccountLoadedProps) => {
                     <StyledSelect
                         value={value}
                         label={<Translation id="TR_SAVINGS_UNSUPPORTED_COUNTRY_SELECT_LABEL" />}
-                        options={regional.countriesOptions.filter(
-                            item => supportedCountries?.has(item.value),
+                        options={regional.countriesOptions.filter(item =>
+                            supportedCountries?.has(item.value),
                         )}
                         isSearchable
                         formatOptionLabel={(option: CountryOption) => {

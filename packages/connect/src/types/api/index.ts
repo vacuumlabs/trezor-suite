@@ -22,7 +22,9 @@ import { cardanoGetAddress } from './cardanoGetAddress';
 import { cardanoGetNativeScriptHash } from './cardanoGetNativeScriptHash';
 import { cardanoGetPublicKey } from './cardanoGetPublicKey';
 import { cardanoSignTransaction } from './cardanoSignTransaction';
+import { cardanoSignMessage } from './cardanoSignMessage';
 import { cardanoComposeTransaction } from './cardanoComposeTransaction';
+import { changeLanguage } from './changeLanguage';
 import { changePin } from './changePin';
 import { changeWipeCode } from './changeWipeCode';
 import { cipherKeyValue } from './cipherKeyValue';
@@ -165,6 +167,12 @@ export interface TrezorConnect {
     cardanoSignTransaction: typeof cardanoSignTransaction;
 
     cardanoComposeTransaction: typeof cardanoComposeTransaction;
+
+    // https://github.com/trezor/trezor-suite/blob/develop/docs/packages/connect/methods/cardanoSignMessage.md
+    cardanoSignMessage: typeof cardanoSignMessage;
+
+    // https://github.com/trezor/trezor-suite/blob/develop/docs/packages/connect/methods/changeLanguage.md
+    changeLanguage: typeof changeLanguage;
 
     // https://github.com/trezor/trezor-suite/blob/develop/docs/packages/connect/methods/changePin.md
     changePin: typeof changePin;

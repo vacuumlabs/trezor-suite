@@ -1,12 +1,13 @@
 import styled, { useTheme } from 'styled-components';
 import { spacingsPx, typography } from '@trezor/theme';
 import { Icon } from '@trezor/components';
-import { getFiatRateKey, localizeNumber } from '@suite-common/wallet-utils';
+import { getFiatRateKey, localizePercentage } from '@suite-common/wallet-utils';
 import { selectFiatRatesByFiatRateKey } from '@suite-common/wallet-core';
 import { FiatValue } from 'src/components/suite';
 import { useSelector } from 'src/hooks/suite';
 import { NoRatesTooltip } from './NoRatesTooltip';
 import { NetworkSymbol } from '@suite-common/wallet-config';
+import { selectLocalCurrency } from 'src/reducers/wallet/settingsReducer';
 
 const PercentageWrapper = styled.div<{ isRateGoingUp: boolean }>`
     ${typography.hint}
@@ -17,20 +18,19 @@ const PercentageWrapper = styled.div<{ isRateGoingUp: boolean }>`
         isRateGoingUp ? theme.textPrimaryDefault : theme.textAlertRed};
 `;
 
-const calculatePercentageDifference = (a: number, b: number) => ((a - b) / b) * 100;
+const calculatePercentageDifference = (a: number, b: number) => (a - b) / b;
 
 interface TickerProps {
     symbol: NetworkSymbol;
 }
 export const TrendTicker = ({ symbol }: TickerProps) => {
     const locale = useSelector(state => state.suite.settings.language);
-    const localCurrency = useSelector(state => state.wallet.settings.localCurrency);
+    const localCurrency = useSelector(selectLocalCurrency);
+    const fiatRateKey = getFiatRateKey(symbol, localCurrency);
     const lastWeekRate = useSelector(state =>
-        selectFiatRatesByFiatRateKey(state, getFiatRateKey(symbol, localCurrency), 'lastWeek'),
+        selectFiatRatesByFiatRateKey(state, fiatRateKey, 'lastWeek'),
     );
-    const currentRate = useSelector(state =>
-        selectFiatRatesByFiatRateKey(state, getFiatRateKey(symbol, localCurrency), 'current'),
-    );
+    const currentRate = useSelector(state => selectFiatRatesByFiatRateKey(state, fiatRateKey));
 
     const theme = useTheme();
 
@@ -53,7 +53,7 @@ export const TrendTicker = ({ symbol }: TickerProps) => {
                             color={isRateGoingUp ? theme.iconPrimaryDefault : theme.iconAlertRed}
                             size={16}
                         />
-                        {localizeNumber(percentageChange, locale, 1, 1)}%
+                        {localizePercentage({ valueInFraction: percentageChange, locale })}
                     </PercentageWrapper>
                 ) : (
                     <NoRatesTooltip />

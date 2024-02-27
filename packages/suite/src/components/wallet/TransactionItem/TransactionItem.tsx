@@ -1,11 +1,10 @@
-/* eslint-disable react/no-array-index-key */
-import { memo, Fragment, useState } from 'react';
+import { memo, useState } from 'react';
 import styled, { css } from 'styled-components';
 import { AnimatePresence } from 'framer-motion';
+import { selectIsPhishingTransaction } from '@suite-common/wallet-core';
 import { variables, Button, Card } from '@trezor/components';
-import { getIsZeroValuePhishing } from '@suite-common/suite-utils';
 import { Translation } from 'src/components/suite';
-import { useDispatch } from 'src/hooks/suite';
+import { useDispatch, useSelector } from 'src/hooks/suite';
 import { openModal } from 'src/actions/suite/modalActions';
 import { formatNetworkAmount, isTestnet, isTxFeePaid } from '@suite-common/wallet-utils';
 import { AccountLabels } from 'src/types/suite/metadata';
@@ -28,16 +27,17 @@ import {
 } from './CommonComponents';
 import { useAnchor } from 'src/hooks/suite/useAnchor';
 import { AccountTransactionBaseAnchor } from 'src/constants/suite/anchors';
-import { SECONDARY_PANEL_HEIGHT } from 'src/components/suite/AppNavigation/AppNavigation';
 import { anchorOutlineStyles } from 'src/utils/suite/anchor';
 import { TransactionTimestamp } from 'src/components/wallet/TransactionTimestamp';
+import { SUBPAGE_NAV_HEIGHT } from 'src/constants/suite/layout';
+import { BlurWrapper } from './TransactionItemBlurWrapper';
 
 const Wrapper = styled(Card)<{
     isPending: boolean;
     shouldHighlight: boolean;
-    isZeroValuePhishing: boolean;
+    isPhishingTransaction: boolean;
 }>`
-    opacity: ${({ isZeroValuePhishing }) => isZeroValuePhishing && 0.6};
+    opacity: ${({ isPhishingTransaction }) => isPhishingTransaction && 0.6};
 
     ${({ isPending }) =>
         isPending &&
@@ -51,7 +51,7 @@ const Wrapper = styled(Card)<{
         `}
 
     /* height of secondary panel and a gap between transactions and graph */
-    scroll-margin-top: calc(${SECONDARY_PANEL_HEIGHT} + 115px);
+    scroll-margin-top: calc(${SUBPAGE_NAV_HEIGHT} + 115px);
 
     ${anchorOutlineStyles}
 `;
@@ -145,8 +145,10 @@ export const TransactionItem = memo(
                 }),
             );
         };
+        const isPhishingTransaction = useSelector(state =>
+            selectIsPhishingTransaction(state, transaction.txid, accountKey),
+        );
 
-        const isZeroValuePhishing = getIsZeroValuePhishing(transaction);
         const dataTestBase = `@transaction-item/${index}${
             transaction.deadline ? '/prepending' : ''
         }`;
@@ -162,7 +164,7 @@ export const TransactionItem = memo(
                 isPending={isPending}
                 ref={anchorRef}
                 shouldHighlight={shouldHighlight}
-                isZeroValuePhishing={isZeroValuePhishing}
+                isPhishingTransaction={isPhishingTransaction}
                 className={className}
             >
                 <Body>
@@ -183,6 +185,7 @@ export const TransactionItem = memo(
                                 txItemIsHovered={txItemIsHovered}
                                 nestedItemIsHovered={nestedItemIsHovered}
                                 onClick={() => openTxDetailsModal()}
+                                isPhishingTransaction={isPhishingTransaction}
                                 dataTestBase={dataTestBase}
                             />
                         </Description>
@@ -198,7 +201,7 @@ export const TransactionItem = memo(
                                 {!isUnknown && type !== 'failed' && previewTargets.length ? (
                                     <>
                                         {previewTargets.map((t, i) => (
-                                            <Fragment key={i}>
+                                            <BlurWrapper isBlurred={isPhishingTransaction} key={i}>
                                                 {t.type === 'target' && (
                                                     <TransactionTarget
                                                         // render first n targets, n = DEFAULT_LIMIT
@@ -214,6 +217,9 @@ export const TransactionItem = memo(
                                                         accountMetadata={accountMetadata}
                                                         accountKey={accountKey}
                                                         isActionDisabled={isActionDisabled}
+                                                        isPhishingTransaction={
+                                                            isPhishingTransaction
+                                                        }
                                                     />
                                                 )}
                                                 {t.type === 'token' && (
@@ -226,6 +232,9 @@ export const TransactionItem = memo(
                                                             limit > 0
                                                                 ? false
                                                                 : i === previewTargets.length - 1
+                                                        }
+                                                        isPhishingTransaction={
+                                                            isPhishingTransaction
                                                         }
                                                     />
                                                 )}
@@ -242,14 +251,17 @@ export const TransactionItem = memo(
                                                         }
                                                     />
                                                 )}
-                                            </Fragment>
+                                            </BlurWrapper>
                                         ))}
                                         <AnimatePresence initial={false}>
                                             {limit > 0 &&
                                                 allOutputs
                                                     .slice(DEFAULT_LIMIT, DEFAULT_LIMIT + limit)
                                                     .map((t, i) => (
-                                                        <Fragment key={i}>
+                                                        <BlurWrapper
+                                                            isBlurred={isPhishingTransaction}
+                                                            key={i}
+                                                        >
                                                             {t.type === 'target' && (
                                                                 <TransactionTarget
                                                                     target={t.payload}
@@ -270,6 +282,9 @@ export const TransactionItem = memo(
                                                                         accountMetadata
                                                                     }
                                                                     accountKey={accountKey}
+                                                                    isPhishingTransaction={
+                                                                        isPhishingTransaction
+                                                                    }
                                                                 />
                                                             )}
                                                             {t.type === 'token' && (
@@ -282,6 +297,9 @@ export const TransactionItem = memo(
                                                                         allOutputs.length -
                                                                             DEFAULT_LIMIT -
                                                                             1
+                                                                    }
+                                                                    isPhishingTransaction={
+                                                                        isPhishingTransaction
                                                                     }
                                                                 />
                                                             )}
@@ -298,7 +316,7 @@ export const TransactionItem = memo(
                                                                     }
                                                                 />
                                                             )}
-                                                        </Fragment>
+                                                        </BlurWrapper>
                                                     ))}
                                         </AnimatePresence>
                                     </>
@@ -330,14 +348,16 @@ export const TransactionItem = memo(
                                 )}
 
                                 {showFeeRow && (
-                                    <StyledFeeRow
-                                        fee={fee}
-                                        transaction={transaction}
-                                        useFiatValues={useFiatValues}
-                                        $noInputsOutputs={noInputsOutputs}
-                                        isFirst
-                                        isLast
-                                    />
+                                    <BlurWrapper isBlurred={isPhishingTransaction}>
+                                        <StyledFeeRow
+                                            fee={fee}
+                                            transaction={transaction}
+                                            useFiatValues={useFiatValues}
+                                            $noInputsOutputs={noInputsOutputs}
+                                            isFirst
+                                            isLast
+                                        />
+                                    </BlurWrapper>
                                 )}
 
                                 {isExpandable && (

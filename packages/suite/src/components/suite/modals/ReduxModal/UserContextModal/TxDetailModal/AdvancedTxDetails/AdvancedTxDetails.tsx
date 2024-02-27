@@ -23,7 +23,7 @@ const TabSelector = styled.div<{ elevation: Elevation }>`
     width: 100%;
     text-align: left;
     margin-bottom: ${spacingsPx.md};
-    border-bottom: 1px solid ${({ theme, elevation }) => theme[mapElevationToBorder[elevation]]};
+    border-bottom: 1px solid ${mapElevationToBorder};
 `;
 
 const TabButton = styled.button<{ selected: boolean; elevation: Elevation }>`
@@ -42,8 +42,7 @@ const TabButton = styled.button<{ selected: boolean; elevation: Elevation }>`
 
     :hover {
         border-bottom: 2px solid
-            ${({ theme, selected, elevation }) =>
-                !selected && theme[mapElevationToBorder[elevation]]};
+            ${({ selected, ...props }) => !selected && mapElevationToBorder(props)};
     }
 `;
 
@@ -55,6 +54,7 @@ interface AdvancedTxDetailsProps {
     tx: WalletAccountTransaction;
     chainedTxs?: ChainedTransactions;
     explorerUrl: string;
+    isPhishingTransaction: boolean;
 }
 
 export const AdvancedTxDetails = ({
@@ -63,6 +63,7 @@ export const AdvancedTxDetails = ({
     tx,
     chainedTxs,
     explorerUrl,
+    isPhishingTransaction,
 }: AdvancedTxDetailsProps) => {
     const [selectedTab, setSelectedTab] = useState<TabID>(defaultTab ?? 'amount');
 
@@ -71,11 +72,12 @@ export const AdvancedTxDetails = ({
     if (selectedTab === 'amount') {
         content = <AmountDetails tx={tx} isTestnet={isTestnet(network.symbol)} />;
     } else if (selectedTab === 'io' && network.networkType !== 'ripple') {
-        content = <IODetails tx={tx} />;
+        content = <IODetails tx={tx} isPhishingTransaction={isPhishingTransaction} />;
     } else if (selectedTab === 'chained' && chainedTxs) {
         content = <ChainedTxs txs={chainedTxs} explorerUrl={explorerUrl} network={network} />;
     }
     const { elevation } = useElevation();
+
     return (
         <Wrapper>
             <TabSelector elevation={elevation}>

@@ -330,6 +330,19 @@ export default [
                 url: '/method/cardanoSignTransaction',
             },
             {
+                name: 'Sign message',
+                children: [
+                    {
+                        name: 'include key hash',
+                        url: '/method/cardanoSignMessage',
+                    },
+                    {
+                        name: 'include address',
+                        url: '/method/cardanoSignMessage-addressParameters',
+                    },
+                ],
+            },
+            {
                 name: 'Account info',
                 children: [
                     {
@@ -526,6 +539,19 @@ export default [
             {
                 name: 'Backup device',
                 url: '/method/backupDevice',
+            },
+            {
+                name: 'Change language',
+                children: [
+                    {
+                        name: 'using select',
+                        url: '/method/changeLanguage',
+                    },
+                    {
+                        name: 'using binary',
+                        url: '/method/changeLanguage-binary',
+                    },
+                ],
             },
             {
                 name: 'Change PIN',

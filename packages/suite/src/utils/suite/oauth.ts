@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 import { desktopApi } from '@trezor/suite-desktop-api';
 import { getPrefixedURL } from 'src/utils/suite/router';
 import { METADATA_PROVIDER } from 'src/actions/suite/constants';
@@ -12,6 +11,7 @@ export const getOauthReceiverUrl = () => {
     if (!desktopApi.available) {
         return `${window.location.origin}${getPrefixedURL('/static/oauth/oauth_receiver.html')}`;
     }
+
     return desktopApi.getHttpReceiverAddress('/oauth');
 };
 
@@ -47,6 +47,7 @@ const openWindowOnAnotherDomain = (
             closeCallback();
         }
     }, 1000);
+
     return win;
 };
 
@@ -108,6 +109,7 @@ const getDesktopHandlerInstance = (
             },
         );
     };
+
     return desktopHandlerInstance;
 };
 
@@ -134,6 +136,7 @@ const getWebHandlerInstance = (
             },
         );
     };
+
     return webHandlerInstance;
 };
 

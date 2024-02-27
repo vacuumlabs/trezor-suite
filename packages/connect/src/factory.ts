@@ -103,6 +103,8 @@ export const factory = ({
         cardanoComposeTransaction: params =>
             call({ ...params, method: 'cardanoComposeTransaction' }),
 
+        cardanoSignMessage: params => call({ ...params, method: 'cardanoSignMessage' }),
+
         cipherKeyValue: params => call({ ...params, method: 'cipherKeyValue' }),
 
         composeTransaction: params => call({ ...params, method: 'composeTransaction' }),
@@ -239,6 +241,8 @@ export const factory = ({
 
         backupDevice: params => call({ ...params, method: 'backupDevice' }),
 
+        changeLanguage: params => call({ ...params, method: 'changeLanguage' }),
+
         changePin: params => call({ ...params, method: 'changePin' }),
 
         changeWipeCode: params => call({ ...params, method: 'changeWipeCode' }),
@@ -265,5 +269,6 @@ export const factory = ({
 
         requestWebUSBDevice,
     };
+
     return api;
 };

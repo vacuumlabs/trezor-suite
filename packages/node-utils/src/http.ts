@@ -3,7 +3,8 @@ import * as net from 'net';
 import * as url from 'url';
 
 import type { RequiredKey } from '@trezor/type-utils';
-import { TypedEmitter } from '@trezor/utils/lib/typedEventEmitter';
+import { TypedEmitter } from '@trezor/utils';
+import { arrayPartition } from '@trezor/utils';
 
 import { getFreePort } from './getFreePort';
 
@@ -24,13 +25,30 @@ type OriginalLogger = {
     error: OriginalLogFn;
 };
 
-export type Handler = (
-    request: Request,
+type RequestWithParams = Request & {
+    params: Record<string, string>;
+};
+
+type Response = http.ServerResponse;
+
+type Next<R extends Request = RequestWithParams> = (
+    request: R,
     response: http.ServerResponse,
-    next: () => void,
+) => void;
+
+export type Handler<R extends Request = RequestWithParams> = (
+    request: R,
+    response: Response,
+    next: Next<R>,
     { logger }: { logger: Logger },
 ) => void;
 
+type Route = {
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE' | '*';
+    pathname: string;
+    params: string[];
+    handler: Handler[];
+};
 /**
  * Events that may be emitted or listened to by HttpServer
  */
@@ -46,11 +64,7 @@ type BaseEvents = {
  */
 export class HttpServer<T extends EventMap> extends TypedEmitter<T & BaseEvents> {
     server: http.Server;
-    private routes: {
-        method: 'GET' | 'POST' | 'PUT' | 'DELETE' | '*';
-        pathname: string;
-        handler: Handler[];
-    }[] = [];
+    private routes: Route[] = [];
     private logger: Logger;
     private readonly emitter: TypedEmitter<BaseEvents> = this;
     private port?: number;
@@ -93,11 +107,13 @@ export class HttpServer<T extends EventMap> extends TypedEmitter<T & BaseEvents>
         const address = this.getServerAddress();
         const route = this.routes.find(r => r.pathname === pathname);
         if (!route) return;
+
         return `http://${address.address}:${address.port}${route.pathname}`;
     }
 
     public getInfo() {
         const address = this.getServerAddress();
+
         return {
             url: `http://${address.address}:${address.port}`,
         };
@@ -105,6 +121,7 @@ export class HttpServer<T extends EventMap> extends TypedEmitter<T & BaseEvents>
 
     public async start() {
         const port = this.port || (this.port = await getFreePort());
+
         return new Promise((resolve, reject) => {
             let nextSocketId = 0;
             this.server.on('connection', socket => {
@@ -128,6 +145,7 @@ export class HttpServer<T extends EventMap> extends TypedEmitter<T & BaseEvents>
                         : `Start error code: ${errorCode}`;
 
                 this.logger.error(errorMessage);
+
                 return reject(new Error(`http-receiver: ${errorMessage}`));
             });
 
@@ -137,6 +155,7 @@ export class HttpServer<T extends EventMap> extends TypedEmitter<T & BaseEvents>
                 if (address) {
                     this.emitter.emit('server/listening', address);
                 }
+
                 return resolve(address);
             });
         });
@@ -163,21 +182,39 @@ export class HttpServer<T extends EventMap> extends TypedEmitter<T & BaseEvents>
         });
     }
 
-    public post(pathname: string, handler: Handler[]) {
+    /**
+     * split /a/:b/:c
+     * to [a] and [:b, :c]
+     */
+    private splitSegments(pathname: string) {
+        const [baseSegments, paramsSegments] = arrayPartition(
+            pathname.split('/').filter(segment => segment),
+            segment => !segment.includes(':'),
+        );
+
+        return [baseSegments, paramsSegments];
+    }
+
+    private registerRoute(pathname: string, method: 'POST' | 'GET', handler: Handler[]) {
+        const [baseSegments, paramsSegments] = this.splitSegments(pathname);
+        const basePathname = baseSegments.join('/');
         this.routes.push({
-            method: 'POST',
-            pathname,
+            method,
+            pathname: `/${basePathname}`,
+            params: paramsSegments,
             handler,
         });
     }
 
-    public get(pathname: string, handler: Handler[]) {
-        this.routes.push({
-            method: 'GET',
-            pathname,
-            handler,
-        });
+    public post(pathname: string, handler: Handler[]) {
+        this.registerRoute(pathname, 'POST', handler);
     }
+
+    public get(pathname: string, handler: Handler[]) {
+        this.registerRoute(pathname, 'GET', handler);
+    }
+
+    // PUT, DELETE etc are not used anywhere in our codebase, so no need to implement them now
 
     /**
      * Register common handlers that are run for all requests before route handlers
@@ -187,11 +224,37 @@ export class HttpServer<T extends EventMap> extends TypedEmitter<T & BaseEvents>
             method: '*',
             pathname: '*',
             handler,
+            params: [],
         });
     }
 
-    // PUT, DELETE etc are not used anywhere in our codebase, so no need to implement them now
+    /**
+     * pathname could be /a/b/c/d
+     * return route with highest number of matching segments
+     */
+    private findBestMatchingRoute = (pathname: string, method = 'GET') => {
+        const segments = pathname.split('/').map(segment => segment || '/');
+        const routes = this.routes.filter(r => r.method === method || r.method === '*');
+        const match = routes.reduce(
+            (acc, route) => {
+                // todo:
+                // Is it necessary to split the path when registering, then join it for storing, and splitting again everytime when finding the best one?
+                // Also, when stored segment-by-segment, it would be possible to represent it as a tree instead of iterating over an array.
+                const routeSegments = route.pathname.split('/').map(segment => segment || '/');
+                const matchedSegments = segments.filter(
+                    (segment, index) => segment === routeSegments[index],
+                );
+                if (matchedSegments.length > acc.matchedSegments.length) {
+                    return { route, matchedSegments };
+                }
 
+                return acc;
+            },
+            { route: undefined as Route | undefined, matchedSegments: [] as string[] },
+        );
+
+        return match.route;
+    };
     /**
      * Entry point for handling requests
      */
@@ -200,6 +263,7 @@ export class HttpServer<T extends EventMap> extends TypedEmitter<T & BaseEvents>
         if (!request.url) {
             this.logger.warn('Unexpected incoming message (no url)');
             this.emitter.emit('server/error', 'Unexpected incoming message');
+
             return;
         }
 
@@ -208,21 +272,43 @@ export class HttpServer<T extends EventMap> extends TypedEmitter<T & BaseEvents>
         });
 
         const { pathname } = url.parse(request.url, true);
+        if (!pathname) {
+            const msg = `url ${request.url} could not be parsed`;
+            this.emitter.emit('server/error', msg);
+            this.logger.warn(msg);
 
+            return;
+        }
         this.logger.info(`Handling request for ${pathname}`);
 
-        const route = this.routes.find(r => r.pathname === pathname && r.method === request.method);
+        const route = this.findBestMatchingRoute(pathname, request.method);
         if (!route) {
             this.emitter.emit('server/error', `Route not found for ${pathname}`);
             this.logger.warn(`Route not found for ${pathname}`);
+
             return;
         }
 
         if (!route.handler.length) {
             this.emitter.emit('server/error', `No handlers registered for route ${pathname}`);
             this.logger.warn(`No handlers registered for route ${pathname}`);
+
             return;
         }
+        const paramsSegments = pathname
+            .replace(route.pathname, '')
+            .split('/')
+            .filter(segment => segment);
+
+        const requestWithParams = request as RequestWithParams;
+        requestWithParams.params = route.params.reduce(
+            (acc, param, index) => {
+                acc[param.replace(':', '')] = paramsSegments[index];
+
+                return acc;
+            },
+            {} as Record<string, string>,
+        );
 
         const handlers = [
             ...this.routes
@@ -231,11 +317,11 @@ export class HttpServer<T extends EventMap> extends TypedEmitter<T & BaseEvents>
             ...route.handler,
         ];
 
-        const run = ([handler, ...rest]: Handler[]) => {
-            handler?.(request as Request, response, () => run(rest), { logger: this.logger });
-        };
-
-        run(handlers);
+        const run =
+            ([handler, ...rest]: Handler<RequestWithParams>[]) =>
+            (req: RequestWithParams, res: http.ServerResponse) =>
+                handler?.(req, res, run(rest), { logger: this.logger });
+        run(handlers)(requestWithParams, response);
     };
 }
 
@@ -258,7 +344,7 @@ const checkOrigin = ({
         isOriginAllowed = true;
     }
 
-    // If referer is not defined, check if empty referers are allowed
+    // If referer is not defined, check if empty referrers are allowed
     else if (referer === undefined) {
         isOriginAllowed = origins.includes('');
     } else {
@@ -268,6 +354,7 @@ const checkOrigin = ({
             domain = new URL(referer).hostname;
         } catch (err) {
             logger.warn(`Invalid referer ${referer}`);
+
             return false;
         }
 
@@ -287,8 +374,10 @@ const checkOrigin = ({
         logger.warn(`Origin rejected for ${pathname}`);
         logger.warn(`- Received: '${referer}'`);
         logger.warn(`- Allowed origins: ${origins.map(o => `'${o}'`).join(', ')}`);
+
         return false;
     }
+
     return true;
 };
 
@@ -306,6 +395,49 @@ export const allowOrigins =
                 logger,
             })
         ) {
-            next();
+            next(request, _response);
         }
     };
+
+export const parseBodyTextHelper = (request: Request) =>
+    new Promise<string>(resolve => {
+        const tmp: any[] = [];
+        request
+            .on('data', chunk => {
+                tmp.push(chunk);
+            })
+            .on('end', () => {
+                const body = Buffer.concat(tmp).toString();
+                // at this point, `body` has the entire request body stored in it as a string
+                resolve(body);
+            });
+    });
+
+/**
+ * set request.body as parsed JSON
+ */
+export const parseBodyJSON = <R extends RequestWithParams>(
+    request: R,
+    response: Response,
+    next: Next<R & { body: Record<string, any> }>,
+) => {
+    parseBodyTextHelper(request)
+        .then(body => JSON.parse(body))
+        .catch(() => ({}))
+        .then(body => {
+            next({ ...request, body }, response);
+        });
+};
+
+/**
+ * set request.body as string
+ */
+export const parseBodyText = <R extends RequestWithParams>(
+    request: R,
+    response: Response,
+    next: Next<R & { body: string }>,
+) => {
+    parseBodyTextHelper(request).then(body => {
+        next({ ...request, body }, response);
+    });
+};

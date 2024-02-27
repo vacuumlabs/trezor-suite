@@ -4,7 +4,7 @@ import { Translation } from 'src/components/suite';
 import { useDispatch } from 'src/hooks/suite';
 import { useSendFormContext } from 'src/hooks/wallet';
 import { sendRaw } from 'src/actions/wallet/sendFormActions';
-import { WalletLayoutHeader } from 'src/components/wallet';
+import { WalletSubpageHeading } from 'src/components/wallet';
 import { FADE_IN } from '@trezor/components/src/config/animations';
 
 const ClearButton = styled(Button)`
@@ -35,6 +35,7 @@ export const Header = () => {
         },
         {
             key: 'import',
+            'data-test': '@send/header-dropdown/import',
             onClick: () => {
                 loadTransaction();
             },
@@ -43,6 +44,7 @@ export const Header = () => {
         },
         {
             key: 'raw',
+            'data-test': '@send/header-dropdown/raw',
             onClick: () => {
                 dispatch(sendRaw(true));
             },
@@ -51,7 +53,7 @@ export const Header = () => {
     ];
 
     return (
-        <WalletLayoutHeader title="TR_NAV_SEND">
+        <WalletSubpageHeading title="TR_NAV_SEND">
             {isDirty && (
                 <ClearButton
                     size="small"
@@ -73,6 +75,6 @@ export const Header = () => {
                     },
                 ]}
             />
-        </WalletLayoutHeader>
+        </WalletSubpageHeading>
     );
 };

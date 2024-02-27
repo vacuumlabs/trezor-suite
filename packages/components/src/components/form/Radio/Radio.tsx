@@ -26,12 +26,12 @@ const radioVariantStyles: Record<CheckboxVariant, VariantStyles> = {
         dotDisabledChecked: 'backgroundPrimarySubtleOnElevation0',
         borderDisabledChecked: 'backgroundPrimarySubtleOnElevation1',
     },
-    'alert-red': {
+    destructive: {
         borderChecked: 'backgroundAlertRedSubtleOnElevation0',
         dotDisabledChecked: 'backgroundAlertRedSubtleOnElevation0',
         borderDisabledChecked: 'backgroundAlertRedSubtleOnElevation1',
     },
-    'alert-yellow': {
+    warning: {
         borderChecked: 'backgroundAlertYellowSubtleOnElevation0',
         dotDisabledChecked: 'backgroundAlertYellowSubtleOnElevation0',
         borderDisabledChecked: 'backgroundAlertYellowSubtleOnElevation1',
@@ -42,7 +42,7 @@ const RadioIcon = styled(CheckContainer)`
     position: relative;
     border-radius: ${borders.radii.full};
 
-    :after {
+    ::after {
         content: '';
         position: absolute;
         top: 3px;
@@ -58,7 +58,7 @@ const RadioIcon = styled(CheckContainer)`
         background: ${({ theme }) => theme.backgroundSurfaceElevation0};
         border-color: ${({ theme, variant }) => theme[radioVariantStyles[variant].borderChecked]};
 
-        :after {
+        ::after {
             background: ${({ theme, variant }) => theme[variantStyles[variant].backgroundChecked]};
         }
     }
@@ -67,7 +67,7 @@ const RadioIcon = styled(CheckContainer)`
         background: ${({ theme }) => theme.backgroundSurfaceElevation0};
         border-color: ${({ theme, variant }) => theme[variantStyles[variant].borderDisabled]};
 
-        :after {
+        ::after {
             background: transparent;
         }
     }
@@ -77,14 +77,14 @@ const RadioIcon = styled(CheckContainer)`
         border-color: ${({ theme, variant }) =>
             theme[radioVariantStyles[variant].borderDisabledChecked]};
 
-        :after {
+        ::after {
             background: ${({ theme, variant }) =>
                 theme[radioVariantStyles[variant].dotDisabledChecked]};
         }
     }
 
     ${/* sc-selector */ Container}:hover input:not(:disabled):not(:checked) + && {
-        :after {
+        ::after {
             background: ${({ theme, variant }) => theme[variantStyles[variant].backgroundHover]};
         }
     }
@@ -138,7 +138,7 @@ export const Radio = ({
 
             <RadioIcon variant={variant} tabIndex={0} />
 
-            {children && <Label isRed={variant === 'alert-red'}>{children}</Label>}
+            {children && <Label isRed={variant === 'destructive'}>{children}</Label>}
         </Container>
     );
 };

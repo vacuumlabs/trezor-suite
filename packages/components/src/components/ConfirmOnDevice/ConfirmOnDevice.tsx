@@ -166,6 +166,7 @@ export const ConfirmOnDevice = ({
 }: ConfirmOnDeviceProps) => {
     const hasSteps = steps && activeStep !== undefined;
     const theme = useTheme();
+
     return (
         <Wrapper
             animation={isConfirmed ? AnimationDirection.Down : AnimationDirection.Up}
@@ -175,7 +176,8 @@ export const ConfirmOnDevice = ({
                 {deviceModelInternal === DeviceModelInternal.T2B1 && (
                     <DeviceAnimation
                         type="ROTATE"
-                        size={34}
+                        height="34px"
+                        width="34px"
                         deviceModelInternal={deviceModelInternal}
                         deviceUnitColor={deviceUnitColor}
                     />

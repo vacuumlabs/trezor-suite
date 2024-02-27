@@ -1,48 +1,55 @@
-import { css, DefaultTheme } from 'styled-components';
-import {
-    BackgroundTertiaryElevationColor,
-    Elevation,
-    spacings,
-    spacingsPx,
-    nextElevation,
-} from '@trezor/theme';
+import { css } from 'styled-components';
 
-export type ButtonVariant =
-    | 'primary'
-    | 'secondary'
-    | 'tertiary'
-    | 'info'
-    | 'warning'
-    | 'destructive';
-export type ButtonSize = 'large' | 'medium' | 'small' | 'tiny';
-export type IconAlignment = 'left' | 'right';
+import { Color, Colors, Elevation, spacings, spacingsPx } from '@trezor/theme';
+import { capitalizeFirstLetter } from '@trezor/utils';
+import type { UIHorizontalAlignment, UISize, UIVariant } from '../../config/types';
 
-export const mapElevationToBackgroundTertiary: Record<Elevation, BackgroundTertiaryElevationColor> =
-    {
-        '-1': 'backgroundTertiaryElevationNegative', // For example left menu is negative elevation
-        0: 'backgroundTertiaryDefaultOnElevation0',
-        1: 'backgroundTertiaryDefaultOnElevation1',
-        2: 'backgroundTertiaryDefaultOnElevation2',
-        3: 'backgroundTertiaryDefaultOnElevation3',
+export type ButtonVariant = Extract<
+    UIVariant,
+    'primary' | 'secondary' | 'tertiary' | 'info' | 'warning' | 'destructive'
+>;
+export type ButtonSize = Extract<UISize, 'large' | 'medium' | 'small' | 'tiny'>;
+export type ButtonState = 'normal' | 'hover';
+export type IconAlignment = Extract<UIHorizontalAlignment, 'left' | 'right'>;
+
+const mapElevationToButtonBackground = ({
+    elevation,
+    variant,
+    state,
+}: {
+    elevation: Elevation;
+    variant: Extract<ButtonVariant, 'destructive' | 'tertiary' | 'info' | 'warning'>;
+    state: ButtonState;
+}) => {
+    const capitalizedVariant = capitalizeFirstLetter(variant);
+    const capitalizedState = capitalizeFirstLetter(state);
+
+    const map: Record<Elevation, Color> = {
+        '-1': `interactionBackground${capitalizedVariant}DefaultHoverOnElevation3`, // For example left menu is negative elevation
+
+        // Button lies always on elevation so for example Button that lies has elevation 0, lies on elevation -1.
+        // This is why the values here a shifted by 1.
+        0: `interactionBackground${capitalizedVariant}Default${capitalizedState}OnElevationNegative`,
+        1: `interactionBackground${capitalizedVariant}Default${capitalizedState}OnElevation0`,
+        2: `interactionBackground${capitalizedVariant}Default${capitalizedState}OnElevation1`,
+        3: `interactionBackground${capitalizedVariant}Default${capitalizedState}OnElevation2`,
     };
 
-export const getPadding = (size: ButtonSize, hasLabel?: boolean) => {
-    switch (size) {
-        case 'large':
-            return hasLabel ? `${spacingsPx.md} ${spacingsPx.xl}` : `${spacingsPx.md}`;
-        case 'medium':
-            return hasLabel ? `${spacingsPx.sm} ${spacingsPx.lg}` : '14px';
-        case 'small':
-            return hasLabel ? `${spacingsPx.xs} ${spacingsPx.md}` : '10px';
-        case 'tiny':
-            return hasLabel ? `${spacingsPx.xxxs} ${spacingsPx.xs}` : '6px';
-
-        default:
-            break;
-    }
+    return ({ theme }: { theme: Colors }) => theme[map[elevation]];
 };
 
-export const getIconColor = (variant: ButtonVariant, isDisabled: boolean, theme: DefaultTheme) => {
+export const getPadding = (size: ButtonSize, hasLabel?: boolean) => {
+    const map: Record<ButtonSize, string> = {
+        small: hasLabel ? `${spacingsPx.xs} ${spacingsPx.md}` : '10px',
+        large: hasLabel ? `${spacingsPx.md} ${spacingsPx.xl}` : `${spacingsPx.md}`,
+        medium: hasLabel ? `${spacingsPx.sm} ${spacingsPx.lg}` : '14px',
+        tiny: hasLabel ? `${spacingsPx.xxxs} ${spacingsPx.xs}` : '6px',
+    };
+
+    return map[size];
+};
+
+export const getIconColor = (variant: ButtonVariant, isDisabled: boolean, theme: Colors) => {
     if (isDisabled) {
         return theme.iconDisabled;
     }
@@ -80,7 +87,10 @@ export const getIconSize = (size: ButtonSize) => {
     }
 };
 
-export const getVariantStyle = (variant: ButtonVariant, elevation: Elevation) => {
+export const getVariantStyle = (
+    variant: ButtonVariant,
+    elevation: Elevation,
+): ReturnType<typeof css> => {
     switch (variant) {
         case 'primary':
             return css`
@@ -107,23 +117,38 @@ export const getVariantStyle = (variant: ButtonVariant, elevation: Elevation) =>
             `;
         case 'tertiary':
             return css`
-                background: ${({ theme }) => theme[mapElevationToBackgroundTertiary[elevation]]};
+                background: ${mapElevationToButtonBackground({
+                    elevation,
+                    variant,
+                    state: 'normal',
+                })};
                 color: ${({ theme }) => theme.textOnTertiary};
 
                 :hover,
                 :active {
-                    background: ${({ theme }) =>
-                        theme[mapElevationToBackgroundTertiary[nextElevation[elevation]]]};
+                    background: ${mapElevationToButtonBackground({
+                        elevation,
+                        variant,
+                        state: 'hover',
+                    })};
                 }
             `;
         case 'info':
             return css`
-                background: ${({ theme }) => theme.backgroundAlertBlueSubtleOnElevation0};
+                background: ${mapElevationToButtonBackground({
+                    elevation,
+                    variant,
+                    state: 'normal',
+                })};
                 color: ${({ theme }) => theme.textAlertBlue};
 
                 :hover,
                 :active {
-                    background: ${({ theme }) => theme.backgroundAlertBlueSubtleOnElevation1};
+                    background: ${mapElevationToButtonBackground({
+                        elevation,
+                        variant,
+                        state: 'hover',
+                    })};
                 }
             `;
         case 'warning':

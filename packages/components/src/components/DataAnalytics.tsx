@@ -55,6 +55,7 @@ const Description = styled.span`
     color: ${({ theme }) => theme.TYPE_LIGHT_GREY};
 
     margin-bottom: 20px;
+
     /* text-align: center; */
 `;
 
@@ -70,7 +71,7 @@ const CategoryItems = styled.div`
 `;
 
 const CategoryName = styled(Description)`
-    margin-bottom: 0px;
+    margin-bottom: 0;
     width: 120px;
 `;
 
@@ -152,7 +153,6 @@ export const DataAnalytics = ({
                 >
                     <Category>
                         {collectedData.map((category, i) => (
-                            // eslint-disable-next-line react/no-array-index-key
                             <Fragment key={i}>
                                 <CategoryName>{category.name}</CategoryName>
                                 <CategoryItems>

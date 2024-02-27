@@ -11,6 +11,7 @@ import {
     isLowAnonymityWarning,
     getInputState,
     findToken,
+    getFiatRateKey,
 } from '@suite-common/wallet-utils';
 import { useSendFormContext } from 'src/hooks/wallet';
 import { Output } from 'src/types/wallet/sendForm';
@@ -18,7 +19,7 @@ import { formInputsMaxLength } from '@suite-common/validators';
 import { TokenSelect } from './components/TokenSelect';
 import { Fiat } from './components/Fiat';
 import { useBitcoinAmountUnit } from 'src/hooks/wallet/useBitcoinAmountUnit';
-import { useTranslation } from 'src/hooks/suite';
+import { useSelector, useTranslation } from 'src/hooks/suite';
 import {
     validateDecimals,
     validateInteger,
@@ -27,6 +28,9 @@ import {
 } from 'src/utils/suite/validation';
 import { spacingsPx } from '@trezor/theme';
 import { breakpointMediaQueries } from '@trezor/styles';
+import { selectFiatRatesByFiatRateKey } from '@suite-common/wallet-core';
+import { TokenAddress } from '@suite-common/wallet-types';
+import { FiatCurrencyCode } from '@suite-common/suite-config';
 
 const Row = styled.div`
     position: relative;
@@ -41,21 +45,14 @@ const Row = styled.div`
 
 const Heading = styled.p`
     position: absolute;
-`;
-
-const Text = styled.div`
-    margin-right: 3px;
+    display: flex;
+    flex-direction: row;
 `;
 
 const AmountInput = styled(NumberInput)`
     display: flex;
     flex: 1;
 ` as typeof NumberInput; // Styled wrapper doesn't preserve type argument, see https://github.com/styled-components/styled-components/issues/1803#issuecomment-857092410
-
-const Label = styled.div`
-    display: flex;
-    align-items: center;
-`;
 
 const Left = styled.div`
     position: relative; /* for TokenBalance positioning */
@@ -95,7 +92,7 @@ const Symbol = styled.span`
     font-weight: ${variables.FONT_WEIGHT.MEDIUM};
 `;
 
-const StyledWarning = styled(Warning)`
+const WarningWrapper = styled.div`
     margin-bottom: 8px;
 `;
 
@@ -143,6 +140,18 @@ export const Amount = ({ output, outputId }: AmountProps) => {
             } ${token.symbol!.toUpperCase()}`}</TokenBalanceValue>
         </HiddenPlaceholder>
     ) : undefined;
+
+    const currentRate = useSelector(state =>
+        selectFiatRatesByFiatRateKey(
+            state,
+            getFiatRateKey(
+                symbol,
+                localCurrencyOption.value as FiatCurrencyCode,
+                (token?.contract || '') as TokenAddress,
+            ),
+            'current',
+        ),
+    );
 
     let decimals: number;
     if (token) {
@@ -226,6 +235,11 @@ export const Amount = ({ output, outputId }: AmountProps) => {
             <Row>
                 <Heading>
                     <Translation id="AMOUNT" />
+                    {tokenBalance && (
+                        <TokenBalance>
+                            (<Translation id="TOKEN_BALANCE" values={{ balance: tokenBalance }} />)
+                        </TokenBalance>
+                    )}
                 </Heading>
 
                 <Left>
@@ -233,22 +247,6 @@ export const Amount = ({ output, outputId }: AmountProps) => {
                         inputState={inputState}
                         labelHoverAddon={!isSetMaxVisible ? <SendMaxSwitch /> : undefined}
                         labelRight={isSetMaxVisible ? <SendMaxSwitch /> : undefined}
-                        label={
-                            <Label>
-                                <Text>
-                                    <Translation id="AMOUNT" />
-                                </Text>
-
-                                {tokenBalance && (
-                                    <TokenBalance>
-                                        <Translation
-                                            id="TOKEN_BALANCE"
-                                            values={{ balance: tokenBalance }}
-                                        />
-                                    </TokenBalance>
-                                )}
-                            </Label>
-                        }
                         bottomText={bottomText || null}
                         onChange={handleInputChange}
                         name={inputName}
@@ -267,7 +265,7 @@ export const Amount = ({ output, outputId }: AmountProps) => {
                     />
                 </Left>
 
-                {!token && (
+                {(!token || (token && currentRate?.rate)) && (
                     <FiatValue amount="1" symbol={symbol} fiatCurrency={localCurrencyOption.value}>
                         {({ rate }) =>
                             rate && (
@@ -289,9 +287,11 @@ export const Amount = ({ output, outputId }: AmountProps) => {
             </Row>
 
             {isLowAnonymity && (
-                <StyledWarning withIcon>
-                    <Translation id="TR_NOT_ENOUGH_ANONYMIZED_FUNDS_WARNING" />
-                </StyledWarning>
+                <WarningWrapper>
+                    <Warning withIcon>
+                        <Translation id="TR_NOT_ENOUGH_ANONYMIZED_FUNDS_WARNING" />
+                    </Warning>
+                </WarningWrapper>
             )}
         </>
     );

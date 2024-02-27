@@ -7,6 +7,7 @@ export * from './support/ThemeProvider';
 
 export * from './components/Badge/Badge';
 export * from './components/buttons/Button/Button';
+export * from './components/Divider/Divider';
 export * from './components/buttons/IconButton/IconButton';
 export * from './components/buttons/TextButton/TextButton';
 export * from './components/buttons/ButtonGroup/ButtonGroup';
@@ -60,6 +61,7 @@ export * from './components/skeletons/SkeletonRectangle';
 export * from './components/skeletons/SkeletonStack';
 export * from './components/skeletons/SkeletonSpread';
 export * from './components/skeletons/types';
+export * from './components/GradientOverlay/GradientOverlay';
 export * from './components/ElevationContext/ElevationContext';
 
 export * from './constants/keyboardEvents';

@@ -76,7 +76,7 @@ const createSelectStyle = (
         padding: `${spacingsPx.xs} ${spacingsPx.sm}`,
         borderRadius: borders.radii.xxs,
         background: isFocused
-            ? theme[mapElevationToBackground[nextElevation[elevation]]]
+            ? mapElevationToBackground({ theme, elevation: nextElevation[elevation] })
             : 'transparent',
 
         color: theme.textDefault,
@@ -103,6 +103,7 @@ type WrapperProps = Pick<
 };
 
 const Wrapper = styled.div<WrapperProps>`
+    /* stylelint-disable selector-class-pattern */
     position: relative;
     width: 100%;
     padding-bottom: ${({ hasBottomPadding }) =>
@@ -117,12 +118,12 @@ const Wrapper = styled.div<WrapperProps>`
         `}
 
     .${reactSelectClassNamePrefix}__dropdown-indicator {
-        display: flex;
         align-items: center;
         color: ${({ theme, isDisabled }) => (isDisabled ? theme.iconDisabled : theme.iconSubdued)};
         padding: 0;
         transition: transform 0.2s cubic-bezier(0.68, -0.02, 0.21, 1.1);
         cursor: pointer;
+        display: ${({ isDisabled }) => isDisabled && 'none'};
     }
 
     .${reactSelectClassNamePrefix}__control {
@@ -173,6 +174,7 @@ const Wrapper = styled.div<WrapperProps>`
         color: ${({ isDisabled, theme }) => (isDisabled ? theme.textDisabled : theme.textDefault)};
         border-style: none;
         transform: none;
+        margin-left: 0;
 
         :hover {
             cursor: ${({ isSearchable }) => isSearchable && 'text'};
@@ -230,7 +232,7 @@ interface CommonProps extends Omit<ReactSelectProps<Option>, 'onChange'> {
      */
     bottomText?: ReactNode;
     hasBottomPadding?: boolean;
-    minValueWidth?: string;
+    minValueWidth?: string; // TODO: should be probably removed
     inputState?: InputState;
     onChange?: (value: Option, ref?: SelectInstance<Option, boolean> | null) => void;
     'data-test'?: string;
@@ -279,6 +281,7 @@ export const Select = ({
                     selectRef.current?.blur();
                 }
             }
+
             return null;
         },
         [onChange, menuIsOpen],
@@ -304,13 +307,13 @@ export const Select = ({
                 classNamePrefix={reactSelectClassNamePrefix}
                 openMenuOnFocus
                 closeMenuOnScroll={closeMenuOnScroll}
-                menuPosition="fixed" // Required for closeMenuOnScroll to work properly when near page bottom
                 menuPortalTarget={menuPortalTarget}
                 styles={createSelectStyle(theme, elevation)}
                 onChange={handleOnChange}
                 isSearchable={isSearchable}
                 menuIsOpen={menuIsOpen}
                 isDisabled={isDisabled}
+                menuPlacement="auto"
                 placeholder={placeholder || ''}
                 {...props}
                 components={{
