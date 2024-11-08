@@ -8864,7 +8864,6 @@ __metadata:
     "@trezor/connect": "workspace:*"
     "@trezor/device-utils": "workspace:*"
     "@trezor/env-utils": "workspace:*"
-    "@trezor/suite-analytics": "workspace:*"
     "@trezor/type-utils": "workspace:*"
     "@trezor/utils": "workspace:*"
     date-fns: "npm:^2.30.0"
