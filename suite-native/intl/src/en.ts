@@ -35,6 +35,9 @@ export const en = {
         },
     },
     moduleHome: {
+        graphIgnoredNetworks: {
+            sol: 'Solana is not included in the graph trend.',
+        },
         emptyState: {
             device: {
                 title: 'Your wallet is empty',
@@ -789,6 +792,7 @@ export const en = {
         title: 'Transactions',
         receive: 'Receive',
         send: 'Send',
+        more: 'Load more',
         status: { pending: 'Pending', confirmed: 'Confirmed' },
         phishing: {
             badge: 'Caution!',
