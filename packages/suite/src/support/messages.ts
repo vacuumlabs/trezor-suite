@@ -1328,6 +1328,10 @@ export default defineMessagesWithTypeCheck({
         defaultMessage: 'KYC never required',
         id: 'TR_COINMARKET_KYC_POLICY_NEVER_REQUIRED',
     },
+    TR_COINMARKET_KYC_REQUIRED: {
+        defaultMessage: 'KYC required.',
+        id: 'TR_COINMARKET_KYC_REQUIRED',
+    },
     TR_COINMARKET_KYC_NO_REFUND: {
         defaultMessage: 'KYC requested in exceptional cases. KYC required for refunds. 👈',
         id: 'TR_COINMARKET_KYC_NO_REFUND',
