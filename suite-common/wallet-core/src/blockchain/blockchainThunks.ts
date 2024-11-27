@@ -18,6 +18,7 @@ import {
     isTrezorConnectBackendType,
     shouldUseIdentities,
     getAccountIdentity,
+    shouldSubscribeBlocks,
 } from '@suite-common/wallet-utils';
 import TrezorConnect, {
     BlockchainBlock,
@@ -245,9 +246,11 @@ export const subscribeBlockchainThunk = createThunk(
         { getState },
     ) => {
         const useIdentities = shouldUseIdentities(symbol);
+        // Don't subscribe to blocks for Solana, this is too intensive
+        const blocks = shouldSubscribeBlocks(symbol);
 
         if (onConnect && useIdentities) {
-            await TrezorConnect.blockchainSubscribe({ coin: symbol, blocks: true });
+            await TrezorConnect.blockchainSubscribe({ coin: symbol, blocks });
         }
 
         // do NOT subscribe if there are no accounts
@@ -267,7 +270,7 @@ export const subscribeBlockchainThunk = createThunk(
                       blocks: false,
                   }),
               )
-            : [{ accounts: accountsToSubscribe, coin: symbol, blocks: true }];
+            : [{ accounts: accountsToSubscribe, coin: symbol, blocks }];
 
         return Promise.all(paramsArray.map(params => TrezorConnect.blockchainSubscribe(params)));
     },
