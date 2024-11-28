@@ -2073,6 +2073,10 @@ export default defineMessagesWithTypeCheck({
         defaultMessage: 'Trezor is not readable.',
         id: 'TR_NEEDS_ATTENTION_UNREADABLE',
     },
+    TR_NEEDS_ATTENTION_UNABLE_TO_CONNECT: {
+        defaultMessage: 'Failed to communicate with Trezor',
+        id: 'TR_NEEDS_ATTENTION_UNABLE_TO_CONNECT',
+    },
     TR_UDEV_DOWNLOAD_TITLE: {
         defaultMessage: 'Download udev rules',
         id: 'TR_UDEV_DOWNLOAD_TITLE',
@@ -6775,11 +6779,6 @@ export default defineMessagesWithTypeCheck({
         id: 'TR_DEVICE_CONNECTED_UNACQUIRED_DESCRIPTION',
         defaultMessage:
             'The app {transportSessionOwner} may currently be using this device. You can take control of the device if needed.',
-    },
-    TR_DEVICE_CONNECTED_UNACQUIRED_DESCRIPTION_UNKNOWN_APP: {
-        id: 'TR_DEVICE_CONNECTED_UNACQUIRED_DESCRIPTION_UNKNOWN_APP',
-        defaultMessage:
-            'Another app may currently be using this device. You can take control of the device if needed.',
     },
     TR_WIPE_OR_UPDATE: {
         id: 'TR_WIPE_OR_UPDATE',
