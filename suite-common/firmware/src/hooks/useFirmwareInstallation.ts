@@ -1,17 +1,19 @@
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { useMemo, useCallback } from 'react';
 
 import { FirmwareStatus } from '@suite-common/suite-types';
-import { firmwareUpdate, selectFirmware, firmwareActions } from '@suite-common/wallet-core';
+import {
+    firmwareUpdate as firmwareUpdateThunk,
+    selectFirmware,
+    firmwareActions,
+} from '@suite-common/firmware';
 import { DEVICE, DeviceModelInternal, FirmwareType, UI } from '@trezor/connect';
 import {
     getFirmwareVersion,
     hasBitcoinOnlyFirmware,
     isBitcoinOnlyDevice,
 } from '@trezor/device-utils';
-
-import { useSelector, useDevice, useTranslation } from 'src/hooks/suite';
-import { isWebUsb } from 'src/utils/suite/transport';
-import { MODAL } from 'src/actions/suite/constants';
+import { selectDevice } from '@suite-common/wallet-core';
 
 /*
 There are three firmware update flows, depending on current firmware version:
@@ -24,21 +26,25 @@ const VERSIONS_GUARANTEED_TO_WIPE_DEVICE_ON_UPDATE: ReturnType<typeof getFirmwar
     '1.6.1',
 ];
 
-type UseFirmwareParams =
+export type UseFirmwareInstallationParams =
     | {
           shouldSwitchFirmwareType?: boolean;
       }
     | undefined;
 
-export const useFirmware = (
-    { shouldSwitchFirmwareType }: UseFirmwareParams = { shouldSwitchFirmwareType: false },
+export type FirmwareOperationStatus = {
+    operation: 'installing' | 'validating' | 'restarting' | 'completed' | null;
+    progress: number;
+};
+
+export const useFirmwareInstallation = (
+    { shouldSwitchFirmwareType }: UseFirmwareInstallationParams = {
+        shouldSwitchFirmwareType: false,
+    },
 ) => {
-    const { translationString } = useTranslation();
     const dispatch = useDispatch();
     const firmware = useSelector(selectFirmware);
-    const transport = useSelector(state => state.suite.transport);
-    const modal = useSelector(state => state.modal);
-    const { device } = useDevice();
+    const device = useSelector(selectDevice);
 
     // Device in its state before installation is cached when installation begins.
     // Until then, access device as normal.
@@ -60,15 +66,10 @@ export const useFirmware = (
             )) ||
         showManualReconnectPrompt;
 
-    const showFingerprintCheck =
-        modal.context === MODAL.CONTEXT_DEVICE &&
-        modal.windowType === 'ButtonRequest_FirmwareCheck';
-
     const deviceModelInternal = originalDevice?.features?.internal_model;
     // Device may be wiped during firmware type switch because Universal and Bitcoin-only firmware have different vendor headers,
     // except T1B1 and T2T1. There may be some false negatives here during custom installation.
     // TODO: Determine this in Connect.
-
     const deviceWillBeWiped =
         (!!shouldSwitchFirmwareType &&
             deviceModelInternal !== undefined &&
@@ -102,10 +103,10 @@ export const useFirmware = (
             firmware.uiEvent.payload.operation === 'downloading'
         );
 
-    const getUpdateStatus = () => {
+    const updateStatus = useMemo<FirmwareOperationStatus>(() => {
         if (firmware.status === 'done') {
             return {
-                operation: translationString('TR_FIRMWARE_STATUS_INSTALLATION_COMPLETED'),
+                operation: 'completed',
                 progress: 100,
             };
         }
@@ -114,12 +115,12 @@ export const useFirmware = (
             switch (firmware.uiEvent.payload.operation) {
                 case 'flashing':
                     return {
-                        operation: translationString('TR_INSTALLING'),
+                        operation: 'installing',
                         progress: firmware.uiEvent.payload.progress,
                     };
                 case 'validating':
                     return {
-                        operation: translationString('TR_VALIDATION'),
+                        operation: 'validating',
                         progress: 100,
                     };
             }
@@ -130,13 +131,13 @@ export const useFirmware = (
             firmware.uiEvent?.type === UI.FIRMWARE_RECONNECT &&
             firmware.uiEvent.payload.method === 'wait'
         ) {
-            return { operation: translationString('TR_WAIT_FOR_REBOOT'), progress: 100 };
+            return { operation: 'restarting', progress: 100 };
         }
 
         return { operation: null, progress: 0 };
-    };
+    }, [firmware.uiEvent, firmware.status]);
 
-    const getTargetFirmwareType = () => {
+    const targetFirmwareType = useMemo(() => {
         const isCurrentlyBitcoinOnly = hasBitcoinOnlyFirmware(originalDevice);
         const isBitcoinOnlyAvailable = !!originalDevice?.firmwareRelease?.release.url_bitcoinonly;
 
@@ -147,21 +148,28 @@ export const useFirmware = (
             isBitcoinOnlyDevice(originalDevice)
             ? FirmwareType.BitcoinOnly
             : FirmwareType.Regular;
-    };
+    }, [originalDevice, shouldSwitchFirmwareType]);
 
-    const targetFirmwareType = getTargetFirmwareType();
+    const firmwareUpdate = useCallback(
+        (...params: Parameters<typeof firmwareUpdateThunk>) =>
+            dispatch(firmwareUpdateThunk(...params)),
+        [dispatch],
+    );
+
+    const setStatus = useCallback(
+        (status: FirmwareStatus | 'error') => dispatch(firmwareActions.setStatus(status)),
+        [dispatch],
+    );
+
+    const resetReducer = useCallback(() => dispatch(firmwareActions.resetReducer()), [dispatch]);
 
     return {
         ...firmware,
-        ...getUpdateStatus(),
+        ...updateStatus,
         originalDevice,
-        firmwareUpdate: (...params: Parameters<typeof firmwareUpdate>) =>
-            dispatch(firmwareUpdate(...params)),
-        setStatus: (status: FirmwareStatus | 'error') =>
-            dispatch(firmwareActions.setStatus(status)),
-        resetReducer: () => dispatch(firmwareActions.resetReducer()),
-        isWebUSB: isWebUsb(transport),
-        showFingerprintCheck,
+        firmwareUpdate,
+        setStatus,
+        resetReducer,
         targetFirmwareType,
         showManualReconnectPrompt,
         confirmOnDevice,
