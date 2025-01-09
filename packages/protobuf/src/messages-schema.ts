@@ -3033,6 +3033,7 @@ export type SolanaTxAdditionalInfo = Static<typeof SolanaTxAdditionalInfo>;
 export const SolanaTxAdditionalInfo = Type.Object(
     {
         token_accounts_infos: Type.Array(SolanaTxTokenAccountInfo),
+        rent_fees: Type.Optional(Type.Number()),
     },
     { $id: 'SolanaTxAdditionalInfo' },
 );

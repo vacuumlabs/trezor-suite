@@ -17,5 +17,6 @@ export const transformAdditionalInfo = (additionalInfo?: SolanaTxAdditionalInfo)
                 token_mint: tokenAccountInfo.tokenMint,
                 token_account: tokenAccountInfo.tokenAccount,
             })) || [],
+        ...(additionalInfo.rentFees ? { rent_fees: additionalInfo.rentFees } : {}),
     };
 };
